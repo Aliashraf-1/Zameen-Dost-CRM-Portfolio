@@ -230,6 +230,7 @@ export default function EmployeeTable({ employees = [], onDelete }) {
                 <option value="Security">Security</option>
                 <option value="HR">HR</option>
                 <option value="Marketing">Marketing</option>
+                <option value="Marketing">Marketing</option>
               </select>
             </div>
           </div>

@@ -14,6 +14,8 @@ export const employees = [
     address: "House #12, Street 5, Satellite Town, Sargodha",
     emergencyContact: "0312-7654321",
     emergencyName: "Fatima Ahmed",
+    createdAt: "2024-01-15T10:00:00.000Z",
+    updatedAt: "2026-08-20T10:00:00.000Z",
     attendance: [
       { date: "2026-08-01", status: "Present" },
       { date: "2026-08-02", status: "Present" },
@@ -33,6 +35,7 @@ export const employees = [
         amount: 85000,
         status: "Paid",
         paidAt: "2026-07-30T10:00:00.000Z",
+        remarks: "Full salary paid",
       },
       {
         id: 2,
@@ -40,6 +43,7 @@ export const employees = [
         amount: 85000,
         status: "Paid",
         paidAt: "2026-06-30T10:00:00.000Z",
+        remarks: "Full salary paid",
       },
       {
         id: 3,
@@ -47,6 +51,7 @@ export const employees = [
         amount: 85000,
         status: "Paid",
         paidAt: "2026-05-30T10:00:00.000Z",
+        remarks: "Full salary paid",
       },
     ],
   },
@@ -65,6 +70,8 @@ export const employees = [
     address: "Flat #5, Block B, Faisalabad Road, Sargodha",
     emergencyContact: "0321-1112222",
     emergencyName: "Ali Khan",
+    createdAt: "2024-03-01T10:00:00.000Z",
+    updatedAt: "2026-08-20T10:00:00.000Z",
     attendance: [
       { date: "2026-08-01", status: "Present" },
       { date: "2026-08-02", status: "Present" },
@@ -84,6 +91,7 @@ export const employees = [
         amount: 70000,
         status: "Paid",
         paidAt: "2026-07-30T10:00:00.000Z",
+        remarks: "Full salary paid",
       },
       {
         id: 2,
@@ -91,6 +99,7 @@ export const employees = [
         amount: 70000,
         status: "Paid",
         paidAt: "2026-06-30T10:00:00.000Z",
+        remarks: "Full salary paid",
       },
     ],
   },
@@ -109,6 +118,8 @@ export const employees = [
     address: "House #45, Street 12, University Road, Sargodha",
     emergencyContact: "0333-9998888",
     emergencyName: "Ayesha Malik",
+    createdAt: "2024-06-15T10:00:00.000Z",
+    updatedAt: "2026-08-20T10:00:00.000Z",
     attendance: [
       { date: "2026-08-01", status: "Present" },
       { date: "2026-08-02", status: "Present" },
@@ -128,6 +139,7 @@ export const employees = [
         amount: 60000,
         status: "Paid",
         paidAt: "2026-07-30T10:00:00.000Z",
+        remarks: "Full salary paid",
       },
       {
         id: 2,
@@ -135,6 +147,7 @@ export const employees = [
         amount: 60000,
         status: "Pending",
         paidAt: null,
+        remarks: "Salary pending",
       },
     ],
   },
@@ -153,6 +166,8 @@ export const employees = [
     address: "Flat #2, Block A, Satellite Town, Sargodha",
     emergencyContact: "0300-5553333",
     emergencyName: "Mohammad Ali",
+    createdAt: "2024-08-01T10:00:00.000Z",
+    updatedAt: "2026-08-20T10:00:00.000Z",
     attendance: [
       { date: "2026-08-01", status: "Present" },
       { date: "2026-08-02", status: "Present" },
@@ -172,6 +187,7 @@ export const employees = [
         amount: 45000,
         status: "Paid",
         paidAt: "2026-07-30T10:00:00.000Z",
+        remarks: "Full salary paid",
       },
     ],
   },
@@ -190,6 +206,8 @@ export const employees = [
     address: "Village #12, Faisalabad Road, Sargodha",
     emergencyContact: "0345-8887777",
     emergencyName: "Nadia Butt",
+    createdAt: "2024-09-01T10:00:00.000Z",
+    updatedAt: "2026-08-20T10:00:00.000Z",
     attendance: [
       { date: "2026-08-01", status: "Present" },
       { date: "2026-08-02", status: "Present" },
@@ -209,6 +227,7 @@ export const employees = [
         amount: 35000,
         status: "Paid",
         paidAt: "2026-07-30T10:00:00.000Z",
+        remarks: "Full salary paid",
       },
       {
         id: 2,
@@ -216,6 +235,7 @@ export const employees = [
         amount: 35000,
         status: "Paid",
         paidAt: "2026-06-30T10:00:00.000Z",
+        remarks: "Full salary paid",
       },
     ],
   },

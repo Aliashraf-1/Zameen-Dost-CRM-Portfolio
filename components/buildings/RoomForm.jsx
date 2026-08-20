@@ -19,6 +19,8 @@ export default function UnitForm({
   initialData = null,
   mode = "create",
   buildingId,
+  onCancel, // ✅ New prop for cancel
+  onSubmit, // ✅ New prop for submit
 }) {
   const isEdit = mode === "edit";
 
@@ -491,16 +493,24 @@ export default function UnitForm({
       unitData
     );
 
-    /*
-     * Backend/API integration baad mein
-     * isi point par connect hogi.
-     */
-
-    await new Promise((resolve) =>
-      setTimeout(resolve, 800)
-    );
+    // ✅ If onSubmit prop is provided, call it
+    if (onSubmit) {
+      await onSubmit(unitData);
+    } else {
+      // Fallback: Just wait and log
+      await new Promise((resolve) =>
+        setTimeout(resolve, 800)
+      );
+    }
 
     setLoading(false);
+  };
+
+  // ✅ Handle cancel - call onCancel if provided
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+    }
   };
 
   return (
@@ -1189,17 +1199,29 @@ export default function UnitForm({
       )}
 
       {/* ==================================================
-          FOOTER
+          FOOTER - UPDATED with onCancel support
       ================================================== */}
 
       <div className="flex justify-end gap-3 border-t border-slate-800 p-6">
-        <Link
-          href={`/dashboard/buildings/${buildingId}`}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-800 px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
-        >
-          <X size={17} />
-          Cancel
-        </Link>
+        {/* ✅ Cancel Button - Uses onCancel if provided, otherwise Link */}
+        {onCancel ? (
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-800 px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+          >
+            <X size={17} />
+            Cancel
+          </button>
+        ) : (
+          <Link
+            href={`/dashboard/buildings/${buildingId}`}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-800 px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+          >
+            <X size={17} />
+            Cancel
+          </Link>
+        )}
 
         <button
           type="submit"

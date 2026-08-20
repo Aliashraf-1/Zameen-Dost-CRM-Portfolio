@@ -1,12 +1,13 @@
 export const buildings = [
   {
     id: 1,
-    buildingNo: "Building #01",
+    buildingNo: "B-101",
     reference: "University Road",
     address: "University Road, Sargodha",
     totalUnits: 12,
     status: "Active",
-
+    createdAt: "2024-01-15T10:00:00.000Z",
+    updatedAt: "2026-08-20T10:00:00.000Z",
     rooms: [
       {
         id: 101,
@@ -17,15 +18,19 @@ export const buildings = [
         purpose: "Office",
         monthlyRent: 25000,
         rentStartDate: "2026-06-01",
-        unitImage: "https://placehold.co/600x400/e2e8f0/1e293b?text=Office+101",
+        unitImage: null,
+        reference: "Corner office with balcony",
+        createdAt: "2026-06-01T10:00:00.000Z",
+        updatedAt: "2026-08-20T10:00:00.000Z",
 
         tenant: {
           name: "Muhammad Ahmed",
           cnic: "37405-1234567-1",
           phone: "0300-1234567",
-          reference: "Software wala bacha",
+          reference: "Software Engineer",
           image: null,
           agreement: [],
+          createdAt: "2026-06-01T10:00:00.000Z",
         },
 
         initialPayment: {
@@ -44,6 +49,15 @@ export const buildings = [
             amount: 25000,
             status: "Paid",
             paidAt: "2026-06-01T10:30:00.000Z",
+            remarks: "First month rent",
+          },
+          {
+            id: 2,
+            month: "2026-07",
+            amount: 25000,
+            status: "Paid",
+            paidAt: "2026-07-01T10:30:00.000Z",
+            remarks: "Monthly rent",
           },
         ],
 
@@ -56,6 +70,9 @@ export const buildings = [
             note: "Initial security received",
           },
         ],
+
+        clearanceHistory: [],
+        transactionHistory: [],
       },
 
       {
@@ -63,49 +80,20 @@ export const buildings = [
         unitNo: "102",
         type: "Room",
         deskNo: null,
-        status: "Rented",
+        status: "Available",
         purpose: "Hostel",
         monthlyRent: 30000,
-        rentStartDate: "2026-07-15",
+        rentStartDate: null,
         unitImage: null,
-
-        tenant: {
-          name: "Ali Raza",
-          cnic: "37405-7654321-1",
-          phone: "0312-7654321",
-          reference: "Student",
-          image: null,
-          agreement: [],
-        },
-
-        initialPayment: {
-          cashReceived: 130000,
-          rentPaid: 30000,
-          securityReceived: 100000,
-          securityStatus: "Held",
-          paymentDateTime: "2026-07-15T11:15:00.000Z",
-          rentMonths: 1,
-        },
-
-        rentHistory: [
-          {
-            id: 1,
-            month: "2026-07",
-            amount: 30000,
-            status: "Paid",
-            paidAt: "2026-07-15T11:15:00.000Z",
-          },
-        ],
-
-        securityHistory: [
-          {
-            id: 1,
-            type: "received",
-            amount: 100000,
-            date: "2026-07-15T11:15:00.000Z",
-            note: "Initial security received",
-          },
-        ],
+        reference: "Corner room with attached bathroom",
+        createdAt: "2026-07-15T10:00:00.000Z",
+        updatedAt: "2026-08-20T10:00:00.000Z",
+        tenant: null,
+        initialPayment: null,
+        rentHistory: [],
+        securityHistory: [],
+        clearanceHistory: [],
+        transactionHistory: [],
       },
 
       {
@@ -118,16 +106,20 @@ export const buildings = [
         monthlyRent: 28000,
         rentStartDate: null,
         unitImage: null,
+        reference: "Standard room with AC",
+        createdAt: "2026-08-01T10:00:00.000Z",
+        updatedAt: "2026-08-20T10:00:00.000Z",
         tenant: null,
         initialPayment: null,
         rentHistory: [],
         securityHistory: [],
+        clearanceHistory: [],
+        transactionHistory: [],
       },
 
-      // Desk example
       {
         id: 104,
-        unitNo: "101",
+        unitNo: "104",
         type: "Desk",
         deskNo: "D-04",
         status: "Rented",
@@ -135,14 +127,18 @@ export const buildings = [
         monthlyRent: 4000,
         rentStartDate: "2026-08-19",
         unitImage: null,
+        reference: "Co-working desk with monitor",
+        createdAt: "2026-08-19T10:00:00.000Z",
+        updatedAt: "2026-08-20T10:00:00.000Z",
 
         tenant: {
           name: "Ahmed Khan",
           cnic: "37405-3333333-1",
           phone: "0300-0000000",
-          reference: "Software wala bacha",
+          reference: "Freelancer",
           image: null,
           agreement: [],
+          createdAt: "2026-08-19T10:00:00.000Z",
         },
 
         initialPayment: {
@@ -161,6 +157,7 @@ export const buildings = [
             amount: 4000,
             status: "Paid",
             paidAt: "2026-08-19T10:30:00.000Z",
+            remarks: "First month rent for desk",
           },
         ],
 
@@ -173,18 +170,22 @@ export const buildings = [
             note: "Initial security received",
           },
         ],
+
+        clearanceHistory: [],
+        transactionHistory: [],
       },
     ],
   },
 
   {
     id: 2,
-    buildingNo: "Building #02",
+    buildingNo: "B-102",
     reference: "Satellite Town",
     address: "Satellite Town, Sargodha",
     totalUnits: 16,
     status: "Active",
-
+    createdAt: "2024-02-01T10:00:00.000Z",
+    updatedAt: "2026-08-20T10:00:00.000Z",
     rooms: [
       {
         id: 201,
@@ -196,14 +197,18 @@ export const buildings = [
         monthlyRent: 22000,
         rentStartDate: "2026-05-20",
         unitImage: null,
+        reference: "Ground floor office",
+        createdAt: "2026-05-20T10:00:00.000Z",
+        updatedAt: "2026-08-20T10:00:00.000Z",
 
         tenant: {
           name: "Usman Khan",
           cnic: "37405-1111111-1",
           phone: "0321-1111111",
-          reference: "Client",
+          reference: "Business Owner",
           image: null,
           agreement: [],
+          createdAt: "2026-05-20T10:00:00.000Z",
         },
 
         initialPayment: {
@@ -222,6 +227,23 @@ export const buildings = [
             amount: 22000,
             status: "Paid",
             paidAt: "2026-05-20T09:45:00.000Z",
+            remarks: "First month rent",
+          },
+          {
+            id: 2,
+            month: "2026-06",
+            amount: 22000,
+            status: "Paid",
+            paidAt: "2026-06-20T09:45:00.000Z",
+            remarks: "Monthly rent",
+          },
+          {
+            id: 3,
+            month: "2026-07",
+            amount: 22000,
+            status: "Paid",
+            paidAt: "2026-07-20T09:45:00.000Z",
+            remarks: "Monthly rent",
           },
         ],
 
@@ -234,6 +256,9 @@ export const buildings = [
             note: "Initial security received",
           },
         ],
+
+        clearanceHistory: [],
+        transactionHistory: [],
       },
 
       {
@@ -246,22 +271,28 @@ export const buildings = [
         monthlyRent: 25000,
         rentStartDate: null,
         unitImage: null,
+        reference: "First floor room with view",
+        createdAt: "2026-06-01T10:00:00.000Z",
+        updatedAt: "2026-08-20T10:00:00.000Z",
         tenant: null,
         initialPayment: null,
         rentHistory: [],
         securityHistory: [],
+        clearanceHistory: [],
+        transactionHistory: [],
       },
     ],
   },
 
   {
     id: 3,
-    buildingNo: "Building #03",
+    buildingNo: "B-103",
     reference: "Faisalabad Road",
     address: "Faisalabad Road, Sargodha",
     totalUnits: 20,
     status: "Active",
-
+    createdAt: "2024-03-15T10:00:00.000Z",
+    updatedAt: "2026-08-20T10:00:00.000Z",
     rooms: [
       {
         id: 301,
@@ -273,14 +304,18 @@ export const buildings = [
         monthlyRent: 35000,
         rentStartDate: "2026-08-01",
         unitImage: null,
+        reference: "Executive office",
+        createdAt: "2026-08-01T10:00:00.000Z",
+        updatedAt: "2026-08-20T10:00:00.000Z",
 
         tenant: {
           name: "Hassan Ali",
           cnic: "37405-2222222-1",
           phone: "0333-2222222",
-          reference: "Software wala bacha",
+          reference: "CEO",
           image: null,
           agreement: [],
+          createdAt: "2026-08-01T10:00:00.000Z",
         },
 
         initialPayment: {
@@ -299,6 +334,7 @@ export const buildings = [
             amount: 35000,
             status: "Paid",
             paidAt: "2026-08-01T12:20:00.000Z",
+            remarks: "First month rent",
           },
         ],
 
@@ -311,6 +347,9 @@ export const buildings = [
             note: "Initial security received",
           },
         ],
+
+        clearanceHistory: [],
+        transactionHistory: [],
       },
 
       {
@@ -323,10 +362,15 @@ export const buildings = [
         monthlyRent: 30000,
         rentStartDate: null,
         unitImage: null,
+        reference: "Standard office room",
+        createdAt: "2026-08-15T10:00:00.000Z",
+        updatedAt: "2026-08-20T10:00:00.000Z",
         tenant: null,
         initialPayment: null,
         rentHistory: [],
         securityHistory: [],
+        clearanceHistory: [],
+        transactionHistory: [],
       },
     ],
   },

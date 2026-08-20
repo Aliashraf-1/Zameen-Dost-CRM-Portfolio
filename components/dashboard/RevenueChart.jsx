@@ -51,6 +51,7 @@ export default function RevenueChart() {
       labels: {
         style: {
           colors: "#64748b",
+          fontSize: "11px",
         },
       },
 
@@ -67,10 +68,11 @@ export default function RevenueChart() {
       labels: {
         style: {
           colors: "#64748b",
+          fontSize: "11px",
         },
 
         formatter: (value) =>
-          `Rs. ${Number(value).toLocaleString()}`,
+          `Rs. ${(value / 1000).toFixed(0)}K`,
       },
     },
 
@@ -113,23 +115,22 @@ export default function RevenueChart() {
   ];
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
-      <div className="mb-5">
-        <h2 className="text-lg font-semibold">
-          Monthly Revenue
-        </h2>
-
-        <p className="mt-1 text-sm text-slate-500">
+    <div className="flex h-full w-full flex-col rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold">Monthly Revenue</h2>
+        <p className="mt-0.5 text-xs text-slate-500">
           Revenue performance over the current year
         </p>
       </div>
 
-      <Chart
-        options={options}
-        series={series}
-        type="area"
-        height={340}
-      />
+      <div className="flex-1">
+        <Chart
+          options={options}
+          series={series}
+          type="area"
+          height="100%"
+        />
+      </div>
     </div>
   );
 }

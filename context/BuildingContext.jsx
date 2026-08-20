@@ -41,7 +41,7 @@ export function BuildingProvider({ children }) {
    * ----------------------------------------
    */
 
-  const payRent = (buildingId, unitId, months) => {
+  const payRent = (buildingId, unitId, months, remarks = "") => {
     const numberOfMonths = Number(months);
 
     if (!numberOfMonths || numberOfMonths < 1) {
@@ -108,17 +108,12 @@ export function BuildingProvider({ children }) {
               ).padStart(2, "0");
 
               newHistory.push({
-                id:
-                  Date.now() +
-                  i,
-
+                id: Date.now() + i,
                 month: `${year}-${month}`,
-
                 amount: monthlyRent,
-
                 status: "Paid",
-
                 paidAt: paymentDateTime,
+                remarks: remarks || "Monthly rent payment",
               });
 
               nextDate.setMonth(
@@ -135,6 +130,7 @@ export function BuildingProvider({ children }) {
               amount,
               months: numberOfMonths,
               paidAt: paymentDateTime,
+              remarks: remarks || "Monthly rent payment",
             };
 
             return {
@@ -149,6 +145,7 @@ export function BuildingProvider({ children }) {
                 amount,
                 months: numberOfMonths,
                 paidAt: paymentDateTime,
+                remarks: remarks || "Monthly rent payment",
               },
             };
           }),
@@ -173,10 +170,9 @@ export function BuildingProvider({ children }) {
     const {
       returnAmount = 0,
       forfeitAmount = 0,
+      remarks = "",
+      clearedAt = new Date().toISOString(),
     } = settlement;
-
-    const paymentDateTime =
-      new Date().toISOString();
 
     let rentalRecord = null;
 
@@ -195,83 +191,68 @@ export function BuildingProvider({ children }) {
             }
 
             const securityHeld = Number(
-              room.initialPayment
-                ?.securityReceived || 0
+              room.initialPayment?.securityReceived || 0
             );
 
-            const returned = Number(
-              returnAmount || 0
-            );
+            const returned = Number(returnAmount || 0);
+            const forfeited = Number(forfeitAmount || 0);
 
-            const forfeited = Number(
-              forfeitAmount || 0
-            );
-
-            if (
-              returned + forfeited !==
-              securityHeld
-            ) {
+            if (returned + forfeited !== securityHeld) {
               throw new Error(
                 "Security settlement amount must equal the security held."
               );
             }
 
+            const previousSecurityHistory = room.securityHistory || [];
+            const previousClearanceHistory = room.clearanceHistory || [];
+
             rentalRecord = {
               type: "rental-cleared",
-
               buildingId,
-
               unitId,
-
               unitNo: room.unitNo,
-
-              tenantName:
-                room.tenant?.name,
-
+              tenantName: room.tenant?.name,
               securityHeld,
-
               returned,
-
               forfeited,
-
-              clearedAt:
-                paymentDateTime,
+              remarks: remarks || "Rental cleared",
+              clearedAt,
             };
-
-            const previousSecurityHistory =
-              room.securityHistory || [];
 
             return {
               ...room,
 
               status: "Available",
-
               purpose: null,
-
               rentStartDate: null,
-
               tenant: null,
-
               initialPayment: null,
 
+              // Add clearance history
+              clearanceHistory: [
+                ...previousClearanceHistory,
+                {
+                  id: Date.now(),
+                  type: "Rental Clearance",
+                  returnAmount: returned,
+                  forfeitAmount: forfeited,
+                  remarks: remarks || "Rental cleared",
+                  clearedAt: clearedAt,
+                },
+              ],
+
+              // Update security history
               securityHistory: [
                 ...previousSecurityHistory,
 
                 ...(returned > 0
                   ? [
                       {
-                        id:
-                          Date.now(),
-
+                        id: Date.now(),
                         type: "returned",
-
                         amount: returned,
-
-                        date:
-                          paymentDateTime,
-
-                        note:
-                          "Security returned after rental ended.",
+                        date: clearedAt,
+                        note: `Security returned to customer. ${remarks || "Rental ended"}`,
                       },
                     ]
                   : []),
@@ -279,18 +260,44 @@ export function BuildingProvider({ children }) {
                 ...(forfeited > 0
                   ? [
                       {
-                        id:
-                          Date.now() + 1,
-
+                        id: Date.now() + 1,
                         type: "forfeited",
-
                         amount: forfeited,
+                        date: clearedAt,
+                        note: `Security forfeited. ${remarks || "Rental ended"}`,
+                      },
+                    ]
+                  : []),
+              ],
 
-                        date:
-                          paymentDateTime,
-
-                        note:
-                          "Security forfeited after rental ended.",
+              // Add to transaction history for revenue tracking
+              transactionHistory: [
+                ...(room.transactionHistory || []),
+                ...(returned > 0
+                  ? [
+                      {
+                        id: `clear-return-${Date.now()}`,
+                        type: "Security Returned",
+                        category: "Security Refund",
+                        amount: returned,
+                        description: `Security returned to ${room.tenant?.name} - Unit ${room.unitNo}`,
+                        status: "Completed",
+                        paidAt: clearedAt,
+                        remarks: remarks || "Security returned after rental ended",
+                      },
+                    ]
+                  : []),
+                ...(forfeited > 0
+                  ? [
+                      {
+                        id: `clear-forfeit-${Date.now()}`,
+                        type: "Security Forfeited",
+                        category: "Security Income",
+                        amount: forfeited,
+                        description: `Security forfeited from ${room.tenant?.name} - Unit ${room.unitNo}`,
+                        status: "Received",
+                        receivedAt: clearedAt,
+                        remarks: remarks || "Security forfeited after rental ended",
                       },
                     ]
                   : []),
@@ -306,16 +313,29 @@ export function BuildingProvider({ children }) {
 
   /*
    * ----------------------------------------
+   * GET UNIT TRANSACTIONS
+   * ----------------------------------------
+   */
+
+  const getUnitTransactions = (buildingId, unitId) => {
+    const building = buildings.find((b) => b.id === buildingId);
+    if (!building) return [];
+
+    const room = building.rooms?.find((r) => r.id === unitId);
+    if (!room) return [];
+
+    return room.transactionHistory || [];
+  };
+
+  /*
+   * ----------------------------------------
    * RESET DEMO DATA
    * ----------------------------------------
    */
 
   const resetBuildings = () => {
     setBuildings(initialBuildings);
-
-    localStorage.removeItem(
-      STORAGE_KEY
-    );
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   const value = useMemo(
@@ -324,6 +344,7 @@ export function BuildingProvider({ children }) {
       setBuildings,
       payRent,
       clearRental,
+      getUnitTransactions,
       resetBuildings,
     }),
     [buildings]
@@ -337,8 +358,7 @@ export function BuildingProvider({ children }) {
 }
 
 export function useBuildings() {
-  const context =
-    useContext(BuildingContext);
+  const context = useContext(BuildingContext);
 
   if (!context) {
     throw new Error(

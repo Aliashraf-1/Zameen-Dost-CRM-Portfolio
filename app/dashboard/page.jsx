@@ -1,8 +1,21 @@
+"use client";
+
 import {
   Building2,
   Wallet,
   Users,
   DoorOpen,
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  Clock,
+  Calendar,
+  ArrowUpRight,
+  ArrowDownRight,
+  DollarSign,
+  UserPlus,
+  Home,
+  AlertCircle,
 } from "lucide-react";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -10,13 +23,16 @@ import StatCard from "@/components/dashboard/StatCard";
 import RevenueChart from "@/components/dashboard/RevenueChart";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import Alerts from "@/components/dashboard/Alerts";
+import LeadsCard from "@/components/dashboard/LeadsCard";
 
 export default function DashboardPage() {
   return (
-    <div className="mx-auto max-w-[1600px]">
+    <div className="mx-auto max-w-[1600px] space-y-6">
       <DashboardHeader />
 
-      {/* Stats */}
+     
+
+      {/* Main Stats Grid */}
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Total Buildings"
@@ -24,6 +40,7 @@ export default function DashboardPage() {
           icon={Building2}
           description="48 total rooms"
           href="/dashboard/buildings"
+          trend={{ value: 8, label: "vs last month" }}
         />
 
         <StatCard
@@ -32,6 +49,7 @@ export default function DashboardPage() {
           icon={Wallet}
           description="+12.5% from last month"
           href="/dashboard/revenue"
+          trend={{ value: 12.5, label: "vs last month", positive: true }}
         />
 
         <StatCard
@@ -40,6 +58,7 @@ export default function DashboardPage() {
           icon={Users}
           description="3 salaries pending"
           href="/dashboard/employees"
+          trend={{ value: 5, label: "vs last month", positive: true }}
         />
 
         <StatCard
@@ -48,16 +67,22 @@ export default function DashboardPage() {
           icon={DoorOpen}
           description="10 rooms available"
           href="/dashboard/buildings"
+          trend={{ value: 79, label: "occupancy rate", positive: true }}
         />
       </div>
 
-      {/* Revenue */}
-      <div className="mt-5">
-        <RevenueChart />
+      {/* Chart + Leads Row */}
+      <div className="grid gap-5 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <RevenueChart />
+        </div>
+        <div>
+          <LeadsCard />
+        </div>
       </div>
 
       {/* Activity + Alerts */}
-      <div className="mt-5 grid gap-5 xl:grid-cols-2">
+      <div className="grid gap-5 xl:grid-cols-2">
         <RecentActivity />
         <Alerts />
       </div>
