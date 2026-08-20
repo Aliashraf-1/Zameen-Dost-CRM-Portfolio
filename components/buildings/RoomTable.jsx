@@ -420,16 +420,14 @@ export default function RoomTable({
 
                       <div className="flex items-center gap-1">
 
-                        {/* View */}
-                        <button
-                          type="button"
-                          className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
-                          title="View unit"
-                        >
-                          <Eye size={17} />
-                        </button>
+                      <Link
+                        href={`/dashboard/buildings/${buildingId}/rooms/${room.id}`}
+                        className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                        title="View unit"
+                      >
+                        <Eye size={17} />
+                      </Link>
 
-                        {/* Edit */}
                         <Link
                           href={editUrl}
                           className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
@@ -438,7 +436,6 @@ export default function RoomTable({
                           <Pencil size={17} />
                         </Link>
 
-                        {/* Rented actions */}
                         {rented && (
                           <>
                             {/* Pay Rent */}

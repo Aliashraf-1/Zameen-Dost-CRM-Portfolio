@@ -3,13 +3,13 @@
 import { useState, useMemo } from "react";
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { employees as initialEmployees } from "@/data/employees";
+import { useEmployees } from "@/context/EmployeeContext";
 import EmployeeStats from "@/components/employees/EmployeeStats";
 import EmployeeTable from "@/components/employees/EmployeeTable";
-import EmployeeFilters from "@/components/employees/EmployeeFilters";
+// import EmployeeFilters from "@/components/employees/EmployeeFilters";
 
 export default function EmployeesPage() {
-  const [employees, setEmployees] = useState(initialEmployees);
+  const { employees, setEmployees } = useEmployees();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
   const [department, setDepartment] = useState("All");
@@ -62,16 +62,20 @@ export default function EmployeesPage() {
       <EmployeeStats employees={filteredEmployees} />
 
       <div className="mt-6">
-        <EmployeeFilters
+        {/* <EmployeeFilters
           search={search}
           setSearch={setSearch}
           status={status}
           setStatus={setStatus}
           department={department}
           setDepartment={setDepartment}
+        /> */}
+        <EmployeeTable
+          employees={filteredEmployees}
+          onDelete={handleDelete}
         />
-        <EmployeeTable employees={filteredEmployees} onDelete={handleDelete} />
       </div>
     </div>
   );
 }
+

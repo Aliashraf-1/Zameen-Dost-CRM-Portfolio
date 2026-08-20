@@ -17,7 +17,7 @@ export const buildings = [
         purpose: "Office",
         monthlyRent: 25000,
         rentStartDate: "2026-06-01",
-        unitImage: null,
+        unitImage: "https://placehold.co/600x400/e2e8f0/1e293b?text=Office+101",
 
         tenant: {
           name: "Muhammad Ahmed",
