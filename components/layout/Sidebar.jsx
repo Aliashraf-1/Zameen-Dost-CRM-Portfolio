@@ -38,7 +38,7 @@ export default function Sidebar({
             {sidebarOpen && (
               <div>
                 <h1 className="whitespace-nowrap text-sm font-bold">
-                  BMS
+                  Zameen Dost Marketing
                 </h1>
 
                 <p className="text-xs text-slate-400">
