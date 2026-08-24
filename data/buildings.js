@@ -26,6 +26,31 @@ export const buildings = [
           reference: "Software wala bacha",
           image: null,
           agreement: [],
+          // ✅ Documents array for saved editable documents
+          documents: [
+            {
+              id: "doc-101-1",
+              templateId: "hostel-flat-agreement",
+              title: "ہاسٹل رہائشی معاہدہ",
+              content: "معاہدہ نمبر: 001\nتاریخ: 2026-06-01\n\nیہ معاہدہ زمین دوست گروپ آف کمپنیز اور Muhammad Ahmed کے درمیان طے پایا...",
+              type: "rental",
+              language: "urdu",
+              createdAt: "2026-06-01T10:30:00.000Z",
+              updatedAt: "2026-06-01T10:30:00.000Z",
+              version: 1
+            },
+            {
+              id: "doc-101-2",
+              templateId: "office-agreement",
+              title: "دفتر استعمال کا معاہدہ",
+              content: "معاہدہ نمبر: 002\nتاریخ: 2026-06-01\n\nیہ معاہدہ زمین دوست گروپ آف کمپنیز اور Muhammad Ahmed کے درمیان طے پایا...",
+              type: "office",
+              language: "urdu",
+              createdAt: "2026-06-01T11:00:00.000Z",
+              updatedAt: "2026-06-15T09:00:00.000Z",
+              version: 2
+            }
+          ]
         },
 
         initialPayment: {
@@ -66,7 +91,6 @@ export const buildings = [
           },
         ],
 
-        // ✅ Previous customer history
         clearanceHistory: [
           {
             id: 1001,
@@ -109,39 +133,39 @@ export const buildings = [
       },
 
       {
-  id: 102,
-  unitNo: "102",
-  type: "Room",
-  deskNo: null,
-  status: "Available",
-  purpose: "Hostel",
-  monthlyRent: 30000,
-  rentStartDate: null,
-  unitImage: null,
-  tenant: null,
-  initialPayment: null,
-  rentHistory: [],
-  securityHistory: [],
-  clearanceHistory: [
-    {
-      id: 2001,
-      type: "Rental Clearance",
-      tenantName: "Ali Raza",
-      tenantCnic: "37405-7654321-1",
-      tenantPhone: "0312-7654321",
-      tenantReference: "Student",
-      tenantImage: null,
-      agreement: [],
-      monthlyRent: 30000,
-      securityHeld: 100000,
-      returnAmount: 95000,
-      forfeitAmount: 5000,
-      remarks: "Security forfeited due to damages",
-      clearedAt: "2026-07-15T10:30:00.000Z",
-    },
-  ],
-  transactionHistory: [],
-},
+        id: 102,
+        unitNo: "102",
+        type: "Room",
+        deskNo: null,
+        status: "Available",
+        purpose: "Hostel",
+        monthlyRent: 30000,
+        rentStartDate: null,
+        unitImage: null,
+        tenant: null,
+        initialPayment: null,
+        rentHistory: [],
+        securityHistory: [],
+        clearanceHistory: [
+          {
+            id: 2001,
+            type: "Rental Clearance",
+            tenantName: "Ali Raza",
+            tenantCnic: "37405-7654321-1",
+            tenantPhone: "0312-7654321",
+            tenantReference: "Student",
+            tenantImage: null,
+            agreement: [],
+            monthlyRent: 30000,
+            securityHeld: 100000,
+            returnAmount: 95000,
+            forfeitAmount: 5000,
+            remarks: "Security forfeited due to damages",
+            clearedAt: "2026-07-15T10:30:00.000Z",
+          },
+        ],
+        transactionHistory: [],
+      },
 
       {
         id: 103,
@@ -180,6 +204,20 @@ export const buildings = [
           reference: "Software wala bacha",
           image: null,
           agreement: [],
+          // ✅ Documents for this tenant
+          documents: [
+            {
+              id: "doc-104-1",
+              templateId: "office-agreement",
+              title: "دفتر استعمال کا معاہدہ - 104",
+              content: "معاہدہ نمبر: 104-001\nتاریخ: 2026-08-19\n\nیہ معاہدہ زمین دوست گروپ آف کمپنیز اور Ahmed Khan کے درمیان طے پایا...",
+              type: "office",
+              language: "urdu",
+              createdAt: "2026-08-19T10:30:00.000Z",
+              updatedAt: "2026-08-19T10:30:00.000Z",
+              version: 1
+            }
+          ]
         },
 
         initialPayment: {
@@ -245,6 +283,20 @@ export const buildings = [
           reference: "Client",
           image: null,
           agreement: [],
+          // ✅ Documents for this tenant
+          documents: [
+            {
+              id: "doc-201-1",
+              templateId: "hostel-flat-agreement",
+              title: "ہاسٹل رہائشی معاہدہ - 201",
+              content: "معاہدہ نمبر: 201-001\nتاریخ: 2026-05-20\n\nیہ معاہدہ زمین دوست گروپ آف کمپنیز اور Usman Khan کے درمیان طے پایا...",
+              type: "rental",
+              language: "urdu",
+              createdAt: "2026-05-20T09:45:00.000Z",
+              updatedAt: "2026-05-20T09:45:00.000Z",
+              version: 1
+            }
+          ]
         },
 
         initialPayment: {
@@ -361,6 +413,31 @@ export const buildings = [
           reference: "Software wala bacha",
           image: null,
           agreement: [],
+          // ✅ Documents for this tenant
+          documents: [
+            {
+              id: "doc-301-1",
+              templateId: "office-agreement",
+              title: "دفتر استعمال کا معاہدہ - 301",
+              content: "معاہدہ نمبر: 301-001\nتاریخ: 2026-08-01\n\nیہ معاہدہ زمین دوست گروپ آف کمپنیز اور Hassan Ali کے درمیان طے پایا...",
+              type: "office",
+              language: "urdu",
+              createdAt: "2026-08-01T12:20:00.000Z",
+              updatedAt: "2026-08-01T12:20:00.000Z",
+              version: 1
+            },
+            {
+              id: "doc-301-2",
+              templateId: "hostel-flat-agreement",
+              title: "ہاسٹل رہائشی معاہدہ - 301",
+              content: "معاہدہ نمبر: 301-002\nتاریخ: 2026-08-01\n\nیہ معاہدہ زمین دوست گروپ آف کمپنیز اور Hassan Ali کے درمیان طے پایا...",
+              type: "rental",
+              language: "urdu",
+              createdAt: "2026-08-01T13:00:00.000Z",
+              updatedAt: "2026-08-01T13:00:00.000Z",
+              version: 1
+            }
+          ]
         },
 
         initialPayment: {

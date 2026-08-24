@@ -27,6 +27,7 @@ import {
   Trash2,
   X,
   Download,
+  FilePlus,
 } from "lucide-react";
 import { useBuildings } from "@/context/BuildingContext";
 import RentHistory from "@/components/customers/RentHistory";
@@ -34,6 +35,9 @@ import SecurityHistory from "@/components/customers/SecurityHistory";
 import ClearRentalModal from "@/components/rent/ClearRentalModal";
 import PayRentModal from "@/components/rent/PayRentModal";
 import DeleteConfirmModal from "@/components/common/DeleteConfirmModal";
+import DocumentTemplates from "@/components/buildings/DocumentTemplates";
+import DocumentEditor from "@/components/buildings/DocumentEditor";
+import { documentTemplates } from "@/data/documentTemplates";
 
 function InfoItem({ icon: Icon, label, value, valueClassName = "" }) {
   return (
@@ -88,7 +92,6 @@ function PreviousCustomerCard({ customer, onDelete }) {
   return (
     <>
       <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4 transition hover:border-slate-700">
-        {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-500/10 text-indigo-400">
@@ -130,10 +133,8 @@ function PreviousCustomerCard({ customer, onDelete }) {
           </div>
         </div>
 
-        {/* Expanded Details */}
         {expanded && (
           <div className="mt-4 space-y-4 border-t border-slate-800 pt-4">
-            {/* Tenant Details */}
             <div className="grid gap-3 md:grid-cols-2">
               <InfoItem icon={User} label="Name" value={customer.tenantName} />
               <InfoItem icon={CreditCard} label="CNIC" value={customer.tenantCnic} />
@@ -141,7 +142,6 @@ function PreviousCustomerCard({ customer, onDelete }) {
               <InfoItem icon={FileText} label="Reference" value={customer.tenantReference || "N/A"} />
             </div>
 
-            {/* Financial Details */}
             <div className="grid gap-3 md:grid-cols-3">
               <InfoItem
                 icon={Wallet}
@@ -163,7 +163,6 @@ function PreviousCustomerCard({ customer, onDelete }) {
               />
             </div>
 
-            {/* Remarks */}
             {customer.remarks && (
               <div className="rounded-xl border border-slate-800 bg-slate-950/30 p-3">
                 <p className="text-xs text-slate-500">Remarks</p>
@@ -171,7 +170,6 @@ function PreviousCustomerCard({ customer, onDelete }) {
               </div>
             )}
 
-            {/* Agreement Documents */}
             {customer.agreement && customer.agreement.length > 0 && (
               <div className="rounded-xl border border-slate-800 bg-slate-950/30 p-3">
                 <p className="text-xs text-slate-500">Agreement Documents</p>
@@ -192,7 +190,6 @@ function PreviousCustomerCard({ customer, onDelete }) {
               </div>
             )}
 
-            {/* Tenant Image */}
             {customer.tenantImage && (
               <div className="rounded-xl border border-slate-800 bg-slate-950/30 p-3">
                 <p className="text-xs text-slate-500">Tenant Image</p>
@@ -206,7 +203,6 @@ function PreviousCustomerCard({ customer, onDelete }) {
               </div>
             )}
 
-            {/* Clearance Info */}
             <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">
               <p className="text-xs text-slate-500">Clearance Details</p>
               <div className="mt-2 grid gap-1 text-sm">
@@ -238,7 +234,6 @@ function PreviousCustomerCard({ customer, onDelete }) {
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <DeleteConfirmModal
           isOpen={showDeleteModal}
@@ -313,6 +308,57 @@ function PreviousCustomers({ previousCustomers = [], onDelete }) {
   );
 }
 
+// ✅ Documents Section Component
+function DocumentsSection({ documents = [], onViewDocument }) {
+  if (documents.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+      <div className="mb-4 flex items-center gap-3">
+        <FileText size={20} className="text-indigo-400" />
+        <div>
+          <h2 className="text-lg font-semibold text-slate-200">
+            Saved Documents ({documents.length})
+          </h2>
+          <p className="text-xs text-slate-500">
+            Editable agreement documents for this unit
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {documents.map((doc) => (
+          <div
+            key={doc.id}
+            className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/50 p-3 transition hover:border-slate-700"
+          >
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-indigo-500/10 p-2 text-indigo-400">
+                <FileText size={16} />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-200">{doc.title}</p>
+                <p className="text-xs text-slate-500">
+                  {doc.type} • v{doc.version || 1} • {new Date(doc.updatedAt || doc.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => onViewDocument(doc)}
+              className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+              title="View document"
+            >
+              <Eye size={16} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function UnitDetailsPage() {
   const params = useParams();
   const { buildings, setBuildings } = useBuildings();
@@ -321,6 +367,11 @@ export default function UnitDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [showClearModal, setShowClearModal] = useState(false);
   const [showPayModal, setShowPayModal] = useState(false);
+  
+  // ✅ Document Editor State
+  const [showDocumentEditor, setShowDocumentEditor] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   useEffect(() => {
     if (params.id && params.roomId) {
@@ -340,7 +391,7 @@ export default function UnitDetailsPage() {
     }
   }, [params.id, params.roomId, buildings]);
 
-  // ✅ FIX: Filter out current tenant from clearanceHistory
+  // Extract previous customers from clearanceHistory
   const previousCustomers = unit?.clearanceHistory
     ?.filter((record) => record.tenantName !== unit?.tenant?.name)
     ?.map((record) => ({
@@ -361,6 +412,9 @@ export default function UnitDetailsPage() {
       clearedAt: record.clearedAt || new Date().toISOString(),
     })) || [];
 
+  // ✅ Get documents from tenant
+  const documents = unit?.tenant?.documents || [];
+
   const handleDeletePreviousCustomer = (recordId) => {
     setBuildings((prevBuildings) =>
       prevBuildings.map((b) => {
@@ -379,6 +433,41 @@ export default function UnitDetailsPage() {
         };
       })
     );
+  };
+
+  // ✅ Handle view document
+  const handleViewDocument = (doc) => {
+    setSelectedDocument(doc);
+    const template = documentTemplates.find((t) => t.id === doc.templateId);
+    setSelectedTemplate(template || null);
+    setShowDocumentEditor(true);
+  };
+
+  // ✅ Handle save document (update)
+  const handleSaveDocument = (documentData) => {
+    setBuildings((prevBuildings) =>
+      prevBuildings.map((b) => {
+        if (b.id !== building.id) return b;
+        return {
+          ...b,
+          rooms: b.rooms.map((r) => {
+            if (r.id !== unit.id) return r;
+            return {
+              ...r,
+              tenant: {
+                ...r.tenant,
+                documents: r.tenant?.documents?.map((doc) =>
+                  doc.id === documentData.id ? documentData : doc
+                ) || [documentData],
+              },
+            };
+          }),
+        };
+      })
+    );
+    setShowDocumentEditor(false);
+    setSelectedDocument(null);
+    setSelectedTemplate(null);
   };
 
   if (loading) {
@@ -561,6 +650,12 @@ export default function UnitDetailsPage() {
           </div>
         </div>
 
+        {/* ✅ Documents Section */}
+        <DocumentsSection 
+          documents={documents} 
+          onViewDocument={handleViewDocument} 
+        />
+
         {/* Rent History */}
         {isRented && (
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
@@ -605,7 +700,6 @@ export default function UnitDetailsPage() {
               Edit Unit
             </Link>
 
-            {/* Previous Records Button - Always visible if records exist */}
             {previousCustomers.length > 0 && (
               <button
                 onClick={() => {
@@ -639,6 +733,37 @@ export default function UnitDetailsPage() {
           buildingId={building.id}
           room={unit}
           onClose={() => setShowClearModal(false)}
+        />
+      )}
+
+      {/* ✅ Document Editor Modal */}
+      {showDocumentEditor && selectedTemplate && (
+        <DocumentEditor
+          isOpen={showDocumentEditor}
+          onClose={() => {
+            setShowDocumentEditor(false);
+            setSelectedDocument(null);
+            setSelectedTemplate(null);
+          }}
+          template={selectedTemplate}
+          formData={{
+            customerName: tenant?.name || "",
+            cnic: tenant?.cnic || "",
+            phone: tenant?.phone || "",
+            unitNo: unit?.unitNo || "",
+            monthlyRent: unit?.monthlyRent || 0,
+            security: initialPayment?.securityReceived || 0,
+            rentStartDate: unit?.rentStartDate || "",
+            buildingAddress: building?.address || "",
+            customerFatherName: tenant?.fatherName || "",
+            permanentAddress: tenant?.address || "",
+          }}
+          buildingData={{
+            buildingId: building.id,
+            buildingNo: building.buildingNo,
+          }}
+          onSave={handleSaveDocument}
+          existingDocument={selectedDocument}
         />
       )}
     </>

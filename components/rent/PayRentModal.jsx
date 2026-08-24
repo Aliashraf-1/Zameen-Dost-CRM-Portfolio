@@ -39,6 +39,7 @@ export default function PayRentModal({
   );
 
   // Close on Escape key
+  
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape") onClose();
