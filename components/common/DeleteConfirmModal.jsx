@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { X, AlertTriangle, Trash2 } from "lucide-react";
+import ModalPortal from "@/components/common/ModalPortal";
 
 export default function DeleteConfirmModal({
   isOpen,
@@ -33,85 +34,96 @@ export default function DeleteConfirmModal({
     }
   }, [isOpen]);
 
+  // Close on outside click
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+    <ModalPortal>
       <div
-        ref={modalRef}
-        tabIndex={-1}
-        className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+        className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+        onClick={handleBackdropClick}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 p-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10 text-red-400">
-              <AlertTriangle size={20} />
+        {/* Modal - Viewport ke center mein */}
+        <div
+          ref={modalRef}
+          tabIndex={-1}
+          className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-slate-800 p-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10 text-red-400">
+                <AlertTriangle size={20} />
+              </div>
+              <div>
+                <h2 className="font-semibold text-red-400">{title}</h2>
+                <p className="text-xs text-slate-500">This action cannot be undone</p>
+              </div>
             </div>
-            <div>
-              <h2 className="font-semibold text-red-400">{title}</h2>
-              <p className="text-xs text-slate-500">This action cannot be undone</p>
-            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+            >
+              <X size={18} />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
-          >
-            <X size={18} />
-          </button>
-        </div>
 
-        {/* Body */}
-        <div className="p-5 space-y-4">
-          <p className="text-sm text-slate-300">{message}</p>
-          
-          {itemName && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3">
-              <p className="text-sm font-medium text-red-400">
-                <span className="text-slate-400">Item:</span> {itemName}
+          {/* Body */}
+          <div className="p-5 space-y-4">
+            <p className="text-sm text-slate-300">{message}</p>
+            
+            {itemName && (
+              <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3">
+                <p className="text-sm font-medium text-red-400">
+                  <span className="text-slate-400">Item:</span> {itemName}
+                </p>
+              </div>
+            )}
+
+            <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">
+              <p className="text-xs text-amber-400 flex items-center gap-2">
+                <AlertTriangle size={14} />
+                This will permanently remove this record from the system.
               </p>
             </div>
-          )}
+          </div>
 
-          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">
-            <p className="text-xs text-amber-400 flex items-center gap-2">
-              <AlertTriangle size={14} />
-              This will permanently remove this record from the system.
-            </p>
+          {/* Footer */}
+          <div className="flex gap-3 border-t border-slate-800 p-5">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="flex-1 rounded-xl border border-slate-800 px-5 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              disabled={loading}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-500 disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 size={17} />
+                  Delete
+                </>
+              )}
+            </button>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="flex gap-3 border-t border-slate-800 p-5">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            className="flex-1 rounded-xl border border-slate-800 px-5 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white disabled:opacity-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={loading}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-500 disabled:opacity-50"
-          >
-            {loading ? (
-              <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                Deleting...
-              </>
-            ) : (
-              <>
-                <Trash2 size={17} />
-                Delete
-              </>
-            )}
-          </button>
-        </div>
       </div>
-    </div>
+    </ModalPortal>
   );
 }

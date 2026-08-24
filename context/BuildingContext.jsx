@@ -74,11 +74,6 @@ export function BuildingProvider({ children }) {
 
             const newHistory = [];
 
-            /*
-             * Find pending months starting from
-             * the month after the last recorded payment.
-             */
-
             let nextDate = new Date(
               room.rentStartDate || paymentDateTime
             );
@@ -162,154 +157,174 @@ export function BuildingProvider({ children }) {
    * ----------------------------------------
    */
 
-  const clearRental = (
-    buildingId,
-    unitId,
-    settlement
-  ) => {
-    const {
-      returnAmount = 0,
-      forfeitAmount = 0,
-      remarks = "",
-      clearedAt = new Date().toISOString(),
-    } = settlement;
+ const clearRental = (buildingId, unitId, settlement) => {
+  const {
+    returnAmount = 0,
+    forfeitAmount = 0,
+    remarks = "",
+    clearedAt = new Date().toISOString(),
+  } = settlement;
 
-    let rentalRecord = null;
+  let rentalRecord = null;
 
-    setBuildings((prevBuildings) =>
-      prevBuildings.map((building) => {
-        if (building.id !== buildingId) {
-          return building;
-        }
+  setBuildings((prevBuildings) =>
+    prevBuildings.map((building) => {
+      if (building.id !== buildingId) {
+        return building;
+      }
 
-        return {
-          ...building,
+      return {
+        ...building,
 
-          rooms: building.rooms.map((room) => {
-            if (room.id !== unitId) {
-              return room;
-            }
+        rooms: building.rooms.map((room) => {
+          if (room.id !== unitId) {
+            return room;
+          }
 
-            const securityHeld = Number(
-              room.initialPayment?.securityReceived || 0
+          const securityHeld = Number(
+            room.initialPayment?.securityReceived || 0
+          );
+
+          const returned = Number(returnAmount || 0);
+          const forfeited = Number(forfeitAmount || 0);
+
+          if (returned + forfeited !== securityHeld) {
+            throw new Error(
+              "Security settlement amount must equal the security held."
             );
+          }
 
-            const returned = Number(returnAmount || 0);
-            const forfeited = Number(forfeitAmount || 0);
+          const previousSecurityHistory = room.securityHistory || [];
+          const previousClearanceHistory = room.clearanceHistory || [];
 
-            if (returned + forfeited !== securityHeld) {
-              throw new Error(
-                "Security settlement amount must equal the security held."
-              );
-            }
+          // ✅ Store complete tenant data for history
+          const tenantData = room.tenant ? {
+            name: room.tenant.name || "Unknown",
+            cnic: room.tenant.cnic || "N/A",
+            phone: room.tenant.phone || "N/A",
+            reference: room.tenant.reference || "",
+            image: room.tenant.image || null,
+            agreement: room.tenant.agreement || [],
+          } : null;
 
-            const previousSecurityHistory = room.securityHistory || [];
-            const previousClearanceHistory = room.clearanceHistory || [];
+          rentalRecord = {
+            type: "rental-cleared",
+            buildingId,
+            unitId,
+            unitNo: room.unitNo,
+            tenantName: tenantData?.name || "Unknown",
+            tenantCnic: tenantData?.cnic || "N/A",
+            tenantPhone: tenantData?.phone || "N/A",
+            tenantReference: tenantData?.reference || "",
+            tenantImage: tenantData?.image || null,
+            agreement: tenantData?.agreement || [],
+            monthlyRent: room.monthlyRent || 0,
+            securityHeld,
+            returned,
+            forfeited,
+            remarks: remarks || "Rental cleared",
+            clearedAt,
+          };
 
-            rentalRecord = {
-              type: "rental-cleared",
-              buildingId,
-              unitId,
-              unitNo: room.unitNo,
-              tenantName: room.tenant?.name,
-              securityHeld,
-              returned,
-              forfeited,
-              remarks: remarks || "Rental cleared",
-              clearedAt,
-            };
+          return {
+            ...room,
+            // ✅ Clear all tenant related data
+            status: "Available",
+            purpose: null,
+            rentStartDate: null,
+            tenant: null,        // ✅ Important: tenant null karo
+            initialPayment: null, // ✅ Important: initialPayment null karo
+            unitImage: room.unitImage || null,
+            deskNo: room.deskNo || null,
+            
+            // ✅ Add to clearance history
+            clearanceHistory: [
+              ...previousClearanceHistory,
+              {
+                id: Date.now(),
+                type: "Rental Clearance",
+                tenantName: rentalRecord.tenantName,
+                tenantCnic: rentalRecord.tenantCnic,
+                tenantPhone: rentalRecord.tenantPhone,
+                tenantReference: rentalRecord.tenantReference,
+                tenantImage: rentalRecord.tenantImage,
+                agreement: rentalRecord.agreement,
+                monthlyRent: rentalRecord.monthlyRent,
+                securityHeld: rentalRecord.securityHeld,
+                returnAmount: rentalRecord.returned,
+                forfeitAmount: rentalRecord.forfeited,
+                remarks: rentalRecord.remarks,
+                clearedAt: rentalRecord.clearedAt,
+              },
+            ],
 
-            return {
-              ...room,
+            // ✅ Update security history
+            securityHistory: [
+              ...previousSecurityHistory,
+              ...(returned > 0
+                ? [
+                    {
+                      id: Date.now(),
+                      type: "returned",
+                      amount: returned,
+                      date: clearedAt,
+                      note: `Security returned to customer. ${remarks || "Rental ended"}`,
+                    },
+                  ]
+                : []),
+              ...(forfeited > 0
+                ? [
+                    {
+                      id: Date.now() + 1,
+                      type: "forfeited",
+                      amount: forfeited,
+                      date: clearedAt,
+                      note: `Security forfeited. ${remarks || "Rental ended"}`,
+                    },
+                  ]
+                : []),
+            ],
 
-              status: "Available",
-              purpose: null,
-              rentStartDate: null,
-              tenant: null,
-              initialPayment: null,
+            // ✅ Update transaction history
+            transactionHistory: [
+              ...(room.transactionHistory || []),
+              ...(returned > 0
+                ? [
+                    {
+                      id: `clear-return-${Date.now()}`,
+                      type: "Security Returned",
+                      category: "Security Refund",
+                      amount: returned,
+                      description: `Security returned to ${room.tenant?.name || "Unknown"} - Unit ${room.unitNo}`,
+                      status: "Completed",
+                      paidAt: clearedAt,
+                      remarks: remarks || "Security returned after rental ended",
+                    },
+                  ]
+                : []),
+              ...(forfeited > 0
+                ? [
+                    {
+                      id: `clear-forfeit-${Date.now()}`,
+                      type: "Security Forfeited",
+                      category: "Security Income",
+                      amount: forfeited,
+                      description: `Security forfeited from ${room.tenant?.name || "Unknown"} - Unit ${room.unitNo}`,
+                      status: "Received",
+                      receivedAt: clearedAt,
+                      remarks: remarks || "Security forfeited after rental ended",
+                    },
+                  ]
+                : []),
+            ],
+          };
+        }),
+      };
+    })
+  );
 
-              // Add clearance history
-              clearanceHistory: [
-                ...previousClearanceHistory,
-                {
-                  id: Date.now(),
-                  type: "Rental Clearance",
-                  returnAmount: returned,
-                  forfeitAmount: forfeited,
-                  remarks: remarks || "Rental cleared",
-                  clearedAt: clearedAt,
-                },
-              ],
-
-              // Update security history
-              securityHistory: [
-                ...previousSecurityHistory,
-
-                ...(returned > 0
-                  ? [
-                      {
-                        id: Date.now(),
-                        type: "returned",
-                        amount: returned,
-                        date: clearedAt,
-                        note: `Security returned to customer. ${remarks || "Rental ended"}`,
-                      },
-                    ]
-                  : []),
-
-                ...(forfeited > 0
-                  ? [
-                      {
-                        id: Date.now() + 1,
-                        type: "forfeited",
-                        amount: forfeited,
-                        date: clearedAt,
-                        note: `Security forfeited. ${remarks || "Rental ended"}`,
-                      },
-                    ]
-                  : []),
-              ],
-
-              // Add to transaction history for revenue tracking
-              transactionHistory: [
-                ...(room.transactionHistory || []),
-                ...(returned > 0
-                  ? [
-                      {
-                        id: `clear-return-${Date.now()}`,
-                        type: "Security Returned",
-                        category: "Security Refund",
-                        amount: returned,
-                        description: `Security returned to ${room.tenant?.name} - Unit ${room.unitNo}`,
-                        status: "Completed",
-                        paidAt: clearedAt,
-                        remarks: remarks || "Security returned after rental ended",
-                      },
-                    ]
-                  : []),
-                ...(forfeited > 0
-                  ? [
-                      {
-                        id: `clear-forfeit-${Date.now()}`,
-                        type: "Security Forfeited",
-                        category: "Security Income",
-                        amount: forfeited,
-                        description: `Security forfeited from ${room.tenant?.name} - Unit ${room.unitNo}`,
-                        status: "Received",
-                        receivedAt: clearedAt,
-                        remarks: remarks || "Security forfeited after rental ended",
-                      },
-                    ]
-                  : []),
-              ],
-            };
-          }),
-        };
-      })
-    );
-
-    return rentalRecord;
-  };
+  return rentalRecord;
+};
 
   /*
    * ----------------------------------------

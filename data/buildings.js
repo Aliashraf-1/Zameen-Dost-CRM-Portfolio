@@ -1,13 +1,12 @@
 export const buildings = [
   {
     id: 1,
-    buildingNo: "B-101",
+    buildingNo: "Building #01",
     reference: "University Road",
     address: "University Road, Sargodha",
     totalUnits: 12,
     status: "Active",
-    createdAt: "2024-01-15T10:00:00.000Z",
-    updatedAt: "2026-08-20T10:00:00.000Z",
+
     rooms: [
       {
         id: 101,
@@ -19,18 +18,14 @@ export const buildings = [
         monthlyRent: 25000,
         rentStartDate: "2026-06-01",
         unitImage: null,
-        reference: "Corner office with balcony",
-        createdAt: "2026-06-01T10:00:00.000Z",
-        updatedAt: "2026-08-20T10:00:00.000Z",
 
         tenant: {
           name: "Muhammad Ahmed",
           cnic: "37405-1234567-1",
           phone: "0300-1234567",
-          reference: "Software Engineer",
+          reference: "Software wala bacha",
           image: null,
           agreement: [],
-          createdAt: "2026-06-01T10:00:00.000Z",
         },
 
         initialPayment: {
@@ -71,30 +66,82 @@ export const buildings = [
           },
         ],
 
-        clearanceHistory: [],
+        // ✅ Previous customer history
+        clearanceHistory: [
+          {
+            id: 1001,
+            type: "Rental Clearance",
+            tenantName: "Ali Raza",
+            tenantCnic: "37405-7654321-1",
+            tenantPhone: "0312-7654321",
+            tenantReference: "Previous Tenant",
+            tenantImage: null,
+            agreement: [
+              { name: "agreement_1.pdf", url: "/docs/agreement_1.pdf" },
+              { name: "agreement_2.pdf", url: "/docs/agreement_2.pdf" },
+            ],
+            monthlyRent: 22000,
+            securityHeld: 70000,
+            returnAmount: 65000,
+            forfeitAmount: 5000,
+            remarks: "Damage deductions applied - AC repair",
+            clearedAt: "2026-05-15T10:30:00.000Z",
+          },
+          {
+            id: 1002,
+            type: "Rental Clearance",
+            tenantName: "Usman Khan",
+            tenantCnic: "37405-1111111-1",
+            tenantPhone: "0321-1111111",
+            tenantReference: "Business Owner",
+            tenantImage: null,
+            agreement: [],
+            monthlyRent: 20000,
+            securityHeld: 60000,
+            returnAmount: 60000,
+            forfeitAmount: 0,
+            remarks: "Security returned in full",
+            clearedAt: "2025-12-20T10:30:00.000Z",
+          },
+        ],
+
         transactionHistory: [],
       },
 
       {
-        id: 102,
-        unitNo: "102",
-        type: "Room",
-        deskNo: null,
-        status: "Available",
-        purpose: "Hostel",
-        monthlyRent: 30000,
-        rentStartDate: null,
-        unitImage: null,
-        reference: "Corner room with attached bathroom",
-        createdAt: "2026-07-15T10:00:00.000Z",
-        updatedAt: "2026-08-20T10:00:00.000Z",
-        tenant: null,
-        initialPayment: null,
-        rentHistory: [],
-        securityHistory: [],
-        clearanceHistory: [],
-        transactionHistory: [],
-      },
+  id: 102,
+  unitNo: "102",
+  type: "Room",
+  deskNo: null,
+  status: "Available",
+  purpose: "Hostel",
+  monthlyRent: 30000,
+  rentStartDate: null,
+  unitImage: null,
+  tenant: null,
+  initialPayment: null,
+  rentHistory: [],
+  securityHistory: [],
+  clearanceHistory: [
+    {
+      id: 2001,
+      type: "Rental Clearance",
+      tenantName: "Ali Raza",
+      tenantCnic: "37405-7654321-1",
+      tenantPhone: "0312-7654321",
+      tenantReference: "Student",
+      tenantImage: null,
+      agreement: [],
+      monthlyRent: 30000,
+      securityHeld: 100000,
+      returnAmount: 95000,
+      forfeitAmount: 5000,
+      remarks: "Security forfeited due to damages",
+      clearedAt: "2026-07-15T10:30:00.000Z",
+    },
+  ],
+  transactionHistory: [],
+},
 
       {
         id: 103,
@@ -106,9 +153,6 @@ export const buildings = [
         monthlyRent: 28000,
         rentStartDate: null,
         unitImage: null,
-        reference: "Standard room with AC",
-        createdAt: "2026-08-01T10:00:00.000Z",
-        updatedAt: "2026-08-20T10:00:00.000Z",
         tenant: null,
         initialPayment: null,
         rentHistory: [],
@@ -117,6 +161,7 @@ export const buildings = [
         transactionHistory: [],
       },
 
+      // Desk example
       {
         id: 104,
         unitNo: "104",
@@ -127,18 +172,14 @@ export const buildings = [
         monthlyRent: 4000,
         rentStartDate: "2026-08-19",
         unitImage: null,
-        reference: "Co-working desk with monitor",
-        createdAt: "2026-08-19T10:00:00.000Z",
-        updatedAt: "2026-08-20T10:00:00.000Z",
 
         tenant: {
           name: "Ahmed Khan",
           cnic: "37405-3333333-1",
           phone: "0300-0000000",
-          reference: "Freelancer",
+          reference: "Software wala bacha",
           image: null,
           agreement: [],
-          createdAt: "2026-08-19T10:00:00.000Z",
         },
 
         initialPayment: {
@@ -179,13 +220,12 @@ export const buildings = [
 
   {
     id: 2,
-    buildingNo: "B-102",
+    buildingNo: "Building #02",
     reference: "Satellite Town",
     address: "Satellite Town, Sargodha",
     totalUnits: 16,
     status: "Active",
-    createdAt: "2024-02-01T10:00:00.000Z",
-    updatedAt: "2026-08-20T10:00:00.000Z",
+
     rooms: [
       {
         id: 201,
@@ -197,18 +237,14 @@ export const buildings = [
         monthlyRent: 22000,
         rentStartDate: "2026-05-20",
         unitImage: null,
-        reference: "Ground floor office",
-        createdAt: "2026-05-20T10:00:00.000Z",
-        updatedAt: "2026-08-20T10:00:00.000Z",
 
         tenant: {
           name: "Usman Khan",
           cnic: "37405-1111111-1",
           phone: "0321-1111111",
-          reference: "Business Owner",
+          reference: "Client",
           image: null,
           agreement: [],
-          createdAt: "2026-05-20T10:00:00.000Z",
         },
 
         initialPayment: {
@@ -271,14 +307,28 @@ export const buildings = [
         monthlyRent: 25000,
         rentStartDate: null,
         unitImage: null,
-        reference: "First floor room with view",
-        createdAt: "2026-06-01T10:00:00.000Z",
-        updatedAt: "2026-08-20T10:00:00.000Z",
         tenant: null,
         initialPayment: null,
         rentHistory: [],
         securityHistory: [],
-        clearanceHistory: [],
+        clearanceHistory: [
+          {
+            id: 3001,
+            type: "Rental Clearance",
+            tenantName: "Fatima Ali",
+            tenantCnic: "37405-4444444-1",
+            tenantPhone: "0344-4444444",
+            tenantReference: "Teacher",
+            tenantImage: null,
+            agreement: [],
+            monthlyRent: 23000,
+            securityHeld: 65000,
+            returnAmount: 65000,
+            forfeitAmount: 0,
+            remarks: "Security returned in full - Rental ended",
+            clearedAt: "2026-06-30T10:30:00.000Z",
+          },
+        ],
         transactionHistory: [],
       },
     ],
@@ -286,13 +336,12 @@ export const buildings = [
 
   {
     id: 3,
-    buildingNo: "B-103",
+    buildingNo: "Building #03",
     reference: "Faisalabad Road",
     address: "Faisalabad Road, Sargodha",
     totalUnits: 20,
     status: "Active",
-    createdAt: "2024-03-15T10:00:00.000Z",
-    updatedAt: "2026-08-20T10:00:00.000Z",
+
     rooms: [
       {
         id: 301,
@@ -304,18 +353,14 @@ export const buildings = [
         monthlyRent: 35000,
         rentStartDate: "2026-08-01",
         unitImage: null,
-        reference: "Executive office",
-        createdAt: "2026-08-01T10:00:00.000Z",
-        updatedAt: "2026-08-20T10:00:00.000Z",
 
         tenant: {
           name: "Hassan Ali",
           cnic: "37405-2222222-1",
           phone: "0333-2222222",
-          reference: "CEO",
+          reference: "Software wala bacha",
           image: null,
           agreement: [],
-          createdAt: "2026-08-01T10:00:00.000Z",
         },
 
         initialPayment: {
@@ -362,9 +407,6 @@ export const buildings = [
         monthlyRent: 30000,
         rentStartDate: null,
         unitImage: null,
-        reference: "Standard office room",
-        createdAt: "2026-08-15T10:00:00.000Z",
-        updatedAt: "2026-08-20T10:00:00.000Z",
         tenant: null,
         initialPayment: null,
         rentHistory: [],

@@ -23,12 +23,17 @@ import {
   History,
   ChevronDown,
   ChevronUp,
+  Eye,
+  Trash2,
+  X,
+  Download,
 } from "lucide-react";
 import { useBuildings } from "@/context/BuildingContext";
 import RentHistory from "@/components/customers/RentHistory";
 import SecurityHistory from "@/components/customers/SecurityHistory";
 import ClearRentalModal from "@/components/rent/ClearRentalModal";
 import PayRentModal from "@/components/rent/PayRentModal";
+import DeleteConfirmModal from "@/components/common/DeleteConfirmModal";
 
 function InfoItem({ icon: Icon, label, value, valueClassName = "" }) {
   return (
@@ -75,79 +80,242 @@ function StatusBadge({ status }) {
   );
 }
 
-// Previous Records Component
-function PreviousRecords({ clearanceHistory = [] }) {
+// Previous Customer Card Component
+function PreviousCustomerCard({ customer, onDelete }) {
   const [expanded, setExpanded] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  if (clearanceHistory.length === 0) {
+  return (
+    <>
+      <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4 transition hover:border-slate-700">
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-500/10 text-indigo-400">
+              {customer.tenantImage ? (
+                <img
+                  src={customer.tenantImage}
+                  alt={customer.tenantName}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <User size={20} />
+              )}
+            </div>
+            <div>
+              <p className="font-medium text-slate-200">{customer.tenantName}</p>
+              <p className="text-xs text-slate-500">
+                {customer.unitNo} • {customer.type}
+              </p>
+              <p className="text-xs text-slate-600">
+                Cleared: {new Date(customer.clearedAt).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+              title="View details"
+            >
+              {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+            </button>
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="rounded-lg p-2 text-red-500 transition hover:bg-red-500/10 hover:text-red-400"
+              title="Delete record"
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* Expanded Details */}
+        {expanded && (
+          <div className="mt-4 space-y-4 border-t border-slate-800 pt-4">
+            {/* Tenant Details */}
+            <div className="grid gap-3 md:grid-cols-2">
+              <InfoItem icon={User} label="Name" value={customer.tenantName} />
+              <InfoItem icon={CreditCard} label="CNIC" value={customer.tenantCnic} />
+              <InfoItem icon={Phone} label="Phone" value={customer.tenantPhone} />
+              <InfoItem icon={FileText} label="Reference" value={customer.tenantReference || "N/A"} />
+            </div>
+
+            {/* Financial Details */}
+            <div className="grid gap-3 md:grid-cols-3">
+              <InfoItem
+                icon={Wallet}
+                label="Monthly Rent"
+                value={`Rs. ${customer.monthlyRent?.toLocaleString() || "0"}`}
+                valueClassName="text-emerald-400"
+              />
+              <InfoItem
+                icon={ShieldCheck}
+                label="Security Held"
+                value={`Rs. ${customer.securityHeld?.toLocaleString() || "0"}`}
+                valueClassName="text-emerald-400"
+              />
+              <InfoItem
+                icon={Wallet}
+                label="Security Returned"
+                value={`Rs. ${customer.returnAmount?.toLocaleString() || "0"}`}
+                valueClassName="text-amber-400"
+              />
+            </div>
+
+            {/* Remarks */}
+            {customer.remarks && (
+              <div className="rounded-xl border border-slate-800 bg-slate-950/30 p-3">
+                <p className="text-xs text-slate-500">Remarks</p>
+                <p className="mt-1 text-sm text-slate-300">{customer.remarks}</p>
+              </div>
+            )}
+
+            {/* Agreement Documents */}
+            {customer.agreement && customer.agreement.length > 0 && (
+              <div className="rounded-xl border border-slate-800 bg-slate-950/30 p-3">
+                <p className="text-xs text-slate-500">Agreement Documents</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {customer.agreement.map((doc, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-1 rounded-lg bg-slate-800 px-3 py-2 text-xs text-slate-300"
+                    >
+                      <FileText size={14} className="text-indigo-400" />
+                      <span>Document {index + 1}</span>
+                      <button className="ml-1 rounded p-1 hover:bg-slate-700">
+                        <Download size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Tenant Image */}
+            {customer.tenantImage && (
+              <div className="rounded-xl border border-slate-800 bg-slate-950/30 p-3">
+                <p className="text-xs text-slate-500">Tenant Image</p>
+                <div className="mt-2">
+                  <img
+                    src={customer.tenantImage}
+                    alt={customer.tenantName}
+                    className="h-32 w-32 rounded-lg object-cover"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Clearance Info */}
+            <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">
+              <p className="text-xs text-slate-500">Clearance Details</p>
+              <div className="mt-2 grid gap-1 text-sm">
+                <p className="text-slate-300">
+                  <span className="text-slate-500">Cleared At:</span>{" "}
+                  {new Date(customer.clearedAt).toLocaleString()}
+                </p>
+                <p className="text-slate-300">
+                  <span className="text-slate-500">Security Held:</span>{" "}
+                  <span className="text-emerald-400">
+                    Rs. {customer.securityHeld?.toLocaleString() || "0"}
+                  </span>
+                </p>
+                <p className="text-slate-300">
+                  <span className="text-slate-500">Security Returned:</span>{" "}
+                  <span className="text-amber-400">
+                    Rs. {customer.returnAmount?.toLocaleString() || "0"}
+                  </span>
+                </p>
+                <p className="text-slate-300">
+                  <span className="text-slate-500">Security Forfeited:</span>{" "}
+                  <span className="text-red-400">
+                    Rs. {customer.forfeitAmount?.toLocaleString() || "0"}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <DeleteConfirmModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={() => {
+            onDelete(customer.id);
+            setShowDeleteModal(false);
+          }}
+          title="Delete Previous Customer Record"
+          message={`Are you sure you want to delete the record of ${customer.tenantName}? This action cannot be undone and will remove all associated data including agreement documents.`}
+          itemName={`${customer.tenantName} - ${customer.unitNo}`}
+        />
+      )}
+    </>
+  );
+}
+
+// Previous Customers Section
+function PreviousCustomers({ previousCustomers = [], onDelete }) {
+  const [showAll, setShowAll] = useState(false);
+
+  if (previousCustomers.length === 0) {
     return null;
   }
 
+  const displayCustomers = showAll ? previousCustomers : previousCustomers.slice(0, 2);
+
   return (
-    <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between"
-      >
+    <div id="previous-customers" className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6 scroll-mt-20">
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <History size={20} className="text-indigo-400" />
-          <h2 className="text-lg font-semibold">
-            Previous Records ({clearanceHistory.length})
-          </h2>
+          <div>
+            <h2 className="text-lg font-semibold text-slate-200">
+              Previous Customers ({previousCustomers.length})
+            </h2>
+            <p className="text-xs text-slate-500">
+              Customers who have previously rented this unit
+            </p>
+          </div>
         </div>
-        {expanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-      </button>
+        {previousCustomers.length > 2 && (
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="flex items-center gap-1 rounded-lg border border-slate-800 px-3 py-1.5 text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white"
+          >
+            {showAll ? (
+              <>
+                <ChevronUp size={16} />
+                Show Less
+              </>
+            ) : (
+              <>
+                <ChevronDown size={16} />
+                View All ({previousCustomers.length})
+              </>
+            )}
+          </button>
+        )}
+      </div>
 
-      {expanded && (
-        <div className="mt-4 space-y-4">
-          {clearanceHistory.map((record, index) => (
-            <div
-              key={index}
-              className="rounded-xl border border-slate-800 bg-slate-950/50 p-4"
-            >
-              <div className="grid gap-3 md:grid-cols-2">
-                <div>
-                  <p className="text-xs text-slate-500">Tenant</p>
-                  <p className="mt-1 font-medium">{record.tenantName || "Unknown"}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500">Cleared At</p>
-                  <p className="mt-1 text-sm">
-                    {record.clearedAt
-                      ? new Date(record.clearedAt).toLocaleString()
-                      : "Not recorded"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500">Security Returned</p>
-                  <p className="mt-1 font-medium text-emerald-400">
-                    Rs. {record.returnAmount?.toLocaleString() || "0"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500">Security Forfeited</p>
-                  <p className="mt-1 font-medium text-amber-400">
-                    Rs. {record.forfeitAmount?.toLocaleString() || "0"}
-                  </p>
-                </div>
-                <div className="md:col-span-2">
-                  <p className="text-xs text-slate-500">Remarks</p>
-                  <p className="mt-1 text-sm text-slate-300">
-                    {record.remarks || "No remarks"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="space-y-3">
+        {displayCustomers.map((customer) => (
+          <PreviousCustomerCard
+            key={customer.id}
+            customer={customer}
+            onDelete={onDelete}
+          />
+        ))}
+      </div>
     </div>
   );
 }
 
 export default function UnitDetailsPage() {
   const params = useParams();
-  const { buildings } = useBuildings();
+  const { buildings, setBuildings } = useBuildings();
   const [building, setBuilding] = useState(null);
   const [unit, setUnit] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -172,6 +340,47 @@ export default function UnitDetailsPage() {
     }
   }, [params.id, params.roomId, buildings]);
 
+  // ✅ FIX: Filter out current tenant from clearanceHistory
+  const previousCustomers = unit?.clearanceHistory
+    ?.filter((record) => record.tenantName !== unit?.tenant?.name)
+    ?.map((record) => ({
+      id: record.id,
+      tenantName: record.tenantName || "Unknown Customer",
+      tenantCnic: record.tenantCnic || "N/A",
+      tenantPhone: record.tenantPhone || "N/A",
+      tenantReference: record.tenantReference || "",
+      tenantImage: record.tenantImage || null,
+      agreement: record.agreement || [],
+      unitNo: unit?.unitNo || "",
+      type: unit?.type || "",
+      monthlyRent: record.monthlyRent || 0,
+      securityHeld: record.securityHeld || 0,
+      returnAmount: record.returnAmount || 0,
+      forfeitAmount: record.forfeitAmount || 0,
+      remarks: record.remarks || "",
+      clearedAt: record.clearedAt || new Date().toISOString(),
+    })) || [];
+
+  const handleDeletePreviousCustomer = (recordId) => {
+    setBuildings((prevBuildings) =>
+      prevBuildings.map((b) => {
+        if (b.id !== building.id) return b;
+        return {
+          ...b,
+          rooms: b.rooms.map((r) => {
+            if (r.id !== unit.id) return r;
+            return {
+              ...r,
+              clearanceHistory: r.clearanceHistory?.filter(
+                (record) => record.id !== recordId
+              ) || [],
+            };
+          }),
+        };
+      })
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -184,10 +393,9 @@ export default function UnitDetailsPage() {
     notFound();
   }
 
-  const isRented = unit.status === "Rented";
-  const tenant = unit.tenant;
-  const initialPayment = unit.initialPayment;
-  const clearanceHistory = unit.clearanceHistory || [];
+  const isRented = unit.status === "Rented" && unit.tenant !== null && unit.initialPayment !== null;
+  const tenant = isRented ? unit.tenant : null;
+  const initialPayment = isRented ? unit.initialPayment : null;
 
   return (
     <>
@@ -361,8 +569,11 @@ export default function UnitDetailsPage() {
           </div>
         )}
 
-        {/* Previous Records */}
-        <PreviousRecords clearanceHistory={clearanceHistory} />
+        {/* Previous Customers Section */}
+        <PreviousCustomers
+          previousCustomers={previousCustomers}
+          onDelete={handleDeletePreviousCustomer}
+        />
 
         {/* Quick Actions */}
         <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6">
@@ -393,6 +604,22 @@ export default function UnitDetailsPage() {
               <Pencil size={16} />
               Edit Unit
             </Link>
+
+            {/* Previous Records Button - Always visible if records exist */}
+            {previousCustomers.length > 0 && (
+              <button
+                onClick={() => {
+                  const element = document.getElementById('previous-customers');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500"
+              >
+                <History size={16} />
+                View Previous Records ({previousCustomers.length})
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -17,6 +17,7 @@ import {
   Wallet,
   AlertCircle,
   Calendar,
+  CalendarCheck,
 } from "lucide-react";
 import PaySalaryModal from "./PaySalaryModal";
 import DeleteConfirmModal from "@/components/common/DeleteConfirmModal";
@@ -38,7 +39,7 @@ const tableReducer = (state, action) => {
   }
 };
 
-export default function EmployeeTable({ employees = [], onDelete }) {
+export default function EmployeeTable({ employees = [], onDelete, onMarkAttendance }) {
   // Use reducer for filter state
   const [filterState, dispatch] = useReducer(tableReducer, {
     search: "",
@@ -230,7 +231,6 @@ export default function EmployeeTable({ employees = [], onDelete }) {
                 <option value="Security">Security</option>
                 <option value="HR">HR</option>
                 <option value="Marketing">Marketing</option>
-                <option value="Marketing">Marketing</option>
               </select>
             </div>
           </div>
@@ -238,7 +238,7 @@ export default function EmployeeTable({ employees = [], onDelete }) {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1350px]">
+          <table className="w-full min-w-[1400px]">
             <thead>
               <tr className="border-b border-slate-800 text-left">
                 <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
@@ -370,13 +370,13 @@ export default function EmployeeTable({ employees = [], onDelete }) {
 
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1">
-                    <Link
-                      href={`/dashboard/employees/${employee.id}`}
-                      className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
-                      title="View employee"
-                    >
-                      <Eye size={17} />
-                    </Link>
+                        <Link
+                          href={`/dashboard/employees/${employee.id}`}
+                          className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                          title="View employee"
+                        >
+                          <Eye size={17} />
+                        </Link>
 
                         <Link
                           href={`/dashboard/employees/edit/${employee.id}`}
@@ -385,6 +385,15 @@ export default function EmployeeTable({ employees = [], onDelete }) {
                         >
                           <Pencil size={17} />
                         </Link>
+
+                        {/* ✅ Mark Attendance Button */}
+                        <button
+                          onClick={() => onMarkAttendance?.(employee)}
+                          className="rounded-lg p-2 text-slate-500 transition hover:bg-emerald-500/10 hover:text-emerald-400"
+                          title="Mark attendance"
+                        >
+                          <CalendarCheck size={17} />
+                        </button>
 
                         <button
                           onClick={() => handlePayClick(employee)}
