@@ -10,8 +10,6 @@ export function ThemeProvider({ children }) {
     setMounted(true);
   }, []);
 
-  // Server side aur hydration ke dauran children render karo
-  // Lekin theme provider ko sirf client side pe active karo
   if (!mounted) {
     return <>{children}</>;
   }
@@ -22,10 +20,11 @@ export function ThemeProvider({ children }) {
       defaultTheme="dark"
       enableSystem={false}
       disableTransitionOnChange
-      // Script props ko customize karo
+      // ✅ Script props ko customize karo
       scriptProps={{
         "data-nscript": "afterInteractive",
         strategy: "afterInteractive",
+        suppressHydrationWarning: true,
       }}
     >
       {children}

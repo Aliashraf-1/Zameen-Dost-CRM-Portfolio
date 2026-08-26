@@ -16,12 +16,15 @@ import {
   AlertTriangle,
   Upload,
   Trash2,
+  Clock,
+  Settings,
 } from "lucide-react";
 
 export default function EmployeeForm({
   initialData = null,
   mode = "create",
   onSubmit,
+  onCancel,
 }) {
   const router = useRouter();
   const isEdit = mode === "edit";
@@ -40,6 +43,20 @@ export default function EmployeeForm({
     emergencyContact: initialData?.emergencyContact || "",
     emergencyName: initialData?.emergencyName || "",
     image: initialData?.image || null,
+    // ✅ Time Table / Shift Timing
+    shiftTiming: {
+      startTime: initialData?.shiftTiming?.startTime || "09:00",
+      endTime: initialData?.shiftTiming?.endTime || "17:00",
+      graceMinutes: initialData?.shiftTiming?.graceMinutes || 30,
+      weeklyOff: initialData?.shiftTiming?.weeklyOff || "Friday",
+      monthlyLeaves: initialData?.shiftTiming?.monthlyLeaves || 1,
+    },
+    // ✅ Attendance Settings (per employee)
+    attendanceSettings: {
+      leaveDeduction: initialData?.attendanceSettings?.leaveDeduction || 500,
+      lateDeduction: initialData?.attendanceSettings?.lateDeduction || 10,
+      taskFailureDeduction: initialData?.attendanceSettings?.taskFailureDeduction || 1000,
+    },
   });
 
   const [loading, setLoading] = useState(false);
@@ -50,6 +67,30 @@ export default function EmployeeForm({
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     setError("");
+  };
+
+  // ✅ Handle Shift Timing Changes
+  const handleShiftTimingChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      shiftTiming: {
+        ...prev.shiftTiming,
+        [name]: value,
+      },
+    }));
+  };
+
+  // ✅ Handle Attendance Settings Changes
+  const handleAttendanceSettingsChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      attendanceSettings: {
+        ...prev.attendanceSettings,
+        [name]: Number(value) || 0,
+      },
+    }));
   };
 
   const handleImageChange = (e) => {
@@ -86,6 +127,8 @@ export default function EmployeeForm({
         joiningDate: form.joiningDate || new Date().toISOString().split("T")[0],
         attendance: initialData?.attendance || [],
         salaryHistory: initialData?.salaryHistory || [],
+        shiftTiming: form.shiftTiming,
+        attendanceSettings: form.attendanceSettings,
       };
 
       if (onSubmit) {
@@ -103,6 +146,14 @@ export default function EmployeeForm({
     }
   };
 
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+    } else {
+      router.push("/dashboard/employees");
+    }
+  };
+
   const departments = [
     "Operations",
     "Finance",
@@ -113,6 +164,11 @@ export default function EmployeeForm({
     "IT",
     "Sales",
   ];
+
+  const weeklyOffOptions = ["Friday", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
+
+  
+
 
   return (
     <form
@@ -129,7 +185,7 @@ export default function EmployeeForm({
             {isEdit ? "Edit Employee" : "Add New Employee"}
           </h2>
           <p className="mt-1 text-sm text-slate-500">
-            Manage employee information and employment details.
+            Manage employee information, employment details, and shift timing.
           </p>
         </div>
       </div>
@@ -315,6 +371,38 @@ export default function EmployeeForm({
             <option value="On Leave">On Leave</option>
           </select>
         </div>
+          <div>
+  <label className="mb-2 block text-sm font-medium text-slate-300">
+    Role
+  </label>
+  <select
+    name="role"
+    value={form.role}
+    onChange={handleChange}
+    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+  >
+    <option value="employee">Employee</option>
+    <option value="lead_manager">Lead Manager</option>
+    <option value="moderator">Moderator</option>
+    <option value="admin">Admin</option>
+  </select>
+</div>
+
+<div>
+  <label className="mb-2 block text-sm font-medium text-slate-300">
+    Lead Management
+  </label>
+  <select
+    name="canManageLeads"
+    value={form.canManageLeads ? "true" : "false"}
+    onChange={(e) => setForm({ ...form, canManageLeads: e.target.value === "true" })}
+    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+  >
+    <option value="false">Disabled</option>
+    <option value="true">Enabled (Lead Manager)</option>
+  </select>
+</div>
+
 
         {/* Address */}
         <div className="md:col-span-2">
@@ -403,15 +491,204 @@ export default function EmployeeForm({
         </div>
       </div>
 
+      {/* ==================================================
+          SHIFT TIMING / TIME TABLE SECTION
+      ================================================== */}
+      <div className="border-t border-slate-800 p-6">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="rounded-xl bg-emerald-500/10 p-2.5 text-emerald-400">
+            <Clock size={20} />
+          </div>
+          <div>
+            <h3 className="font-semibold">Shift Timing & Time Table</h3>
+            <p className="mt-1 text-sm text-slate-500">
+              Set employee work schedule, grace time, and leave policies.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2">
+          {/* Start Time */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-300">
+              Shift Start Time
+            </label>
+            <input
+              type="time"
+              name="startTime"
+              value={form.shiftTiming.startTime}
+              onChange={handleShiftTimingChange}
+              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          {/* End Time */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-300">
+              Shift End Time
+            </label>
+            <input
+              type="time"
+              name="endTime"
+              value={form.shiftTiming.endTime}
+              onChange={handleShiftTimingChange}
+              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          {/* Grace Minutes */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-300">
+              Grace Minutes
+              <span className="ml-2 text-xs text-slate-500">(no deduction)</span>
+            </label>
+            <input
+              type="number"
+              min="0"
+              name="graceMinutes"
+              value={form.shiftTiming.graceMinutes}
+              onChange={handleShiftTimingChange}
+              placeholder="30"
+              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Minutes allowed after shift start without deduction
+            </p>
+          </div>
+
+          {/* Weekly Off */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-300">
+              Weekly Off Day
+            </label>
+            <select
+              name="weeklyOff"
+              value={form.shiftTiming.weeklyOff}
+              onChange={handleShiftTimingChange}
+              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+            >
+              {weeklyOffOptions.map((day) => (
+                <option key={day} value={day}>
+                  {day}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-slate-500">
+              No deduction for weekly off days
+            </p>
+          </div>
+
+          {/* Monthly Leaves */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-300">
+              Monthly Paid Leaves
+              <span className="ml-2 text-xs text-slate-500">(no deduction)</span>
+            </label>
+            <input
+              type="number"
+              min="0"
+              name="monthlyLeaves"
+              value={form.shiftTiming.monthlyLeaves}
+              onChange={handleShiftTimingChange}
+              placeholder="1"
+              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Number of paid leaves allowed per month (excluding weekly off)
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ==================================================
+          DEDUCTION SETTINGS
+      ================================================== */}
+      <div className="border-t border-slate-800 p-6">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="rounded-xl bg-amber-500/10 p-2.5 text-amber-400">
+            <Settings size={20} />
+          </div>
+          <div>
+            <h3 className="font-semibold">Deduction Settings</h3>
+            <p className="mt-1 text-sm text-slate-500">
+              Set deduction rates for this employee.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-3">
+          {/* Leave Deduction */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-300">
+              Leave Deduction (Rs.)
+              <span className="ml-2 text-xs text-slate-500">per day</span>
+            </label>
+            <input
+              type="number"
+              min="0"
+              name="leaveDeduction"
+              value={form.attendanceSettings.leaveDeduction}
+              onChange={handleAttendanceSettingsChange}
+              placeholder="500"
+              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Deduction per leave day (after paid leaves)
+            </p>
+          </div>
+
+          {/* Late Deduction */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-300">
+              Late Deduction (Rs.)
+              <span className="ml-2 text-xs text-slate-500">per minute</span>
+            </label>
+            <input
+              type="number"
+              min="0"
+              name="lateDeduction"
+              value={form.attendanceSettings.lateDeduction}
+              onChange={handleAttendanceSettingsChange}
+              placeholder="10"
+              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Deduction per late minute (after grace time)
+            </p>
+          </div>
+
+          {/* Task Failure Deduction */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-300">
+              Task Failure Deduction (Rs.)
+              <span className="ml-2 text-xs text-slate-500">per task</span>
+            </label>
+            <input
+              type="number"
+              min="0"
+              name="taskFailureDeduction"
+              value={form.attendanceSettings.taskFailureDeduction}
+              onChange={handleAttendanceSettingsChange}
+              placeholder="1000"
+              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Default deduction per failed task
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Footer */}
       <div className="flex justify-end gap-3 border-t border-slate-800 p-6">
-        <Link
-          href="/dashboard/employees"
+        <button
+          type="button"
+          onClick={handleCancel}
           className="inline-flex items-center gap-2 rounded-xl border border-slate-800 px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
         >
           <X size={17} />
           Cancel
-        </Link>
+        </button>
 
         <button
           type="submit"

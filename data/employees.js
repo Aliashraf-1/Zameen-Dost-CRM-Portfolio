@@ -17,6 +17,20 @@ export const employees = [
     createdAt: "2024-01-15T10:00:00.000Z",
     updatedAt: "2026-08-20T10:00:00.000Z",
     
+    // ✅ Role & Permissions
+    role: "admin",
+    canManageLeads: true,
+    hasLogin: true,
+    
+    // ✅ Shift Timing
+    shiftTiming: {
+      startTime: "09:00",
+      endTime: "17:00",
+      graceMinutes: 30,
+      weeklyOff: "Friday",
+      monthlyLeaves: 1,
+    },
+    
     // ✅ Attendance Settings
     attendanceSettings: {
       dailyWage: 0,
@@ -62,6 +76,7 @@ export const employees = [
         completedAt: "2026-08-14T15:30:00.000Z",
         remarks: "All rooms inspected, 3 minor issues found and reported",
         failureReason: null,
+        failureDeduction: 0,
       },
       {
         id: 2,
@@ -74,6 +89,7 @@ export const employees = [
         completedAt: null,
         remarks: null,
         failureReason: null,
+        failureDeduction: 0,
       },
       {
         id: 3,
@@ -86,6 +102,7 @@ export const employees = [
         completedAt: null,
         remarks: "Client cancelled at last minute",
         failureReason: "Client unavailable - rescheduled for next week",
+        failureDeduction: 500,
       },
       {
         id: 4,
@@ -98,6 +115,7 @@ export const employees = [
         completedAt: null,
         remarks: null,
         failureReason: null,
+        failureDeduction: 0,
       },
     ],
     
@@ -145,6 +163,20 @@ export const employees = [
           total: 2700,
         },
       },
+      {
+        id: 4,
+        month: "2026-04",
+        amount: 82000,
+        status: "Paid",
+        paidAt: "2026-04-30T10:00:00.000Z",
+        remarks: "Salary after deductions",
+        deductions: {
+          leaves: 1500,
+          late: 200,
+          taskFailure: 1000,
+          total: 2700,
+        },
+      },
     ],
   },
 
@@ -165,6 +197,19 @@ export const employees = [
     emergencyName: "Ali Khan",
     createdAt: "2024-03-01T10:00:00.000Z",
     updatedAt: "2026-08-20T10:00:00.000Z",
+    
+    // ✅ Role & Permissions
+    role: "lead_manager",
+    canManageLeads: true,
+    hasLogin: true,
+    
+    shiftTiming: {
+      startTime: "09:00",
+      endTime: "17:00",
+      graceMinutes: 30,
+      weeklyOff: "Friday",
+      monthlyLeaves: 1,
+    },
     
     attendanceSettings: {
       dailyWage: 0,
@@ -198,6 +243,7 @@ export const employees = [
         completedAt: "2026-08-09T16:00:00.000Z",
         remarks: "Report submitted to management",
         failureReason: null,
+        failureDeduction: 0,
       },
       {
         id: 2,
@@ -210,6 +256,7 @@ export const employees = [
         completedAt: null,
         remarks: null,
         failureReason: null,
+        failureDeduction: 0,
       },
     ],
     
@@ -263,6 +310,19 @@ export const employees = [
     createdAt: "2024-06-15T10:00:00.000Z",
     updatedAt: "2026-08-20T10:00:00.000Z",
     
+    // ✅ Role & Permissions
+    role: "employee",
+    canManageLeads: false,
+    hasLogin: true,
+    
+    shiftTiming: {
+      startTime: "09:00",
+      endTime: "17:00",
+      graceMinutes: 30,
+      weeklyOff: "Friday",
+      monthlyLeaves: 1,
+    },
+    
     attendanceSettings: {
       dailyWage: 0,
       leaveDeduction: 400,
@@ -295,6 +355,7 @@ export const employees = [
         completedAt: "2026-08-11T14:00:00.000Z",
         remarks: "All units repaired and tested",
         failureReason: null,
+        failureDeduction: 0,
       },
       {
         id: 2,
@@ -307,6 +368,7 @@ export const employees = [
         completedAt: null,
         remarks: null,
         failureReason: null,
+        failureDeduction: 0,
       },
     ],
     
@@ -360,6 +422,19 @@ export const employees = [
     createdAt: "2024-08-01T10:00:00.000Z",
     updatedAt: "2026-08-20T10:00:00.000Z",
     
+    // ✅ Role & Permissions
+    role: "employee",
+    canManageLeads: false,
+    hasLogin: false, // Receptionist may not have login
+    
+    shiftTiming: {
+      startTime: "09:00",
+      endTime: "17:00",
+      graceMinutes: 30,
+      weeklyOff: "Friday",
+      monthlyLeaves: 1,
+    },
+    
     attendanceSettings: {
       dailyWage: 0,
       leaveDeduction: 300,
@@ -392,6 +467,7 @@ export const employees = [
         completedAt: "2026-08-04T16:00:00.000Z",
         remarks: "Welcome packages delivered",
         failureReason: null,
+        failureDeduction: 0,
       },
       {
         id: 2,
@@ -404,6 +480,7 @@ export const employees = [
         completedAt: null,
         remarks: null,
         failureReason: null,
+        failureDeduction: 0,
       },
     ],
     
@@ -443,6 +520,19 @@ export const employees = [
     createdAt: "2024-09-01T10:00:00.000Z",
     updatedAt: "2026-08-20T10:00:00.000Z",
     
+    // ✅ Role & Permissions
+    role: "employee",
+    canManageLeads: false,
+    hasLogin: false, // Security guard may not have login
+    
+    shiftTiming: {
+      startTime: "09:00",
+      endTime: "17:00",
+      graceMinutes: 30,
+      weeklyOff: "Friday",
+      monthlyLeaves: 1,
+    },
+    
     attendanceSettings: {
       dailyWage: 0,
       leaveDeduction: 300,
@@ -475,6 +565,7 @@ export const employees = [
         completedAt: "2026-08-02T04:30:00.000Z",
         remarks: "All clear, no issues found",
         failureReason: null,
+        failureDeduction: 0,
       },
       {
         id: 2,
@@ -487,6 +578,7 @@ export const employees = [
         completedAt: null,
         remarks: null,
         failureReason: null,
+        failureDeduction: 0,
       },
     ],
     

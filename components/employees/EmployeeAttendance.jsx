@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, Calendar } from "lucide-react";
 
 export default function EmployeeAttendance({ attendance = [] }) {
   const [showAll, setShowAll] = useState(false);
@@ -20,12 +20,30 @@ export default function EmployeeAttendance({ attendance = [] }) {
         class: "bg-amber-500/10 text-amber-400",
         icon: <Clock size={14} />,
       },
+      "Friday Off": {
+        class: "bg-blue-500/10 text-blue-400",
+        icon: <Calendar size={14} />,
+      },
     };
     return variants[status] || variants.Absent;
   };
 
+  // ✅ Check if a date is Friday
+  const isFriday = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.getDay() === 5; // 5 = Friday
+  };
+
+  // ✅ Process attendance - mark Fridays as "Friday Off" if not already marked
+  const processedAttendance = attendance.map((record) => {
+    if (isFriday(record.date) && record.status !== "Present") {
+      return { ...record, status: "Friday Off" };
+    }
+    return record;
+  });
+
   // Get last 30 days of attendance (most recent first)
-  const recentAttendance = attendance.slice(-30).reverse();
+  const recentAttendance = processedAttendance.slice(-30).reverse();
 
   // Show only 4 records initially
   const displayAttendance = showAll ? recentAttendance : recentAttendance.slice(0, 4);
@@ -110,6 +128,9 @@ export default function EmployeeAttendance({ attendance = [] }) {
                         {statusBadge.icon}
                         {record.status}
                       </span>
+                      {record.status === "Friday Off" && (
+                        <span className="ml-2 text-xs text-blue-400/70">(Weekly Off)</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-400">
                       {record.checkIn || "—"}
@@ -130,7 +151,6 @@ export default function EmployeeAttendance({ attendance = [] }) {
             </tbody>
           </table>
 
-          {/* Show More/Less Button - Bottom (alternative) */}
           {recentAttendance.length > 4 && (
             <div className="border-t border-slate-800 p-3 text-center">
               <button

@@ -19,9 +19,6 @@ import {
   AlertCircle,
   Trash2,
   Plus,
-  History,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react";
 import EmployeeAttendance from "./EmployeeAttendance";
 import EmployeeSalaryHistory from "./EmployeeSalaryHistory";
@@ -30,6 +27,8 @@ import EmployeeTasks from "./EmployeeTasks";
 import PaySalaryModal from "./PaySalaryModal";
 import DeleteConfirmModal from "@/components/common/DeleteConfirmModal";
 import AttendanceModal from "./AttendanceModal";
+import { useLeads } from "@/context/LeadContext"; // ✅ Added new
+import LeadTable from "@/components/leads/LeadTable"; // ✅ Added new
 
 function InfoItem({ icon: Icon, label, value }) {
   return (
@@ -128,6 +127,10 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
   };
 
   const salaryStatus = getSalaryStatus();
+
+  const { getLeadsByEmployee } = useLeads();
+const employeeLeads = getLeadsByEmployee(employee.id);
+const isLeadManager = employee.role === "lead_manager" || employee.canManageLeads;
 
   return (
     <>
@@ -265,17 +268,30 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
           <EmployeePerformance employee={employee} />
         </div>
 
-        {/* Tasks Section */}
+        {/* Tasks Section - with Show Previous */}
         <div className="mt-6">
           <EmployeeTasks employee={employee} onTaskUpdate={onTaskUpdate} />
         </div>
+        {isLeadManager && (
+  <div className="mt-6">
+    <LeadTable
+      leads={employeeLeads}
+      userRole={employee.role}
+      employeeId={employee.id}
+      onAdd={() => {/* open add lead modal */}}
+      onEdit={(lead) => {/* open edit modal */}}
+      onDelete={(id) => {/* handle delete */}}
+    />
+  </div>
+)}
 
-        {/* Attendance History */}
+
+        {/* Attendance History - already has Show More */}
         <div className="mt-6">
           <EmployeeAttendance attendance={employee.attendance || []} />
         </div>
 
-        {/* Salary History */}
+        {/* Salary History - already has Show More */}
         <div className="mt-6">
           <EmployeeSalaryHistory salaryHistory={employee.salaryHistory || []} />
         </div>

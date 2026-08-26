@@ -67,7 +67,7 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
         {/* Modal - Viewport ke center mein */}
         <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800 p-5">
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b backdrop-blur border-slate-800 p-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
                 <Plus size={20} />

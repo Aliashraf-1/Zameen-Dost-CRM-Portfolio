@@ -1,0 +1,178 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import { Eye, Pencil, Trash2, Search, Filter, Plus } from "lucide-react";
+import { LEAD_STATUS, LEAD_TYPES } from "@/constants/leadStatus";
+
+export default function LeadTable({
+  leads = [],
+  onView,
+  onEdit,
+  onDelete,
+  onAdd,
+  userRole = "employee",
+  employeeId = null,
+}) {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+
+  const filteredLeads = useMemo(() => {
+    return leads.filter((lead) => {
+      const matchesSearch =
+        lead.customerName.toLowerCase().includes(search.toLowerCase()) ||
+        lead.customerPhone.includes(search) ||
+        lead.customerEmail?.toLowerCase().includes(search.toLowerCase());
+
+      const matchesStatus = statusFilter === "All" || lead.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [leads, search, statusFilter]);
+
+  const getStatusBadge = (status) => {
+    const statusObj = Object.values(LEAD_STATUS).find((s) => s.value === status);
+    return statusObj || LEAD_STATUS.NEW;
+  };
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+      {/* Header */}
+      <div className="border-b border-slate-800 p-5 sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Leads</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              {leads.length} total leads
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            {/* Search */}
+            <div className="relative">
+              <Search size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search leads..."
+                className="w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 pl-10 pr-4 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500 sm:w-64"
+              />
+            </div>
+
+            {/* Status Filter */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-300 outline-none focus:border-indigo-500"
+            >
+              <option value="All">All Status</option>
+              {Object.values(LEAD_STATUS).map((status) => (
+                <option key={status.value} value={status.value}>{status.value}</option>
+              ))}
+            </select>
+
+            {/* Add Lead - Only for Lead Manager role */}
+            {(userRole === "lead_manager" || userRole === "admin" || userRole === "super_admin") && (
+              <button
+                onClick={onAdd}
+                className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500"
+              >
+                <Plus size={17} />
+                Add Lead
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[900px]">
+          <thead>
+            <tr className="border-b border-slate-800 text-left">
+              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Customer</th>
+              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Type</th>
+              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Status</th>
+              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Assigned To</th>
+              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Follow-up</th>
+              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {filteredLeads.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="px-6 py-10 text-center text-sm text-slate-500">
+                  No leads found
+                </td>
+              </tr>
+            ) : (
+              filteredLeads.map((lead) => {
+                const statusObj = getStatusBadge(lead.status);
+
+                return (
+                  <tr key={lead.id} className="border-b border-slate-800/70 transition hover:bg-slate-950/50">
+                    <td className="px-6 py-4">
+                      <div>
+                        <p className="text-sm font-medium text-slate-200">{lead.customerName}</p>
+                        <p className="text-xs text-slate-500">{lead.customerPhone}</p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="rounded-lg bg-slate-800 px-2.5 py-1 text-xs text-slate-400">
+                        {lead.type}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium ${statusObj.color}`}>
+                        {statusObj.value}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-300">
+                      {lead.assignedToName || "Unassigned"}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-400">
+                      {lead.followUpDate ? new Date(lead.followUpDate).toLocaleDateString() : "—"}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => onView(lead)}
+                          className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                          title="View"
+                        >
+                          <Eye size={17} />
+                        </button>
+
+                        {/* Edit - Only for assigned employee or admin */}
+                        {(lead.assignedTo === employeeId || userRole === "admin" || userRole === "super_admin") && (
+                          <button
+                            onClick={() => onEdit(lead)}
+                            className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                            title="Edit"
+                          >
+                            <Pencil size={17} />
+                          </button>
+                        )}
+
+                        {/* Delete - Only for admin/super_admin */}
+                        {(userRole === "admin" || userRole === "super_admin") && (
+                          <button
+                            onClick={() => onDelete(lead.id)}
+                            className="rounded-lg p-2 text-slate-500 transition hover:bg-red-500/10 hover:text-red-400"
+                            title="Delete"
+                          >
+                            <Trash2 size={17} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

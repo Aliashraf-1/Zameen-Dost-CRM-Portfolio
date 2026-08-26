@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useState, useEffect } from "react";
 
 const RevenueContext = createContext(null);
 
@@ -38,9 +38,15 @@ function getInitialData() {
 export function RevenueProvider({ children }) {
   const [revenueData, setRevenueData] = useState(getInitialData);
 
-  // Save to localStorage
-  useState(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(revenueData));
+  // ✅ Save to localStorage - Use useEffect instead of useState
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(revenueData));
+      } catch (error) {
+        console.error("Failed to save revenue data:", error);
+      }
+    }
   }, [revenueData]);
 
   const addIncome = (income) => {

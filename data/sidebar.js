@@ -6,6 +6,7 @@ import {
   Settings,
   UserRound,
   UserCheck,
+  Target,
 } from "lucide-react";
 
 export const sidebarItems = [
@@ -28,6 +29,11 @@ export const sidebarItems = [
     title: "Employees",
     href: "/dashboard/employees",
     icon: UserCheck,
+  },
+  {
+    title: "Leads",
+    href: "/dashboard/leads",
+    icon: Target,
   },
   {
     title: "Revenue",
