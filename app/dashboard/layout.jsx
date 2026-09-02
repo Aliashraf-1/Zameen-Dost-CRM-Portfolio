@@ -1,23 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { UserProvider } from "@/context/UserContext"; // ✅ Add this
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
-import { AuthProvider } from "@/context/AuthContext"; // ✅ Add this
 import { BuildingProvider } from "@/context/BuildingContext";
 import { EmployeeProvider } from "@/context/EmployeeContext";
 import { RevenueProvider } from "@/context/RevenueContext";
 import { LeadProvider } from "@/context/LeadContext";
 
 export default function DashboardLayout({ children }) {
+  const { user, loading, isAuthenticated } = useAuth();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [loading, isAuthenticated, router]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-950">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500/30 border-t-indigo-500" />
+          <p className="text-sm text-slate-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
-    <AuthProvider>  {/* ✅ Wrap with AuthProvider */}
-      <BuildingProvider>
-        <RevenueProvider>
-          <EmployeeProvider>
-            <LeadProvider>
+    <BuildingProvider>
+      <RevenueProvider>
+        <EmployeeProvider>
+          <LeadProvider>
+            <UserProvider>  {/* ✅ Wrap with UserProvider */}
               <div className="min-h-screen bg-background text-foreground">
                 <Sidebar
                   sidebarOpen={sidebarOpen}
@@ -41,10 +66,10 @@ export default function DashboardLayout({ children }) {
                   </main>
                 </div>
               </div>
-            </LeadProvider>
-          </EmployeeProvider>
-        </RevenueProvider>
-      </BuildingProvider>
-    </AuthProvider>
+            </UserProvider>
+          </LeadProvider>
+        </EmployeeProvider>
+      </RevenueProvider>
+    </BuildingProvider>
   );
 }

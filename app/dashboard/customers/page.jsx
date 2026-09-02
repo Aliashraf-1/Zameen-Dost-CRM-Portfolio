@@ -38,13 +38,7 @@ export default function CustomersPage() {
           </p>
         </div>
 
-        <Link
-          href="/dashboard/customers/new"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500"
-        >
-          <UserPlus size={17} />
-          Add Customer
-        </Link>
+       
       </div>
 
       {/* Summary */}

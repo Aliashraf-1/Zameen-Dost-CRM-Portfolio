@@ -4,12 +4,21 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Building2, X } from "lucide-react";
 import { sidebarItems } from "@/data/sidebar";
+import { useAuth } from "@/context/AuthContext"; // ✅ Add this
 
 export default function Sidebar({
   sidebarOpen,
   setSidebarOpen,
 }) {
   const pathname = usePathname();
+  const { user } = useAuth(); // ✅ Get current user
+  const userRole = user?.role || "employee";
+
+  // ✅ Filter sidebar items based on user role
+  const visibleItems = sidebarItems.filter((item) => {
+    if (!item.allowedRoles) return true;
+    return item.allowedRoles.includes(userRole);
+  });
 
   return (
     <>
@@ -58,9 +67,9 @@ export default function Sidebar({
           )}
         </div>
 
-        {/* Navigation */}
+        {/* Navigation - Only show visible items */}
         <nav className="space-y-2 p-4">
-          {sidebarItems.map((item) => {
+          {visibleItems.map((item) => {
             const Icon = item.icon;
             const isDashboard = item.href === "/dashboard";
             const active = isDashboard

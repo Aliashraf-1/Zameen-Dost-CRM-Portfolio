@@ -1,22 +1,140 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const AuthContext = createContext(null);
-
 const STORAGE_KEY = "bms-auth-user";
+const TOKEN_KEY = "bms-token";
+
+// ✅ Role Definitions
+export const ROLES = {
+  SUPER_ADMIN: "super_admin",
+  ADMIN: "admin",
+  LEAD_MANAGER: "lead_manager",
+  MODERATOR: "moderator",
+  EMPLOYEE: "employee",
+};
+
+// ✅ Role Permissions
+export const PERMISSIONS = {
+  [ROLES.SUPER_ADMIN]: {
+    can: [
+      "view_all",
+      "manage_all",
+      "manage_users",
+      "manage_buildings",
+      "manage_employees",
+      "manage_leads",
+      "manage_revenue",
+      "manage_reports",
+      "manage_settings",
+    ],
+  },
+  [ROLES.ADMIN]: {
+    can: [
+      "view_all",
+      "manage_buildings",
+      "manage_employees",
+      "manage_leads",
+      "manage_revenue",
+      "manage_reports",
+    ],
+  },
+  [ROLES.LEAD_MANAGER]: {
+    can: [
+      "view_leads",
+      "manage_leads",
+      "view_team",
+      "view_tasks",
+      "mark_attendance",
+    ],
+  },
+  [ROLES.MODERATOR]: {
+    can: [
+      "view_leads",
+      "manage_leads",
+      "view_team",
+      "view_tasks",
+      "mark_attendance",
+      "view_reports",
+    ],
+  },
+  [ROLES.EMPLOYEE]: {
+    can: [
+      "view_self",
+      "view_tasks",
+      "mark_attendance",
+      "view_attendance",
+      "view_salary",
+    ],
+  },
+};
+
+// ✅ Mock Users Database (Will be replaced with backend)
+const MOCK_USERS = [
+  {
+    id: 1,
+    email: "admin@bms.com",
+    password: "admin123",
+    name: "Admin User",
+    role: ROLES.ADMIN,
+    employeeId: 1,
+    permissions: PERMISSIONS[ROLES.ADMIN].can,
+  },
+  {
+    id: 2,
+    email: "sara@bms.com",
+    password: "sara123",
+    name: "Sara Khan",
+    role: ROLES.LEAD_MANAGER,
+    employeeId: 2,
+    permissions: PERMISSIONS[ROLES.LEAD_MANAGER].can,
+  },
+  {
+    id: 3,
+    email: "usman@bms.com",
+    password: "usman123",
+    name: "Usman Malik",
+    role: ROLES.EMPLOYEE,
+    employeeId: 3,
+    permissions: PERMISSIONS[ROLES.EMPLOYEE].can,
+  },
+  {
+    id: 4,
+    email: "fatima@bms.com",
+    password: "fatima123",
+    name: "Fatima Ali",
+    role: ROLES.EMPLOYEE,
+    employeeId: 4,
+    permissions: PERMISSIONS[ROLES.EMPLOYEE].can,
+  },
+  {
+    id: 5,
+    email: "superadmin@bms.com",
+    password: "super123",
+    name: "Super Admin",
+    role: ROLES.SUPER_ADMIN,
+    employeeId: 1,
+    permissions: PERMISSIONS[ROLES.SUPER_ADMIN].can,
+  },
+];
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const router = useRouter();
 
   // Load user from localStorage on mount
   useEffect(() => {
     try {
       if (typeof window !== "undefined") {
         const savedUser = localStorage.getItem(STORAGE_KEY);
-        if (savedUser) {
-          setUser(JSON.parse(savedUser));
+        const token = localStorage.getItem(TOKEN_KEY);
+        if (savedUser && token) {
+          const parsedUser = JSON.parse(savedUser);
+          setUser(parsedUser);
         }
       }
     } catch (error) {
@@ -26,76 +144,57 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // Login function
+  // ✅ Login Function
   const login = async (email, password) => {
     setLoading(true);
+    setError(null);
+
     try {
-      // TODO: Replace with actual API call
-      // For now, mock login based on email
-      let mockUser = null;
-      
-      if (email === "admin@bms.com" || email === "ahmed.hassan@bms.com") {
-        mockUser = {
-          id: 1,
-          name: "Ahmed Hassan",
-          email: "ahmed.hassan@bms.com",
-          role: "admin",
-          employeeId: 1,
-          permissions: ["all"],
-        };
-      } else if (email === "sara.khan@bms.com") {
-        mockUser = {
-          id: 2,
-          name: "Sara Khan",
-          email: "sara.khan@bms.com",
-          role: "lead_manager",
-          employeeId: 2,
-          permissions: ["manage_leads", "view_tasks", "mark_attendance"],
-        };
-      } else if (email === "usman.malik@bms.com") {
-        mockUser = {
-          id: 3,
-          name: "Usman Malik",
-          email: "usman.malik@bms.com",
-          role: "employee",
-          employeeId: 3,
-          permissions: ["view_tasks", "mark_attendance", "view_attendance"],
-        };
-      } else {
-        // Default employee
-        mockUser = {
-          id: 1,
-          name: "Employee",
-          email: email || "employee@bms.com",
-          role: "employee",
-          employeeId: 1,
-          permissions: ["view_tasks", "mark_attendance", "view_attendance"],
-        };
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      // Find user (will be replaced with API call)
+      const foundUser = MOCK_USERS.find(
+        (u) => u.email === email && u.password === password
+      );
+
+      if (!foundUser) {
+        throw new Error("Invalid email or password");
       }
 
-      // Save user
-      setUser(mockUser);
+      // Create user session (exclude password)
+      const { password: _, ...userWithoutPassword } = foundUser;
+      
+      // Generate mock token
+      const token = `mock-jwt-token-${Date.now()}`;
+
+      // Save to localStorage
       if (typeof window !== "undefined") {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(mockUser));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(userWithoutPassword));
+        localStorage.setItem(TOKEN_KEY, token);
       }
-      return mockUser;
+
+      setUser(userWithoutPassword);
+      return { success: true, user: userWithoutPassword };
     } catch (error) {
-      console.error("Login failed:", error);
-      throw error;
+      setError(error.message);
+      return { success: false, error: error.message };
     } finally {
       setLoading(false);
     }
   };
 
-  // Logout function
+  // ✅ Logout Function
   const logout = () => {
     setUser(null);
     if (typeof window !== "undefined") {
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(TOKEN_KEY);
     }
+    router.push("/login");
   };
 
-  // Check if user has specific role
+  // ✅ Check if user has specific role
   const hasRole = (roles) => {
     if (!user) return false;
     if (Array.isArray(roles)) {
@@ -104,18 +203,46 @@ export function AuthProvider({ children }) {
     return user.role === roles;
   };
 
-  // Check if user has specific permission
+  // ✅ Check if user has specific permission
   const hasPermission = (permission) => {
     if (!user) return false;
-    if (user.role === "admin" || user.role === "super_admin") return true;
-    if (user.permissions?.includes("all")) return true;
+    if (user.role === ROLES.SUPER_ADMIN) return true;
+    if (user.permissions?.includes("manage_all")) return true;
     return user.permissions?.includes(permission) || false;
   };
 
-  // Check if user can manage leads
+  // ✅ Check if user can manage leads
   const canManageLeads = () => {
     if (!user) return false;
-    return user.role === "admin" || user.role === "lead_manager" || user.permissions?.includes("manage_leads");
+    return hasPermission("manage_leads") || hasRole([ROLES.ADMIN, ROLES.LEAD_MANAGER, ROLES.SUPER_ADMIN]);
+  };
+
+  // ✅ Check if user can view reports
+  const canViewReports = () => {
+    if (!user) return false;
+    return hasPermission("view_reports") || hasRole([ROLES.ADMIN, ROLES.MODERATOR, ROLES.SUPER_ADMIN]);
+  };
+
+  // ✅ Check if user can manage employees
+  const canManageEmployees = () => {
+    if (!user) return false;
+    return hasPermission("manage_employees") || hasRole([ROLES.ADMIN, ROLES.SUPER_ADMIN]);
+  };
+
+  // ✅ Check if user can manage buildings
+  const canManageBuildings = () => {
+    if (!user) return false;
+    return hasPermission("manage_buildings") || hasRole([ROLES.ADMIN, ROLES.SUPER_ADMIN]);
+  };
+
+  // ✅ Get user's dashboard stats
+  const getDashboardStats = () => {
+    if (!user) return null;
+    return {
+      role: user.role,
+      name: user.name,
+      permissions: user.permissions,
+    };
   };
 
   const value = useMemo(
@@ -125,14 +252,21 @@ export function AuthProvider({ children }) {
       login,
       logout,
       loading,
+      error,
       hasRole,
       hasPermission,
       canManageLeads,
-      isAdmin: user?.role === "admin" || user?.role === "super_admin",
-      isLeadManager: user?.role === "lead_manager" || user?.permissions?.includes("manage_leads"),
-      isEmployee: user?.role === "employee",
+      canViewReports,
+      canManageEmployees,
+      canManageBuildings,
+      getDashboardStats,
+      isAuthenticated: !!user,
+      isAdmin: user?.role === ROLES.ADMIN || user?.role === ROLES.SUPER_ADMIN,
+      isLeadManager: user?.role === ROLES.LEAD_MANAGER || user?.role === ROLES.ADMIN || user?.role === ROLES.SUPER_ADMIN,
+      isEmployee: user?.role === ROLES.EMPLOYEE,
+      role: user?.role || null,
     }),
-    [user, loading]
+    [user, loading, error]
   );
 
   return (
