@@ -1,169 +1,153 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
-import { employees as initialEmployees } from "@/data/employees";
-import { useRevenue } from "./RevenueContext";
+import { createContext, useContext, useMemo, useState, useEffect } from "react";
+import { employeeAPI } from "@/lib/api";
 
 const EmployeeContext = createContext(null);
 
-const STORAGE_KEY = "bms-employees";
-
-function getInitialData() {
-  if (typeof window === "undefined") {
-    return initialEmployees;
-  }
-
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      return JSON.parse(saved);
-    }
-  } catch (error) {
-    console.error("Failed to load employee data:", error);
-  }
-
-  return initialEmployees;
-}
-
 export function EmployeeProvider({ children }) {
-  const [employees, setEmployees] = useState(getInitialData);
-  const { addExpense } = useRevenue();
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Save to localStorage
-  useState(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(employees));
-  }, [employees]);
+  // ✅ Load employees from API on mount
+  useEffect(() => {
+    loadEmployees();
+  }, []);
 
-  const paySalary = (employeeId, amount) => {
-    const employee = employees.find((emp) => emp.id === employeeId);
-    if (!employee) {
-      throw new Error("Employee not found");
+  // ✅ Load employees
+  const loadEmployees = async () => {
+    try {
+      setLoading(true);
+      const response = await employeeAPI.getAll();
+      setEmployees(response.data.data || []);
+      setError(null);
+    } catch (error) {
+      console.error("Failed to load employees:", error);
+      setError(error.response?.data?.message || "Failed to load employees");
+    } finally {
+      setLoading(false);
     }
-
-    const monthlySalary = Number(employee.salary || 0);
-    const payAmount = Number(amount);
-
-    if (payAmount <= 0 || payAmount > monthlySalary) {
-      throw new Error("Invalid payment amount");
-    }
-
-    const history = employee.salaryHistory || [];
-    const currentMonth = new Date().toISOString().slice(0, 7);
-    const now = new Date();
-    const timestamp = now.toISOString();
-
-    // Check if already paid this month
-    const existingPaymentIndex = history.findIndex(
-      (h) => h.month === currentMonth && h.status !== "Pending"
-    );
-
-    let newHistory = [...history];
-    let status = "Paid";
-
-    if (existingPaymentIndex !== -1) {
-      // Update existing payment
-      const existing = history[existingPaymentIndex];
-      const totalPaid = (existing.amount || 0) + payAmount;
-      status = totalPaid >= monthlySalary ? "Paid" : "Partial";
-
-      newHistory[existingPaymentIndex] = {
-        ...existing,
-        amount: totalPaid,
-        status: status,
-        paidAt: timestamp,
-        updatedAt: timestamp,
-      };
-    } else {
-      // New payment
-      status = payAmount >= monthlySalary ? "Paid" : "Partial";
-      newHistory.push({
-        id: Date.now(),
-        month: currentMonth,
-        amount: payAmount,
-        status: status,
-        paidAt: timestamp,
-        createdAt: timestamp,
-      });
-    }
-
-    // Update employee
-    setEmployees((prevEmployees) =>
-      prevEmployees.map((emp) => {
-        if (emp.id !== employeeId) return emp;
-        return {
-          ...emp,
-          salaryHistory: newHistory,
-        };
-      })
-    );
-
-    // Add expense to revenue with timestamp
-    addExpense({
-      id: `salary-${Date.now()}`,
-      type: "Salary",
-      category: "Employee Salary",
-      description: `Salary payment to ${employee.name} (${employee.designation})`,
-      amount: payAmount,
-      employeeId: employeeId,
-      employeeName: employee.name,
-      month: currentMonth,
-      status: status,
-      paidAt: timestamp,
-      createdAt: timestamp,
-    });
-
-    return {
-      employeeId,
-      amount: payAmount,
-      status,
-      timestamp,
-      month: currentMonth,
-    };
   };
 
-  const getEmployeeSalaryStatus = (employeeId) => {
-    const employee = employees.find((emp) => emp.id === employeeId);
-    if (!employee) return { status: "Pending", amount: 0, remaining: 0 };
-
-    const history = employee.salaryHistory || [];
-    const currentMonth = new Date().toISOString().slice(0, 7);
-    const monthlySalary = Number(employee.salary || 0);
-
-    const currentMonthPayment = history.find(
-      (h) => h.month === currentMonth
-    );
-
-    if (!currentMonthPayment) {
-      return {
-        status: "Pending",
-        amount: 0,
-        remaining: monthlySalary,
-        paidAt: null,
-      };
+  // ✅ Create employee
+  const createEmployee = async (employeeData) => {
+    try {
+      const response = await employeeAPI.create(employeeData);
+      const newEmployee = response.data.data;
+      setEmployees(prev => [...prev, newEmployee]);
+      return newEmployee;
+    } catch (error) {
+      console.error("Failed to create employee:", error);
+      throw error;
     }
+  };
 
-    const paidAmount = Number(currentMonthPayment.amount || 0);
-    const remaining = Math.max(monthlySalary - paidAmount, 0);
+  // ✅ Update employee
+  const updateEmployee = async (id, employeeData) => {
+    try {
+      const response = await employeeAPI.update(id, employeeData);
+      const updatedEmployee = response.data.data;
+      setEmployees(prev => prev.map(e => e._id === id ? updatedEmployee : e));
+      return updatedEmployee;
+    } catch (error) {
+      console.error("Failed to update employee:", error);
+      throw error;
+    }
+  };
 
-    return {
-      status: currentMonthPayment.status || (paidAmount >= monthlySalary ? "Paid" : "Partial"),
-      amount: paidAmount,
-      remaining: remaining,
-      paidAt: currentMonthPayment.paidAt || currentMonthPayment.createdAt || null,
-    };
+  // ✅ Delete employee
+  const deleteEmployee = async (id) => {
+    try {
+      await employeeAPI.delete(id);
+      setEmployees(prev => prev.filter(e => e._id !== id));
+    } catch (error) {
+      console.error("Failed to delete employee:", error);
+      throw error;
+    }
+  };
+
+  // ✅ Get employee by ID
+  const getEmployeeById = (id) => {
+    return employees.find(e => e._id === id);
+  };
+
+  // ✅ Mark attendance
+  const markAttendance = async (employeeId, attendanceData) => {
+    try {
+      const response = await employeeAPI.markAttendance(employeeId, attendanceData);
+      const updatedEmployee = response.data.data;
+      setEmployees(prev => prev.map(e => e._id === employeeId ? updatedEmployee : e));
+      return updatedEmployee;
+    } catch (error) {
+      console.error("Failed to mark attendance:", error);
+      throw error;
+    }
+  };
+
+  // ✅ Add task
+  const addTask = async (employeeId, taskData) => {
+    try {
+      const response = await employeeAPI.addTask(employeeId, taskData);
+      const updatedEmployee = response.data.data;
+      setEmployees(prev => prev.map(e => e._id === employeeId ? updatedEmployee : e));
+      return updatedEmployee;
+    } catch (error) {
+      console.error("Failed to add task:", error);
+      throw error;
+    }
+  };
+
+  // ✅ Update task
+  const updateTask = async (employeeId, taskId, taskData) => {
+    try {
+      const response = await employeeAPI.updateTask(employeeId, taskId, taskData);
+      const updatedEmployee = response.data.data;
+      setEmployees(prev => prev.map(e => e._id === employeeId ? updatedEmployee : e));
+      return updatedEmployee;
+    } catch (error) {
+      console.error("Failed to update task:", error);
+      throw error;
+    }
+  };
+
+  // ✅ Pay salary
+  const paySalary = async (employeeId, salaryData) => {
+    try {
+      const response = await employeeAPI.paySalary(employeeId, salaryData);
+      const updatedEmployee = response.data.data;
+      setEmployees(prev => prev.map(e => e._id === employeeId ? updatedEmployee : e));
+      return updatedEmployee;
+    } catch (error) {
+      console.error("Failed to pay salary:", error);
+      throw error;
+    }
   };
 
   const value = useMemo(
     () => ({
       employees,
       setEmployees,
+      loading,
+      error,
+      loadEmployees,
+      createEmployee,
+      updateEmployee,
+      deleteEmployee,
+      getEmployeeById,
+      markAttendance,
+      addTask,
+      updateTask,
       paySalary,
-      getEmployeeSalaryStatus,
     }),
-    [employees]
+    [employees, loading, error]
   );
 
-  return <EmployeeContext.Provider value={value}>{children}</EmployeeContext.Provider>;
+  return (
+    <EmployeeContext.Provider value={value}>
+      {children}
+    </EmployeeContext.Provider>
+  );
 }
 
 export function useEmployees() {

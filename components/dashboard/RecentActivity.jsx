@@ -1,80 +1,92 @@
-const activities = [
-  {
-    title: "Rent payment received",
-    description: "Building #03 — Faisalabad Road",
-    amount: "+ Rs. 45,000",
-    time: "12 min ago",
-  },
-  {
-    title: "New employee added",
-    description: "Muhammad Ahmed — Office Boy",
-    amount: "",
-    time: "1 hour ago",
-  },
-  {
-    title: "Maintenance expense",
-    description: "Building #01 — Electricity",
-    amount: "- Rs. 18,500",
-    time: "3 hours ago",
-  },
-  {
-    title: "Room rented",
-    description: "Building #02 — Room 204",
-    amount: "+ Rs. 32,000",
-    time: "5 hours ago",
-  },
-];
+"use client";
 
-export default function RecentActivity() {
+import { Clock, User, Building2, DollarSign, UserPlus } from "lucide-react";
+
+export default function RecentActivity({ activities = [] }) {
+  const getIcon = (type) => {
+    const icons = {
+      lead: UserPlus,
+      rent: DollarSign,
+      salary: User,
+      building: Building2,
+    };
+    return icons[type] || Clock;
+  };
+
+  const getIconColor = (type) => {
+    const colors = {
+      lead: "text-indigo-400",
+      rent: "text-emerald-400",
+      salary: "text-blue-400",
+      building: "text-amber-400",
+    };
+    return colors[type] || "text-slate-400";
+  };
+
+  if (activities.length === 0) {
+    return (
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold">Recent Activity</h2>
+          <p className="mt-0.5 text-xs text-slate-500">No recent activity</p>
+        </div>
+        <div className="flex flex-col items-center justify-center py-8">
+          <Clock size={32} className="text-slate-600" />
+          <p className="mt-3 text-sm text-slate-500">No activity yet</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">
-            Recent Activity
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Latest activity across your properties
+          <h2 className="text-lg font-semibold">Recent Activity</h2>
+          <p className="mt-0.5 text-xs text-slate-500">
+            Latest updates from your properties
           </p>
         </div>
-
-        <button className="text-sm font-medium text-indigo-400 hover:text-indigo-300">
-          View all
+        <button className="text-xs text-indigo-400 hover:text-indigo-300">
+          View All
         </button>
       </div>
 
-      <div className="space-y-5">
-        {activities.map((activity, index) => (
-          <div
-            key={index}
-            className="flex items-start justify-between gap-4"
-          >
-            <div className="flex gap-3">
-              <div className="mt-1 h-2.5 w-2.5 rounded-full bg-indigo-500" />
+      <div className="space-y-4">
+        {activities.map((activity, index) => {
+          const Icon = getIcon(activity.type);
+          const iconColor = getIconColor(activity.type);
 
-              <div>
-                <p className="text-sm font-medium">
-                  {activity.title}
+          return (
+            <div
+              key={index}
+              className="flex items-start gap-3 rounded-xl border border-slate-800 bg-slate-950/30 p-3 transition hover:bg-slate-950/50"
+            >
+              <div className={`rounded-lg bg-slate-800/30 p-2 ${iconColor}`}>
+                <Icon size={16} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-slate-200">
+                  {activity.title || "Activity"}
                 </p>
-
-                <p className="mt-1 text-xs text-slate-500">
-                  {activity.description}
+                <p className="text-xs text-slate-400">
+                  {activity.description || ""}
                 </p>
-
-                <p className="mt-1 text-xs text-slate-600">
-                  {activity.time}
-                </p>
+                <div className="mt-1 flex items-center gap-3">
+                  {activity.amount && (
+                    <span className="text-xs font-medium text-emerald-400">
+                      Rs. {activity.amount.toLocaleString()}
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1 text-xs text-slate-500">
+                    <Clock size={11} />
+                    {activity.time ? new Date(activity.time).toLocaleDateString() : "Just now"}
+                  </span>
+                </div>
               </div>
             </div>
-
-            {activity.amount && (
-              <span className="whitespace-nowrap text-sm font-semibold">
-                {activity.amount}
-              </span>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

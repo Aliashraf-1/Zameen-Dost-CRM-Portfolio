@@ -7,6 +7,8 @@ const AuthContext = createContext(null);
 const STORAGE_KEY = "bms-auth-user";
 const TOKEN_KEY = "bms-token";
 
+import { authAPI } from '@/lib/api';
+
 // ✅ Role Definitions
 export const ROLES = {
   SUPER_ADMIN: "super_admin",
@@ -144,45 +146,29 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // ✅ Login Function
-  const login = async (email, password) => {
-    setLoading(true);
-    setError(null);
+  // In login function:
+const login = async (email, password) => {
+  setLoading(true);
+  setError(null);
 
-    try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
+  try {
+    const response = await authAPI.login(email, password);
+    const { user, token } = response.data.data;
 
-      // Find user (will be replaced with API call)
-      const foundUser = MOCK_USERS.find(
-        (u) => u.email === email && u.password === password
-      );
+    localStorage.setItem('bms-token', token);
+    localStorage.setItem('bms-user', JSON.stringify(user));
+    
+    setUser(user);
+    return { success: true, user };
+  } catch (error) {
+    const message = error.response?.data?.message || 'Login failed. Please try again.';
+    setError(message);
+    return { success: false, error: message };
+  } finally {
+    setLoading(false);
+  }
+};
 
-      if (!foundUser) {
-        throw new Error("Invalid email or password");
-      }
-
-      // Create user session (exclude password)
-      const { password: _, ...userWithoutPassword } = foundUser;
-      
-      // Generate mock token
-      const token = `mock-jwt-token-${Date.now()}`;
-
-      // Save to localStorage
-      if (typeof window !== "undefined") {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(userWithoutPassword));
-        localStorage.setItem(TOKEN_KEY, token);
-      }
-
-      setUser(userWithoutPassword);
-      return { success: true, user: userWithoutPassword };
-    } catch (error) {
-      setError(error.message);
-      return { success: false, error: error.message };
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // ✅ Logout Function
   const logout = () => {

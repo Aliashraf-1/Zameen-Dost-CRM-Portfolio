@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   DoorOpen,
@@ -14,7 +15,9 @@ import {
   Image as ImageIcon,
   Trash2,
   FilePlus,
+  Eye,
 } from "lucide-react";
+import { useBuildings } from "@/context/BuildingContext";
 import DocumentTemplates from "./DocumentTemplates";
 import DocumentEditor from "./DocumentEditor";
 import { documentTemplates } from "@/data/documentTemplates";
@@ -26,6 +29,8 @@ export default function UnitForm({
   onCancel,
   onSubmit,
 }) {
+  const router = useRouter();
+  const { addRoom, updateRoom } = useBuildings();
   const isEdit = mode === "edit";
 
   const existingUnitNo = initialData?.unitNo || "";
@@ -57,7 +62,7 @@ export default function UnitForm({
       reference: initialData?.tenant?.reference || "",
       image: initialData?.tenant?.image || null,
       agreement: initialData?.tenant?.agreement || [],
-      documents: initialData?.tenant?.documents || [], // ✅ New field for saved documents
+      documents: initialData?.tenant?.documents || [],
     },
     cashReceived: initialData?.initialPayment?.cashReceived ?? "",
   });
@@ -68,7 +73,7 @@ export default function UnitForm({
   const [agreementFiles, setAgreementFiles] = useState(initialData?.tenant?.agreement || []);
   const [savedDocuments, setSavedDocuments] = useState(initialData?.tenant?.documents || []);
   
-  // ✅ Document Editor State
+  // Document Editor State
   const [showDocumentEditor, setShowDocumentEditor] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [editingDocument, setEditingDocument] = useState(null);
@@ -201,16 +206,13 @@ export default function UnitForm({
   };
 
   const handleSaveDocument = (documentData) => {
-    // Check if document already exists
     const existingIndex = savedDocuments.findIndex(doc => doc.id === documentData.id);
     
     if (existingIndex !== -1) {
-      // Update existing document
       const updatedDocs = [...savedDocuments];
       updatedDocs[existingIndex] = documentData;
       setSavedDocuments(updatedDocs);
     } else {
-      // Add new document
       setSavedDocuments([...savedDocuments, documentData]);
     }
   };
@@ -246,7 +248,7 @@ export default function UnitForm({
 
   /*
    * ----------------------------------------------------
-   * SUBMIT
+   * SUBMIT - WITH FORMDATA SUPPORT
    * ----------------------------------------------------
    */
 
@@ -265,72 +267,112 @@ export default function UnitForm({
         ? new Date().toISOString()
         : null;
 
+    // ✅ Prepare unitData (without file objects)
     const unitData = {
-      ...form,
       unitNo: finalUnitNo,
       deskNo: form.purpose === "Desk" ? form.deskNo.trim() : null,
+      type: form.type,
+      reference: form.reference,
       monthlyRent: Number(form.monthlyRent) || 0,
-      tenant: form.status === "Rented"
-        ? {
-            ...form.tenant,
-            agreement: agreementFiles,
-            documents: savedDocuments, // ✅ Include saved documents
-          }
-        : null,
-      initialPayment: form.status === "Rented"
-        ? {
-            cashReceived: Number(form.cashReceived) || 0,
-            rentPaid: paymentCalculation.rentPaid,
-            securityReceived: paymentCalculation.securityReceived,
-            securityStatus: paymentCalculation.securityReceived > 0 ? "Held" : null,
-            paymentDateTime,
-            rentMonths: paymentCalculation.rentPaid > 0 ? 1 : 0,
-          }
-        : null,
-      rentHistory:
-        form.status === "Rented" && paymentCalculation.rentPaid > 0
-          ? [
-              {
-                id: (initialData?.rentHistory?.length || 0) + 1,
-                month: form.rentStartDate?.slice(0, 7) || new Date().toISOString().slice(0, 7),
-                amount: paymentCalculation.rentPaid,
-                status: "Paid",
-                paidAt: paymentDateTime,
-              },
-            ]
-          : initialData?.rentHistory || [],
-      securityHistory:
-        form.status === "Rented" && paymentCalculation.securityReceived > 0
-          ? [
-              {
-                id: (initialData?.securityHistory?.length || 0) + 1,
-                type: "received",
-                amount: paymentCalculation.securityReceived,
-                date: paymentDateTime,
-                note: "Initial security received",
-              },
-            ]
-          : initialData?.securityHistory || [],
+      purpose: form.purpose,
+      status: form.status,
+      rentStartDate: form.rentStartDate || null,
+      unitImage: null, // Will be set via FormData
+      tenant: form.status === "Rented" ? {
+        name: form.tenant.name || "",
+        cnic: form.tenant.cnic || "",
+        phone: form.tenant.phone || "",
+        reference: form.tenant.reference || "",
+        image: null, // Will be set via FormData
+        agreement: [], // Will be set via FormData
+        documents: savedDocuments, // Already safe
+      } : null,
+      initialPayment: form.status === "Rented" && paymentCalculation.rentPaid > 0 ? {
+        cashReceived: Number(form.cashReceived) || 0,
+        rentPaid: paymentCalculation.rentPaid,
+        securityReceived: paymentCalculation.securityReceived,
+        securityStatus: paymentCalculation.securityReceived > 0 ? "Held" : null,
+        paymentDateTime,
+        rentMonths: paymentCalculation.rentPaid > 0 ? 1 : 0,
+      } : null,
+      rentHistory: form.status === "Rented" && paymentCalculation.rentPaid > 0
+        ? [
+            {
+              month: form.rentStartDate?.slice(0, 7) || new Date().toISOString().slice(0, 7),
+              amount: paymentCalculation.rentPaid,
+              status: "Paid",
+              paidAt: paymentDateTime,
+            },
+          ]
+        : [],
+      securityHistory: form.status === "Rented" && paymentCalculation.securityReceived > 0
+        ? [
+            {
+              type: "received",
+              amount: paymentCalculation.securityReceived,
+              date: paymentDateTime,
+              note: "Initial security received",
+            },
+          ]
+        : [],
     };
 
-    console.log("FINAL UNIT DATA:", unitData);
+    // ✅ Build FormData
+    const formData = new FormData();
+    formData.append('roomData', JSON.stringify(unitData));
 
-    if (onSubmit) {
-      await onSubmit(unitData);
-    } else {
-      await new Promise((resolve) => setTimeout(resolve, 800));
+    // ✅ Append unit image if it's a File object
+    if (form.unitImage && form.unitImage instanceof File) {
+      formData.append('unitImage', form.unitImage);
     }
 
-    setLoading(false);
+    // ✅ Append tenant image if it's a File object
+    if (form.tenant.image && form.tenant.image instanceof File) {
+      formData.append('tenantImage', form.tenant.image);
+    }
+
+    // ✅ Append agreement files
+    agreementFiles.forEach((item) => {
+      if (item.file) {
+        formData.append('agreementFiles', item.file);
+      }
+    });
+
+    // ✅ Log for debugging
+    console.log("FormData keys:", [...formData.keys()]);
+    console.log("Unit Data:", unitData);
+
+    try {
+      if (onSubmit) {
+        await onSubmit(formData);
+      } else {
+        const buildingIdStr = String(buildingId);
+        if (isEdit) {
+          const roomId = initialData._id || initialData.id;
+          await updateRoom(buildingIdStr, roomId, formData);
+        } else {
+          await addRoom(buildingIdStr, formData);
+        }
+        router.push(`/dashboard/buildings/${buildingIdStr}`);
+      }
+    } catch (error) {
+      console.error("Save error:", error);
+      const msg = error.response?.data?.message || error.message || "Failed to save unit.";
+      alert(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
     if (onCancel) {
       onCancel();
+    } else {
+      router.push(`/dashboard/buildings/${buildingId}`);
     }
   };
 
-  // ✅ Build form data for document editor
+  // Build form data for document editor
   const getFormDataForDocument = () => {
     return {
       customerName: form.tenant?.name || "",
@@ -338,7 +380,7 @@ export default function UnitForm({
       customerAddress: form.tenant?.address || "",
       cnic: form.tenant?.cnic || "",
       phone: form.tenant?.phone || "",
-      ownerName: "_____", // Can be filled from settings
+      ownerName: "_____",
       buildingNo: `Building #${buildingId}`,
       unitNo: finalUnitNo,
       unitType: form.type,
@@ -363,10 +405,7 @@ export default function UnitForm({
         onSubmit={handleSubmit}
         className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900"
       >
-        {/* ==================================================
-            HEADER
-        ================================================== */}
-
+        {/* Header */}
         <div className="border-b border-slate-800 p-6">
           <div className="flex items-center gap-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
@@ -383,10 +422,7 @@ export default function UnitForm({
           </div>
         </div>
 
-        {/* ==================================================
-            UNIT INFORMATION
-        ================================================== */}
-
+        {/* Unit Information */}
         <div className="border-b border-slate-800 p-6">
           <div className="mb-5">
             <h3 className="text-base font-semibold">Unit Information</h3>
@@ -570,13 +606,10 @@ export default function UnitForm({
           </div>
         </div>
 
-        {/* ==================================================
-            RENTAL INFORMATION
-        ================================================== */}
-
+        {/* Rental Information */}
         {form.status === "Rented" && (
           <>
-            {/* CUSTOMER */}
+            {/* Customer */}
             <div className="border-b border-slate-800 p-6">
               <div className="mb-5 flex items-center gap-3">
                 <div className="rounded-xl bg-indigo-500/10 p-3 text-indigo-400">
@@ -591,7 +624,6 @@ export default function UnitForm({
               </div>
 
               <div className="grid gap-5 md:grid-cols-2">
-                {/* Name */}
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-300">
                     Customer Name
@@ -606,7 +638,6 @@ export default function UnitForm({
                   />
                 </div>
 
-                {/* CNIC */}
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-300">
                     CNIC
@@ -621,7 +652,6 @@ export default function UnitForm({
                   />
                 </div>
 
-                {/* Phone */}
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-300">
                     Phone Number
@@ -636,7 +666,6 @@ export default function UnitForm({
                   />
                 </div>
 
-                {/* Reference */}
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-300">
                     Customer Reference
@@ -688,12 +717,8 @@ export default function UnitForm({
                 )}
               </div>
 
-              {/* ==================================================
-                  AGREEMENT FILES & DOCUMENT TEMPLATES
-              ================================================== */}
-
+              {/* Agreement Files & Document Templates */}
               <div className="mt-6">
-                {/* Existing Agreement Files Upload */}
                 <div className="mb-4">
                   <div className="mb-2 flex items-center justify-between">
                     <label className="block text-sm font-medium text-slate-300">
@@ -755,7 +780,7 @@ export default function UnitForm({
                   )}
                 </div>
 
-                {/* ✅ Document Templates Section */}
+                {/* Document Templates Section */}
                 <div className="mt-4 border-t border-slate-800 pt-4">
                   <DocumentTemplates
                     onSelectTemplate={handleSelectTemplate}
@@ -764,7 +789,6 @@ export default function UnitForm({
                     disabled={form.status !== "Rented"}
                   />
 
-                  {/* Saved Documents List */}
                   {savedDocuments.length > 0 && (
                     <div className="mt-3 space-y-2">
                       <p className="text-xs font-medium text-slate-500">Saved Documents</p>
@@ -817,10 +841,7 @@ export default function UnitForm({
               </div>
             </div>
 
-            {/* ==================================================
-                RENTAL & PAYMENT
-            ================================================== */}
-
+            {/* Rental & Payment */}
             <div className="border-b border-slate-800 p-6">
               <div className="mb-5 flex items-center gap-3">
                 <div className="rounded-xl bg-emerald-500/10 p-3 text-emerald-400">
@@ -835,7 +856,6 @@ export default function UnitForm({
               </div>
 
               <div className="grid gap-5 md:grid-cols-2">
-                {/* Rent Start Date */}
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-300">
                     Rent Starting Date
@@ -859,7 +879,6 @@ export default function UnitForm({
                   </p>
                 </div>
 
-                {/* Cash Received */}
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-300">
                     Rent & Security Received
@@ -885,7 +904,6 @@ export default function UnitForm({
                 </div>
               </div>
 
-              {/* Calculation */}
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
                   <p className="text-xs text-slate-500">Current Month Rent</p>
@@ -919,10 +937,7 @@ export default function UnitForm({
           </>
         )}
 
-        {/* ==================================================
-            FOOTER
-        ================================================== */}
-
+        {/* Footer */}
         <div className="flex justify-end gap-3 border-t border-slate-800 p-6">
           {onCancel ? (
             <button
@@ -954,10 +969,7 @@ export default function UnitForm({
         </div>
       </form>
 
-      {/* ==================================================
-          DOCUMENT EDITOR MODAL
-      ================================================== */}
-
+      {/* Document Editor Modal */}
       {showDocumentEditor && selectedTemplate && (
         <DocumentEditor
           isOpen={showDocumentEditor}

@@ -1,33 +1,87 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { notFound, useParams } from "next/navigation";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import BuildingUnitTypeChart from "@/components/buildings/BuildingUnitTypeChart";
 import {
   ArrowLeft,
-  Edit,
+  Building2,
+  DoorOpen,
+  User,
+  Wallet,
+  Calendar,
+  Phone,
+  CreditCard,
+  ShieldCheck,
+  Home,
+  Users,
+  FileText,
+  CheckCircle2,
+  Clock,
+  Pencil,
+  UserMinus,
+  History,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  Trash2,
   Plus,
-  MapPin,
 } from "lucide-react";
-
-import { buildings } from "@/data/buildings";
+import { useBuildings } from "@/context/BuildingContext";
 import BuildingSummary from "@/components/buildings/BuildingSummary";
+import BuildingUnitTypeChart from "@/components/buildings/BuildingUnitTypeChart";
 import RoomTable from "@/components/buildings/RoomTable";
 
-export default async function BuildingDetailsPage({
-  params,
-}) {
-  const { id } = await params;
+export default function BuildingDetailsPage() {
+  const params = useParams();
+  const { buildings, loading: buildingsLoading, getBuildingById, loadBuildings } = useBuildings();
+  const [building, setBuilding] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const building = buildings.find(
-    (item) => item.id === Number(id)
-  );
+  useEffect(() => {
+    console.log("Params ID:", params.id);
+    console.log("Buildings:", buildings);
+    
+    if (params.id) {
+      // First try to find building from existing state
+      let found = getBuildingById(params.id);
+      
+      // If not found and buildings is empty, load buildings first
+      if (!found && buildings.length === 0) {
+        loadBuildings().then(() => {
+          const retryFound = getBuildingById(params.id);
+          if (retryFound) {
+            setBuilding(retryFound);
+            setLoading(false);
+          }
+        });
+        return;
+      }
+      
+      if (found) {
+        setBuilding(found);
+      }
+      setLoading(false);
+    }
+  }, [params.id, buildings, getBuildingById, loadBuildings]);
+
+  if (loading || buildingsLoading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="animate-pulse text-slate-500">Loading building details...</div>
+      </div>
+    );
+  }
 
   if (!building) {
+    console.log("Building not found for ID:", params.id);
     notFound();
   }
 
+  const buildingId = building._id || building.id;
+
   return (
     <div className="mx-auto max-w-[1600px]">
-      
       {/* Page Header */}
       <div className="mb-8">
         <Link
@@ -45,48 +99,52 @@ export default async function BuildingDetailsPage({
                 {building.buildingNo}
               </h1>
 
-              <span className="rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400">
+              <span className={`rounded-lg px-2.5 py-1 text-xs font-medium ${
+                building.status === "Active" 
+                  ? "bg-emerald-500/10 text-emerald-400" 
+                  : "bg-red-500/10 text-red-400"
+              }`}>
                 {building.status}
               </span>
             </div>
 
             <div className="mt-3 flex items-center gap-2 text-sm text-slate-500">
-              <MapPin size={16} />
-
+              <Building2 size={16} />
               {building.address}
             </div>
           </div>
 
           <div className="flex gap-3">
             <Link
-              href={`/dashboard/buildings/${building.id}/edit`}
+              href={`/dashboard/buildings/${buildingId}/edit`}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm font-medium text-slate-300 transition hover:border-slate-700 hover:bg-slate-800 hover:text-white"
             >
-              <Edit size={17} />
+              <Pencil size={17} />
               Edit Building
             </Link>
 
-          <Link
-                href={`/dashboard/buildings/${building.id}/rooms/new`}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500"
-                >
-                <Plus size={17} />
-                Add Unit
-         </Link>
+            <Link
+              href={`/dashboard/buildings/${buildingId}/rooms/new`}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500"
+            >
+              <Plus size={17} />
+              Add Unit
+            </Link>
           </div>
         </div>
       </div>
 
       {/* Summary */}
       <BuildingSummary building={building} />
-          {/* donut chart */}
-      <BuildingUnitTypeChart rooms={building.rooms} />
 
-      {/* Rooms */}
+      {/* Donut Chart */}
+      <BuildingUnitTypeChart rooms={building.rooms || []} />
+
+      {/* Rooms Table */}
       <div className="mt-6">
         <RoomTable
-        rooms={building.rooms}
-        buildingId={building.id}
+          rooms={building.rooms || []}
+          buildingId={buildingId}
         />
       </div>
     </div>

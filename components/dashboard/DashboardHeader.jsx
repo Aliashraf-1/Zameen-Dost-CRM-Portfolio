@@ -89,7 +89,7 @@ export default function DashboardHeader() {
   return (
     <>
       {/* ✅ Removed overflow-hidden from card */}
-      <div className="relative rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/20 p-6 sm:p-8">
+      <div className="relative rounded-2xl border mb-2 border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/20 p-6 sm:p-8">
         {/* Background Decoration */}
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-500/5 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-purple-500/5 blur-3xl" />

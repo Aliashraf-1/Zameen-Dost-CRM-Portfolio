@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { UserProvider } from "@/context/UserContext"; // ✅ Add this
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import { BuildingProvider } from "@/context/BuildingContext";
 import { EmployeeProvider } from "@/context/EmployeeContext";
 import { RevenueProvider } from "@/context/RevenueContext";
 import { LeadProvider } from "@/context/LeadContext";
+import { UserProvider } from "@/context/UserContext";
+import { CustomerProvider } from "@/context/CustomerContext";
 
 export default function DashboardLayout({ children }) {
   const { user, loading, isAuthenticated } = useAuth();
@@ -39,25 +40,27 @@ export default function DashboardLayout({ children }) {
 
   return (
     <BuildingProvider>
-      <RevenueProvider>
-        <EmployeeProvider>
+      <EmployeeProvider>
+        <RevenueProvider>
           <LeadProvider>
-            <UserProvider>  {/* ✅ Wrap with UserProvider */}
+            <CustomerProvider>
+
+            <UserProvider>
               <div className="min-h-screen bg-background text-foreground">
                 <Sidebar
                   sidebarOpen={sidebarOpen}
                   setSidebarOpen={setSidebarOpen}
-                />
+                  />
 
                 <div
                   className={`min-h-screen transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
                     sidebarOpen ? "lg:pl-64" : "lg:pl-20"
                   }`}
-                >
+                  >
                   <Topbar
                     sidebarOpen={sidebarOpen}
                     setSidebarOpen={setSidebarOpen}
-                  />
+                    />
 
                   <main className="p-5 transition-all duration-300 sm:p-6 lg:p-8">
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -67,9 +70,10 @@ export default function DashboardLayout({ children }) {
                 </div>
               </div>
             </UserProvider>
+           </CustomerProvider>
           </LeadProvider>
-        </EmployeeProvider>
-      </RevenueProvider>
+        </RevenueProvider>
+      </EmployeeProvider>
     </BuildingProvider>
   );
 }

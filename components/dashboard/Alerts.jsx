@@ -1,57 +1,81 @@
-const alerts = [
-  {
-    title: "Rent payment pending",
-    description: "Room 203 — Building #03",
-    type: "Rent",
-  },
-  {
-    title: "Salary payment due",
-    description: "Office Boy — Muhammad Ahmed",
-    type: "Salary",
-  },
-  {
-    title: "Agreement expiring soon",
-    description: "Room 105 — Building #01",
-    type: "Agreement",
-  },
-];
+"use client";
 
-export default function Alerts() {
+import { AlertCircle, CheckCircle2, Clock, XCircle } from "lucide-react";
+
+export default function Alerts({ alerts = [] }) {
+  const getIcon = (type) => {
+    const icons = {
+      warning: Clock,
+      success: CheckCircle2,
+      error: XCircle,
+      info: AlertCircle,
+    };
+    return icons[type] || AlertCircle;
+  };
+
+  const getColor = (type) => {
+    const colors = {
+      warning: "text-amber-400 bg-amber-500/10",
+      success: "text-emerald-400 bg-emerald-500/10",
+      error: "text-red-400 bg-red-500/10",
+      info: "text-blue-400 bg-blue-500/10",
+    };
+    return colors[type] || colors.info;
+  };
+
+  if (alerts.length === 0) {
+    return (
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold">Alerts</h2>
+          <p className="mt-0.5 text-xs text-slate-500">No alerts</p>
+        </div>
+        <div className="flex flex-col items-center justify-center py-8">
+          <CheckCircle2 size={32} className="text-emerald-400" />
+          <p className="mt-3 text-sm text-slate-500">All clear! No alerts</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
-      <div className="mb-5">
-        <h2 className="text-lg font-semibold">
-          Alerts
-        </h2>
-
-        <p className="mt-1 text-sm text-slate-500">
-          Things that may need your attention
-        </p>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">Alerts</h2>
+          <p className="mt-0.5 text-xs text-slate-500">
+            Important notifications
+          </p>
+        </div>
+        <button className="text-xs text-indigo-400 hover:text-indigo-300">
+          View All
+        </button>
       </div>
 
       <div className="space-y-3">
-        {alerts.map((alert, index) => (
-          <div
-            key={index}
-            className="rounded-xl border border-slate-800 bg-slate-950/50 p-4 transition hover:border-slate-700"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-medium">
-                  {alert.title}
-                </p>
+        {alerts.map((alert, index) => {
+          const Icon = getIcon(alert.type);
+          const color = getColor(alert.type);
 
-                <p className="mt-1 text-xs text-slate-500">
-                  {alert.description}
+          return (
+            <div
+              key={index}
+              className={`flex items-start gap-3 rounded-xl border border-slate-800 bg-slate-950/30 p-3 ${color}`}
+            >
+              <div className={`rounded-lg p-2 ${color}`}>
+                <Icon size={16} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-slate-200">
+                  {alert.title || "Alert"}
+                </p>
+                <p className="text-xs text-slate-400">
+                  {alert.description || ""}
                 </p>
               </div>
-
-              <span className="rounded-lg bg-amber-500/10 px-2 py-1 text-[10px] font-medium text-amber-400">
-                {alert.type}
-              </span>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

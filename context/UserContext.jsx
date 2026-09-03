@@ -1,63 +1,75 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, useEffect } from "react";
-import { users as initialUsers } from "@/data/users";
+import { userAPI } from "@/lib/api";
 
 const UserContext = createContext(null);
-const STORAGE_KEY = "bms-users";
-
-function getInitialData() {
-  if (typeof window === "undefined") return initialUsers;
-  
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
-  } catch (error) {
-    console.error("Failed to load users:", error);
-  }
-  return initialUsers;
-}
 
 export function UserProvider({ children }) {
-  const [users, setUsers] = useState(getInitialData);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // ✅ Load users from API on mount
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-  }, [users]);
+    loadUsers();
+  }, []);
+
+  // ✅ Load users
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await userAPI.getAll();
+      setUsers(response.data.data || []);
+      setError(null);
+    } catch (error) {
+      console.error("Failed to load users:", error);
+      setError(error.response?.data?.message || "Failed to load users");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ✅ Add new user
-  const addUser = (userData) => {
-    const newUser = {
-      ...userData,
-      id: Date.now(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      status: userData.status || "active",
-      permissions: userData.permissions || [],
-    };
-    setUsers([...users, newUser]);
-    return newUser;
+  const addUser = async (userData) => {
+    try {
+      const response = await userAPI.create(userData);
+      const newUser = response.data.data;
+      setUsers(prev => [...prev, newUser]);
+      return newUser;
+    } catch (error) {
+      console.error("Failed to add user:", error);
+      throw error;
+    }
   };
 
   // ✅ Update user
-  const updateUser = (userId, updates) => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === userId
-          ? { ...user, ...updates, updatedAt: new Date().toISOString() }
-          : user
-      )
-    );
+  const updateUser = async (userId, updates) => {
+    try {
+      const response = await userAPI.update(userId, updates);
+      const updatedUser = response.data.data;
+      setUsers(prev => prev.map(user => user._id === userId ? updatedUser : user));
+      return updatedUser;
+    } catch (error) {
+      console.error("Failed to update user:", error);
+      throw error;
+    }
   };
 
   // ✅ Delete user
-  const deleteUser = (userId) => {
-    setUsers((prev) => prev.filter((user) => user.id !== userId));
+  const deleteUser = async (userId) => {
+    try {
+      await userAPI.delete(userId);
+      setUsers(prev => prev.filter(user => user._id !== userId));
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+      throw error;
+    }
   };
 
   // ✅ Get user by ID
   const getUserById = (userId) => {
-    return users.find((user) => user.id === userId);
+    return users.find((user) => user._id === userId);
   };
 
   // ✅ Get users by role
@@ -79,6 +91,9 @@ export function UserProvider({ children }) {
     () => ({
       users,
       setUsers,
+      loading,
+      error,
+      loadUsers,
       addUser,
       updateUser,
       deleteUser,
@@ -87,7 +102,7 @@ export function UserProvider({ children }) {
       getUserByEmployeeId,
       getActiveUsers,
     }),
-    [users]
+    [users, loading, error]
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

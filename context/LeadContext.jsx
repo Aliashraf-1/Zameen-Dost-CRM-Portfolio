@@ -1,78 +1,90 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
-import { leads as initialLeads } from "@/data/leads";
+import { createContext, useContext, useMemo, useState, useEffect } from "react";
+import { leadAPI } from "@/lib/api";
 
 const LeadContext = createContext(null);
-const STORAGE_KEY = "bms-leads";
-
-function getInitialData() {
-  if (typeof window === "undefined") return initialLeads;
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
-  } catch (error) {
-    console.error("Failed to load leads:", error);
-  }
-  return initialLeads;
-}
 
 export function LeadProvider({ children }) {
-  const [leads, setLeads] = useState(getInitialData);
+  const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useState(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
-  }, [leads]);
+  // ✅ Load leads from API
+  useEffect(() => {
+    loadLeads();
+  }, []);
 
-  const addLead = (leadData) => {
-    const newLead = {
-      ...leadData,
-      id: Date.now(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      notes: leadData.notes || [],
-    };
-    setLeads([newLead, ...leads]);
-    return newLead;
+  const loadLeads = async () => {
+    try {
+      setLoading(true);
+      const response = await leadAPI.getAll();
+      setLeads(response.data.data || []);
+      setError(null);
+    } catch (error) {
+      console.error("Failed to load leads:", error);
+      setError(error.response?.data?.message || "Failed to load leads");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updateLead = (leadId, updates) => {
-    setLeads((prev) =>
-      prev.map((lead) =>
-        lead.id === leadId
-          ? { ...lead, ...updates, updatedAt: new Date().toISOString() }
-          : lead
-      )
-    );
+  // ✅ Add lead
+  const addLead = async (leadData) => {
+    try {
+      const response = await leadAPI.create(leadData);
+      const newLead = response.data.data;
+      setLeads(prev => [newLead, ...prev]);
+      return newLead;
+    } catch (error) {
+      console.error("Failed to add lead:", error);
+      throw error;
+    }
   };
 
-  const addNote = (leadId, noteText, employeeId, employeeName) => {
-    setLeads((prev) =>
-      prev.map((lead) =>
-        lead.id === leadId
-          ? {
-              ...lead,
-              notes: [
-                ...(lead.notes || []),
-                {
-                  id: Date.now(),
-                  text: noteText,
-                  createdAt: new Date().toISOString(),
-                  createdBy: employeeId,
-                  createdByName: employeeName,
-                },
-              ],
-              updatedAt: new Date().toISOString(),
-            }
-          : lead
-      )
-    );
+  // ✅ Update lead
+  const updateLead = async (id, leadData) => {
+    try {
+      const response = await leadAPI.update(id, leadData);
+      const updatedLead = response.data.data;
+      setLeads(prev => prev.map(l => l._id === id ? updatedLead : l));
+      return updatedLead;
+    } catch (error) {
+      console.error("Failed to update lead:", error);
+      throw error;
+    }
   };
 
+  // ✅ Delete lead
+  const deleteLead = async (id) => {
+    try {
+      await leadAPI.delete(id);
+      setLeads(prev => prev.filter(l => l._id !== id));
+    } catch (error) {
+      console.error("Failed to delete lead:", error);
+      throw error;
+    }
+  };
+
+  // ✅ Add note to lead
+  const addNote = async (leadId, noteData) => {
+    try {
+      const response = await leadAPI.addNote(leadId, noteData);
+      const updatedLead = response.data.data;
+      setLeads(prev => prev.map(l => l._id === leadId ? updatedLead : l));
+      return updatedLead;
+    } catch (error) {
+      console.error("Failed to add note:", error);
+      throw error;
+    }
+  };
+
+  // ✅ Get leads by employee
   const getLeadsByEmployee = (employeeId) => {
-    return leads.filter((lead) => lead.assignedTo === employeeId);
+    return leads.filter((lead) => lead.assignedTo === Number(employeeId) || lead.assignedTo === employeeId);
   };
 
+  // ✅ Get lead stats
   const getLeadStats = (employeeId = null) => {
     const filtered = employeeId ? getLeadsByEmployee(employeeId) : leads;
     const total = filtered.length;
@@ -89,13 +101,17 @@ export function LeadProvider({ children }) {
     () => ({
       leads,
       setLeads,
+      loading,
+      error,
+      loadLeads,
       addLead,
       updateLead,
+      deleteLead,
       addNote,
       getLeadsByEmployee,
       getLeadStats,
     }),
-    [leads]
+    [leads, loading, error]
   );
 
   return <LeadContext.Provider value={value}>{children}</LeadContext.Provider>;
@@ -103,6 +119,8 @@ export function LeadProvider({ children }) {
 
 export const useLeads = () => {
   const context = useContext(LeadContext);
-  if (!context) throw new Error("useLeads must be used inside LeadProvider");
+  if (!context) {
+    throw new Error("useLeads must be used inside LeadProvider");
+  }
   return context;
 };

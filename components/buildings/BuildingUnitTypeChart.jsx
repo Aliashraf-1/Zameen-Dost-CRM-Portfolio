@@ -10,6 +10,7 @@ export default function BuildingUnitTypeChart({ rooms = [] }) {
       Office: 0,
       Shop: 0,
       Hall: 0,
+      Desk: 0,
       Other: 0,
     };
 
@@ -24,6 +25,8 @@ export default function BuildingUnitTypeChart({ rooms = [] }) {
         counts.Shop++;
       } else if (type === "hall") {
         counts.Hall++;
+      } else if (type === "desk") {
+        counts.Desk++;
       } else {
         counts.Other++;
       }
@@ -43,15 +46,11 @@ export default function BuildingUnitTypeChart({ rooms = [] }) {
     <div className="rounded-2xl border border-slate-800 mt-4 bg-slate-900 p-6">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-lg font-semibold">
-            Unit Types
-          </h2>
-
+          <h2 className="text-lg font-semibold">Unit Types</h2>
           <p className="mt-1 text-sm text-slate-500">
             Distribution of units in this building.
           </p>
         </div>
-
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
           <PieChart size={20} />
         </div>
@@ -84,6 +83,7 @@ export default function BuildingUnitTypeChart({ rooms = [] }) {
                 "amber",
                 "rose",
                 "sky",
+                "purple",
               ];
 
               return unitTypes.map((item, index) => {
@@ -92,11 +92,8 @@ export default function BuildingUnitTypeChart({ rooms = [] }) {
                     ? item.value / totalUnits
                     : 0;
 
-                const dash =
-                  percentage * circumference;
-
+                const dash = percentage * circumference;
                 const currentOffset = offset;
-
                 offset += dash;
 
                 return (
@@ -107,9 +104,7 @@ export default function BuildingUnitTypeChart({ rooms = [] }) {
                     r="72"
                     fill="none"
                     strokeWidth="28"
-                    strokeDasharray={`${dash} ${
-                      circumference - dash
-                    }`}
+                    strokeDasharray={`${dash} ${circumference - dash}`}
                     strokeDashoffset={-currentOffset}
                     strokeLinecap="butt"
                     className={
@@ -121,7 +116,9 @@ export default function BuildingUnitTypeChart({ rooms = [] }) {
                         ? "text-amber-500"
                         : segments[index] === "rose"
                         ? "text-rose-500"
-                        : "text-sky-500"
+                        : segments[index] === "sky"
+                        ? "text-sky-500"
+                        : "text-purple-500"
                     }
                     stroke="currentColor"
                   />
@@ -131,13 +128,8 @@ export default function BuildingUnitTypeChart({ rooms = [] }) {
           </svg>
 
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-3xl font-bold">
-              {totalUnits}
-            </span>
-
-            <span className="mt-1 text-xs text-slate-500">
-              Total Units
-            </span>
+            <span className="text-3xl font-bold">{totalUnits}</span>
+            <span className="mt-1 text-xs text-slate-500">Total Units</span>
           </div>
         </div>
 
@@ -145,11 +137,7 @@ export default function BuildingUnitTypeChart({ rooms = [] }) {
         <div className="w-full max-w-[220px] space-y-3">
           {unitTypes.map((item, index) => {
             const percentage =
-              totalUnits > 0
-                ? Math.round(
-                    (item.value / totalUnits) * 100
-                  )
-                : 0;
+              totalUnits > 0 ? Math.round((item.value / totalUnits) * 100) : 0;
 
             const dotColors = [
               "bg-indigo-500",
@@ -157,40 +145,25 @@ export default function BuildingUnitTypeChart({ rooms = [] }) {
               "bg-amber-500",
               "bg-rose-500",
               "bg-sky-500",
+              "bg-purple-500",
             ];
 
             return (
-              <div
-                key={item.name}
-                className="flex items-center justify-between"
-              >
+              <div key={item.name} className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <span
-                    className={`h-2.5 w-2.5 rounded-full ${dotColors[index]}`}
-                  />
-
-                  <span className="text-sm text-slate-400">
-                    {item.name}
-                  </span>
+                  <span className={`h-2.5 w-2.5 rounded-full ${dotColors[index]}`} />
+                  <span className="text-sm text-slate-400">{item.name}</span>
                 </div>
-
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold">
-                    {item.value}
-                  </span>
-
-                  <span className="text-xs text-slate-600">
-                    {percentage}%
-                  </span>
+                  <span className="text-sm font-semibold">{item.value}</span>
+                  <span className="text-xs text-slate-600">{percentage}%</span>
                 </div>
               </div>
             );
           })}
 
           {unitTypes.length === 0 && (
-            <p className="text-sm text-slate-600">
-              No units have been added yet.
-            </p>
+            <p className="text-sm text-slate-600">No units have been added yet.</p>
           )}
         </div>
       </div>

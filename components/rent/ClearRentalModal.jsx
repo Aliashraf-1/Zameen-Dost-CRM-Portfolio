@@ -95,69 +95,91 @@ export default function ClearRentalModal({
       const now = new Date().toISOString();
       const transactionId = `clear-${Date.now()}`;
 
-      const result = clearRental(buildingId, room.id, {
+      // ✅ Get the room ID properly (supports both _id and id)
+      const roomId = room._id || room.id;
+
+      console.log("🔄 Clearing rental for room:", {
+        buildingId,
+        roomId,
+        roomNo: room.unitNo,
+        securityHeld,
+        returnAmount,
+        forfeitAmount,
+        remarks: remarks.trim(),
+      });
+
+      // ✅ 1. Clear rental in building context - AWAIT the result
+      const result = await clearRental(buildingId, roomId, {
         returnAmount,
         forfeitAmount,
         remarks: remarks.trim(),
         clearedAt: now,
       });
 
+      console.log("✅ Clear rental result:", result);
+
+      // ✅ 2. Add forfeited amount as income in revenue
       if (forfeitAmount > 0) {
-        addIncome({
+        const incomeData = {
           id: `${transactionId}-forfeit`,
           type: "Security Forfeited",
           category: "Security Income",
-          description: `Security forfeited from ${room?.tenant?.name} - Unit ${room?.unitNo}`,
+          description: `Security forfeited from ${room?.tenant?.name || "Unknown"} - Unit ${room?.unitNo}`,
           amount: forfeitAmount,
           source: "Security",
           buildingId: buildingId,
-          unitId: room.id,
+          unitId: roomId,
           unitNo: room?.unitNo,
-          tenantName: room?.tenant?.name,
+          tenantName: room?.tenant?.name || "Unknown",
           remarks: remarks.trim(),
           status: "Received",
           receivedAt: now,
           createdAt: now,
-        });
+        };
+        console.log("💰 Adding forfeited income:", incomeData);
+        addIncome(incomeData);
       }
 
+      // ✅ 3. Add returned amount as expense in revenue
       if (returnAmount > 0) {
-        addExpense({
+        const expenseData = {
           id: `${transactionId}-return`,
           type: "Security Returned",
           category: "Security Refund",
-          description: `Security returned to ${room?.tenant?.name} - Unit ${room?.unitNo}`,
+          description: `Security returned to ${room?.tenant?.name || "Unknown"} - Unit ${room?.unitNo}`,
           amount: returnAmount,
           source: "Security",
           buildingId: buildingId,
-          unitId: room.id,
+          unitId: roomId,
           unitNo: room?.unitNo,
-          tenantName: room?.tenant?.name,
+          tenantName: room?.tenant?.name || "Unknown",
           remarks: remarks.trim(),
           status: "Paid",
           paidAt: now,
           createdAt: now,
-        });
+        };
+        console.log("💰 Adding returned expense:", expenseData);
+        addExpense(expenseData);
       }
 
-      console.log("Rental Cleared:", {
+      console.log("✅ Rental Cleared Successfully:", {
         id: transactionId,
         type: "Rental Clearance",
-        buildingId: buildingId,
-        unitId: room.id,
+        buildingId,
+        unitId: roomId,
         unitNo: room?.unitNo,
         tenantName: room?.tenant?.name,
-        securityHeld: securityHeld,
-        returnAmount: returnAmount,
-        forfeitAmount: forfeitAmount,
+        securityHeld,
+        returnAmount,
+        forfeitAmount,
         remarks: remarks.trim(),
         clearedAt: now,
       });
 
       onClose();
     } catch (error) {
+      console.error("❌ Clear rental error:", error);
       setError(error.message || "Unable to clear rental.");
-      console.error("Clear rental error:", error);
     } finally {
       setLoading(false);
     }
@@ -199,9 +221,9 @@ export default function ClearRentalModal({
                 {/* Customer */}
                 <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
                   <p className="text-xs text-slate-500">Customer</p>
-                  <p className="mt-1 font-medium">{room?.tenant?.name}</p>
+                  <p className="mt-1 font-medium">{room?.tenant?.name || "No tenant"}</p>
                   <p className="text-xs text-slate-500">
-                    {room?.unitNo} • {room?.type}
+                    {room?.unitNo} • {room?.type || "N/A"}
                   </p>
                 </div>
 

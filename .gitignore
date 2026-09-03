@@ -28,6 +28,41 @@ build/
 *.swp
 *.swo
 
+# ============ BACKEND SPECIFIC ============
 
-del .env
-del .env.local
+# MongoDB data (local database)
+data/
+db/
+mongodb-data/
+
+# Backend build files
+BackEnd/dist/
+BackEnd/build/
+
+# Backend environment
+BackEnd/.env
+BackEnd/.env.local
+BackEnd/.env.production
+
+# Uploads / User files
+uploads/
+images/
+temp/
+public/uploads/
+
+# Session files
+sessions/
+*.session
+
+# Package lock files (optional - kuch log rakhte hain, kuch nahi)
+# package-lock.json
+# BackEnd/package-lock.json
+
+# Testing coverage
+coverage/
+.nyc_output/
+
+# Debug logs
+*.pid
+*.seed
+*.pid.lock

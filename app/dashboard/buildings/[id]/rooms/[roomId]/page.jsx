@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { notFound, useParams } from "next/navigation";
 import Link from "next/link";
+
+import Image from "next/image";
 import {
   ArrowLeft,
   Building2,
@@ -29,7 +31,7 @@ import {
   Download,
   FilePlus,
 } from "lucide-react";
-import { useBuildings } from "@/context/BuildingContext";
+import { useBuildings , updateRoom } from "@/context/BuildingContext";
 import RentHistory from "@/components/customers/RentHistory";
 import SecurityHistory from "@/components/customers/SecurityHistory";
 import ClearRentalModal from "@/components/rent/ClearRentalModal";
@@ -38,6 +40,8 @@ import DeleteConfirmModal from "@/components/common/DeleteConfirmModal";
 import DocumentTemplates from "@/components/buildings/DocumentTemplates";
 import DocumentEditor from "@/components/buildings/DocumentEditor";
 import { documentTemplates } from "@/data/documentTemplates";
+import { getImageUrl } from "@/lib/imageHelper";
+
 
 function InfoItem({ icon: Icon, label, value, valueClassName = "" }) {
   return (
@@ -97,9 +101,13 @@ function PreviousCustomerCard({ customer, onDelete }) {
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-500/10 text-indigo-400">
               {customer.tenantImage ? (
                 <img
-                  src={customer.tenantImage}
+                  src={getImageUrl(customer.tenantImage)}
                   alt={customer.tenantName}
                   className="h-full w-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://placehold.co/100x100/1e293b/94a3b8?text=User";
+                  }}
                 />
               ) : (
                 <User size={20} />
@@ -195,9 +203,13 @@ function PreviousCustomerCard({ customer, onDelete }) {
                 <p className="text-xs text-slate-500">Tenant Image</p>
                 <div className="mt-2">
                   <img
-                    src={customer.tenantImage}
+                    src={getImageUrl(customer.tenantImage)}
                     alt={customer.tenantName}
                     className="h-32 w-32 rounded-lg object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://placehold.co/200x200/1e293b/94a3b8?text=No+Image";
+                    }}
                   />
                 </div>
               </div>
@@ -308,7 +320,7 @@ function PreviousCustomers({ previousCustomers = [], onDelete }) {
   );
 }
 
-// ✅ Documents Section Component
+// Documents Section Component
 function DocumentsSection({ documents = [], onViewDocument }) {
   if (documents.length === 0) {
     return null;
@@ -361,27 +373,28 @@ function DocumentsSection({ documents = [], onViewDocument }) {
 
 export default function UnitDetailsPage() {
   const params = useParams();
-  const { buildings, setBuildings } = useBuildings();
+  const { buildings, getBuildingById , updateRoom  } = useBuildings();
   const [building, setBuilding] = useState(null);
   const [unit, setUnit] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showClearModal, setShowClearModal] = useState(false);
   const [showPayModal, setShowPayModal] = useState(false);
   
-  // ✅ Document Editor State
+  // Document Editor State
   const [showDocumentEditor, setShowDocumentEditor] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   useEffect(() => {
     if (params.id && params.roomId) {
-      const foundBuilding = buildings.find(
-        (item) => item.id === Number(params.id)
-      );
+      const buildingId = params.id;
+      const roomId = params.roomId;
+      
+      const foundBuilding = getBuildingById(buildingId);
       if (foundBuilding) {
         setBuilding(foundBuilding);
         const foundUnit = foundBuilding.rooms?.find(
-          (item) => item.id === Number(params.roomId)
+          (item) => item._id === roomId || item.id === Number(roomId)
         );
         if (foundUnit) {
           setUnit(foundUnit);
@@ -389,7 +402,7 @@ export default function UnitDetailsPage() {
       }
       setLoading(false);
     }
-  }, [params.id, params.roomId, buildings]);
+  }, [params.id, params.roomId, buildings, getBuildingById]);
 
   // Extract previous customers from clearanceHistory
   const previousCustomers = unit?.clearanceHistory
@@ -412,30 +425,39 @@ export default function UnitDetailsPage() {
       clearedAt: record.clearedAt || new Date().toISOString(),
     })) || [];
 
-  // ✅ Get documents from tenant
+  // Get documents from tenant
   const documents = unit?.tenant?.documents || [];
 
-  const handleDeletePreviousCustomer = (recordId) => {
-    setBuildings((prevBuildings) =>
-      prevBuildings.map((b) => {
-        if (b.id !== building.id) return b;
-        return {
-          ...b,
-          rooms: b.rooms.map((r) => {
-            if (r.id !== unit.id) return r;
-            return {
-              ...r,
-              clearanceHistory: r.clearanceHistory?.filter(
-                (record) => record.id !== recordId
-              ) || [],
-            };
-          }),
-        };
-      })
+// ✅ Handle delete previous customer record with API
+const handleDeletePreviousCustomer = async (recordId) => {
+  try {
+    // Filter out the record from clearanceHistory
+    const updatedClearanceHistory = unit.clearanceHistory.filter(
+      (record) => record.id !== recordId
     );
-  };
 
-  // ✅ Handle view document
+    // Prepare updated room data
+    const updatedRoomData = {
+      ...unit,
+      clearanceHistory: updatedClearanceHistory,
+    };
+
+    // Send update to backend via context
+    const buildingId = building._id || building.id;
+    const roomId = unit._id || unit.id;
+    await updateRoom(buildingId, roomId, updatedRoomData);
+
+    // Update local state (optional, handled by context)
+    // But we can also directly update UI via setBuilding (already done in context)
+    // No need to manually update state; context will update after API call
+    console.log("Previous customer record deleted successfully");
+  } catch (error) {
+    console.error("Failed to delete previous customer record:", error);
+    alert("Failed to delete record. Please try again.");
+  }
+};
+
+  // Handle view document
   const handleViewDocument = (doc) => {
     setSelectedDocument(doc);
     const template = documentTemplates.find((t) => t.id === doc.templateId);
@@ -443,15 +465,15 @@ export default function UnitDetailsPage() {
     setShowDocumentEditor(true);
   };
 
-  // ✅ Handle save document (update)
+  // Handle save document (update)
   const handleSaveDocument = (documentData) => {
     setBuildings((prevBuildings) =>
       prevBuildings.map((b) => {
-        if (b.id !== building.id) return b;
+        if (b._id !== building._id) return b;
         return {
           ...b,
           rooms: b.rooms.map((r) => {
-            if (r.id !== unit.id) return r;
+            if (r._id !== unit._id) return r;
             return {
               ...r,
               tenant: {
@@ -482,16 +504,26 @@ export default function UnitDetailsPage() {
     notFound();
   }
 
+  const buildingId = building._id || building.id;
+  const unitId = unit._id || unit.id;
+
   const isRented = unit.status === "Rented" && unit.tenant !== null && unit.initialPayment !== null;
   const tenant = isRented ? unit.tenant : null;
   const initialPayment = isRented ? unit.initialPayment : null;
+
+  // ✅ Image URL helper with logging
+  const getImageUrlWithLog = (path, label = "Image") => {
+    const url = getImageUrl(path);
+    console.log(`📸 ${label}:`, path, "→", url);
+    return url;
+  };
 
   return (
     <>
       <div className="mx-auto max-w-[1600px]">
         {/* Back Button */}
         <Link
-          href={`/dashboard/buildings/${building.id}`}
+          href={`/dashboard/buildings/${buildingId}`}
           className="mb-6 inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-white"
         >
           <ArrowLeft size={16} />
@@ -523,7 +555,7 @@ export default function UnitDetailsPage() {
 
           <div className="flex gap-3">
             <Link
-              href={`/dashboard/buildings/${building.id}/rooms/${unit.id}/edit`}
+              href={`/dashboard/buildings/${buildingId}/rooms/${unitId}/edit`}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm font-medium text-slate-300 transition hover:border-slate-700 hover:bg-slate-800 hover:text-white"
             >
               <Pencil size={17} />
@@ -532,16 +564,21 @@ export default function UnitDetailsPage() {
           </div>
         </div>
 
-        {/* Unit Image */}
-        {unit.unitImage && (
-          <div className="mb-6 overflow-hidden rounded-2xl border border-slate-800">
-            <img
-              src={unit.unitImage}
-              alt={`${unit.type} ${unit.unitNo}`}
-              className="h-64 w-full object-cover"
-            />
-          </div>
-        )}
+        {/* ✅ Unit Image - Fixed */}
+      {unit.unitImage && (
+  <div className="mb-6 overflow-hidden rounded-2xl border border-slate-800 relative h-64 w-full">
+    <Image
+      src={getImageUrl(unit.unitImage)}
+      alt={`${unit.type} ${unit.unitNo}`}
+      fill
+      className="object-cover"
+      onError={(e) => {
+        // Fallback to placeholder
+      }}
+      unoptimized={process.env.NODE_ENV === 'development'} // Allow external URLs
+    />
+  </div>
+)}
 
         {/* Stats Grid */}
         <div className="grid gap-6 lg:grid-cols-3">
@@ -560,7 +597,7 @@ export default function UnitDetailsPage() {
             </div>
           </div>
 
-          {/* Tenant Information */}
+          {/* ✅ Tenant Information - Fixed */}
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
             <h2 className="mb-5 font-semibold">Tenant Information</h2>
             {isRented && tenant ? (
@@ -568,7 +605,16 @@ export default function UnitDetailsPage() {
                 <div className="flex items-center gap-4 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-500/10 text-indigo-400">
                     {tenant.image ? (
-                      <img src={tenant.image} alt={tenant.name} className="h-full w-full object-cover" />
+                      <img
+                        src={getImageUrlWithLog(tenant.image, "Tenant Image")}
+                        alt={tenant.name}
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          console.error("❌ Tenant image failed to load:", e.target.src);
+                          e.target.onerror = null;
+                          e.target.src = "https://placehold.co/100x100/1e293b/94a3b8?text=User";
+                        }}
+                      />
                     ) : (
                       <User size={24} />
                     )}
@@ -650,7 +696,7 @@ export default function UnitDetailsPage() {
           </div>
         </div>
 
-        {/* ✅ Documents Section */}
+        {/* Documents Section */}
         <DocumentsSection 
           documents={documents} 
           onViewDocument={handleViewDocument} 
@@ -693,7 +739,7 @@ export default function UnitDetailsPage() {
               </>
             )}
             <Link
-              href={`/dashboard/buildings/${building.id}/rooms/${unit.id}/edit`}
+              href={`/dashboard/buildings/${buildingId}/rooms/${unitId}/edit`}
               className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-slate-700 hover:bg-slate-800 hover:text-white"
             >
               <Pencil size={16} />
@@ -721,7 +767,7 @@ export default function UnitDetailsPage() {
       {/* Pay Rent Modal */}
       {showPayModal && (
         <PayRentModal
-          buildingId={building.id}
+          buildingId={buildingId}
           room={unit}
           onClose={() => setShowPayModal(false)}
         />
@@ -730,13 +776,13 @@ export default function UnitDetailsPage() {
       {/* Clear Rental Modal */}
       {showClearModal && (
         <ClearRentalModal
-          buildingId={building.id}
+          buildingId={buildingId}
           room={unit}
           onClose={() => setShowClearModal(false)}
         />
       )}
 
-      {/* ✅ Document Editor Modal */}
+      {/* Document Editor Modal */}
       {showDocumentEditor && selectedTemplate && (
         <DocumentEditor
           isOpen={showDocumentEditor}
@@ -759,7 +805,7 @@ export default function UnitDetailsPage() {
             permanentAddress: tenant?.address || "",
           }}
           buildingData={{
-            buildingId: building.id,
+            buildingId: buildingId,
             buildingNo: building.buildingNo,
           }}
           onSave={handleSaveDocument}

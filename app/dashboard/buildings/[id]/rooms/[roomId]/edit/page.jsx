@@ -7,23 +7,21 @@ import { ArrowLeft, Building2 } from "lucide-react";
 import { useBuildings } from "@/context/BuildingContext";
 import RoomForm from "@/components/buildings/RoomForm";
 
-export default function EditUnitPage() {
+export default function EditRoomPage() {
   const params = useParams();
   const router = useRouter();
-  const { buildings, setBuildings } = useBuildings();
+  const { buildings, getBuildingById, updateRoom, loading: buildingsLoading } = useBuildings();
   const [building, setBuilding] = useState(null);
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (params.id && params.roomId) {
-      const foundBuilding = buildings.find(
-        (item) => item.id === Number(params.id)
-      );
+      const foundBuilding = getBuildingById(params.id);
       if (foundBuilding) {
         setBuilding(foundBuilding);
         const foundRoom = foundBuilding.rooms?.find(
-          (item) => item.id === Number(params.roomId)
+          (item) => item._id === params.roomId || item.id === Number(params.roomId)
         );
         if (foundRoom) {
           setRoom(foundRoom);
@@ -31,40 +29,29 @@ export default function EditUnitPage() {
       }
       setLoading(false);
     }
-  }, [params.id, params.roomId, buildings]);
+  }, [params.id, params.roomId, buildings, getBuildingById]);
 
-  const handleUpdate = async (updatedRoom) => {
-    // Update room in building
-    setBuildings((prevBuildings) =>
-      prevBuildings.map((b) => {
-        if (b.id !== building.id) return b;
-        return {
-          ...b,
-          rooms: b.rooms.map((r) => {
-            if (r.id !== room.id) return r;
-            return {
-              ...updatedRoom,
-              id: room.id,
-              updatedAt: new Date().toISOString(),
-            };
-          }),
-        };
-      })
-    );
-
-    // Redirect back to building details
-    router.push(`/dashboard/buildings/${building.id}`);
+  const handleSubmit = async (roomData) => {
+    try {
+      const buildingId = building._id || building.id;
+      const roomId = room._id || room.id;
+      await updateRoom(buildingId, roomId, roomData);
+      router.push(`/dashboard/buildings/${buildingId}`);
+    } catch (error) {
+      console.error("Failed to update room:", error);
+      throw error;
+    }
   };
 
   const handleCancel = () => {
-    // Redirect back to building details
-    router.push(`/dashboard/buildings/${building.id}`);
+    const buildingId = building._id || building.id;
+    router.push(`/dashboard/buildings/${buildingId}`);
   };
 
-  if (loading) {
+  if (loading || buildingsLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="animate-pulse text-slate-500">Loading unit details...</div>
+        <div className="animate-pulse text-slate-500">Loading...</div>
       </div>
     );
   }
@@ -73,11 +60,13 @@ export default function EditUnitPage() {
     notFound();
   }
 
+  const buildingId = building._id || building.id;
+  const roomId = room._id || room.id;
+
   return (
     <div className="mx-auto max-w-5xl">
-      {/* Back Button */}
       <Link
-        href={`/dashboard/buildings/${building.id}`}
+        href={`/dashboard/buildings/${buildingId}`}
         className="mb-6 inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-white"
       >
         <ArrowLeft size={16} />
@@ -102,10 +91,11 @@ export default function EditUnitPage() {
       </div>
 
       <RoomForm
-        building={building}
-        room={room}
+        initialData={room}
         mode="edit"
-        onSubmit={handleUpdate}
+        buildingId={buildingId}
+        building={building}
+        onSubmit={handleSubmit}
         onCancel={handleCancel}
       />
     </div>

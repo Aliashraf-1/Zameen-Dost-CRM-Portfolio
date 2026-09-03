@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { dashboardAPI } from "@/lib/api";
 
 const Chart = dynamic(
   () => import("react-apexcharts"),
@@ -10,6 +12,34 @@ const Chart = dynamic(
 );
 
 export default function RevenueChart() {
+  const [chartData, setChartData] = useState({
+    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+    series: [
+      {
+        name: "Revenue",
+        data: [0, 0, 0, 0, 0, 0, 0, 0],
+      },
+    ],
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchChartData = async () => {
+      try {
+        const response = await dashboardAPI.getRevenueChart();
+        if (response.data.success) {
+          setChartData(response.data.data);
+        }
+      } catch (error) {
+        console.error("Failed to load revenue chart:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchChartData();
+  }, []);
+
   const options = {
     chart: {
       type: "area",
@@ -37,28 +67,16 @@ export default function RevenueChart() {
     },
 
     xaxis: {
-      categories: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-      ],
-
+      categories: chartData.categories,
       labels: {
         style: {
           colors: "#64748b",
           fontSize: "11px",
         },
       },
-
       axisBorder: {
         show: false,
       },
-
       axisTicks: {
         show: false,
       },
@@ -70,7 +88,6 @@ export default function RevenueChart() {
           colors: "#64748b",
           fontSize: "11px",
         },
-
         formatter: (value) =>
           `Rs. ${(value / 1000).toFixed(0)}K`,
       },
@@ -78,7 +95,6 @@ export default function RevenueChart() {
 
     tooltip: {
       theme: "dark",
-
       y: {
         formatter: (value) =>
           `Rs. ${Number(value).toLocaleString()}`,
@@ -98,21 +114,24 @@ export default function RevenueChart() {
     },
   };
 
-  const series = [
+  const series = chartData.series || [
     {
       name: "Revenue",
-      data: [
-        320000,
-        380000,
-        410000,
-        450000,
-        490000,
-        530000,
-        610000,
-        680000,
-      ],
+      data: [0, 0, 0, 0, 0, 0, 0, 0],
     },
   ];
+
+  if (loading) {
+    return (
+      <div className="flex h-full w-full flex-col rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold">Monthly Revenue</h2>
+          <p className="mt-0.5 text-xs text-slate-500">Loading chart...</p>
+        </div>
+        <div className="flex-1 animate-pulse bg-slate-800/50 rounded-xl" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full w-full flex-col rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6">

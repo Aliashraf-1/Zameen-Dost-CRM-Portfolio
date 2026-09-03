@@ -12,66 +12,51 @@ import {
   UserMinus,
   Pencil,
   CircleAlert,
+  Trash2,
 } from "lucide-react";
-
+import { useAuth } from "@/context/AuthContext";
+import { useBuildings } from "@/context/BuildingContext";
+import DeleteConfirmModal from "@/components/common/DeleteConfirmModal";
 import PayRentModal from "@/components/rent/PayRentModal";
 import ClearRentalModal from "@/components/rent/ClearRentalModal";
+import { getImageUrl } from "@/lib/imageHelper";
 
 export default function RoomTable({
   rooms = [],
   buildingId,
 }) {
+  const { user } = useAuth();
+  const { deleteRoom } = useBuildings();
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
+
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
-
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [modal, setModal] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
-  /*
-   * Calculate how many rent months are pending.
-   */
   const getPendingMonths = (room) => {
-    if (!room?.rentStartDate) {
-      return 0;
-    }
-
+    if (!room?.rentStartDate) return 0;
     const rentHistory = room.rentHistory || [];
-
-    const paidMonths = rentHistory.filter(
-      (item) => item.status === "Paid"
-    ).length;
-
+    const paidMonths = rentHistory.filter((item) => item.status === "Paid").length;
     const startDate = new Date(room.rentStartDate);
     const today = new Date();
-
-    const startYear = startDate.getFullYear();
-    const startMonth = startDate.getMonth();
-
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth();
-
     const monthsPassed =
-      (currentYear - startYear) * 12 +
-      (currentMonth - startMonth) +
+      (today.getFullYear() - startDate.getFullYear()) * 12 +
+      (today.getMonth() - startDate.getMonth()) +
       1;
-
     return Math.max(monthsPassed - paidMonths, 0);
   };
 
   const filteredRooms = useMemo(() => {
     return rooms.filter((room) => {
       const searchValue = search.toLowerCase().trim();
-
       const unitNumber = String(room.unitNo || "").toLowerCase();
       const tenantName = String(room.tenant?.name || "").toLowerCase();
-
       const matchesSearch =
-        unitNumber.includes(searchValue) ||
-        tenantName.includes(searchValue);
-
-      const matchesStatus =
-        status === "All" || room.status === status;
-
+        unitNumber.includes(searchValue) || tenantName.includes(searchValue);
+      const matchesStatus = status === "All" || room.status === status;
       return matchesSearch && matchesStatus;
     });
   }, [rooms, search, status]);
@@ -91,6 +76,29 @@ export default function RoomTable({
     setModal(null);
   };
 
+  const getRoomId = (room) => room._id || room.id;
+
+  const handleDeleteClick = (room) => {
+    setSelectedRoom(room);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedRoom) return;
+    setDeleteLoading(true);
+    try {
+      const roomId = getRoomId(selectedRoom);
+      await deleteRoom(buildingId, roomId);
+      setShowDeleteModal(false);
+      setSelectedRoom(null);
+    } catch (error) {
+      console.error("Delete room error:", error);
+      alert("Failed to delete room. Please try again.");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
@@ -103,9 +111,7 @@ export default function RoomTable({
                 Manage units and rental information.
               </p>
             </div>
-
             <div className="flex flex-col gap-3 sm:flex-row">
-              {/* Search */}
               <div className="relative">
                 <Search
                   size={17}
@@ -118,8 +124,6 @@ export default function RoomTable({
                   className="w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 pl-10 pr-4 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500 sm:w-64"
                 />
               </div>
-
-              {/* Status */}
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
@@ -138,57 +142,47 @@ export default function RoomTable({
           <table className="w-full min-w-[1200px]">
             <thead>
               <tr className="border-b border-slate-800 text-left">
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Unit
-                </th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Tenant
-                </th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Purpose
-                </th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Monthly Rent
-                </th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Security
-                </th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Rent Status
-                </th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Unit Status
-                </th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Action
-                </th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Unit</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Tenant</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Purpose</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Monthly Rent</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Security</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Rent Status</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Unit Status</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Action</th>
               </tr>
             </thead>
-
             <tbody>
               {filteredRooms.map((room) => {
+                const roomId = getRoomId(room);
                 const rented = room.status === "Rented";
                 const security = Number(room.initialPayment?.securityReceived || 0);
                 const pendingMonths = rented ? getPendingMonths(room) : 0;
                 const rentPending = pendingMonths > 0;
                 const pendingAmount = pendingMonths * Number(room.monthlyRent || 0);
-
-                const viewUrl = `/dashboard/buildings/${buildingId}/rooms/${room.id}`;
-                const editUrl = `/dashboard/buildings/${buildingId}/rooms/${room.id}/edit`;
+                const viewUrl = `/dashboard/buildings/${buildingId}/rooms/${roomId}`;
+                const editUrl = `/dashboard/buildings/${buildingId}/rooms/${roomId}/edit`;
 
                 return (
-                  <tr
-                    key={room.id}
-                    className="border-b border-slate-800/70 transition hover:bg-slate-950/50"
-                  >
+                  <tr key={roomId} className="border-b border-slate-800/70 transition hover:bg-slate-950/50">
                     {/* Unit */}
                     <td className="px-6 py-4">
-                      <Link
-                        href={viewUrl}
-                        className="group flex items-center gap-3"
-                      >
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-800 text-xs font-semibold transition group-hover:bg-indigo-500/10 group-hover:text-indigo-400">
-                          {room.unitNo}
+                      <Link href={viewUrl} className="group flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg bg-slate-800 text-xs font-semibold transition group-hover:bg-indigo-500/10 group-hover:text-indigo-400">
+                          {room.unitImage ? (
+                            <img
+                              src={getImageUrl(room.unitImage)}
+                              alt={room.unitNo}
+                              className="h-full w-full object-cover"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.style.display = "none";
+                                e.target.parentElement.textContent = room.unitNo;
+                              }}
+                            />
+                          ) : (
+                            room.unitNo
+                          )}
                         </div>
                         <div>
                           <p className="text-sm font-medium transition group-hover:text-indigo-400">
@@ -206,9 +200,15 @@ export default function RoomTable({
                           <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-indigo-500/10 text-indigo-400">
                             {room.tenant?.image ? (
                               <img
-                                src={room.tenant.image}
+                                src={getImageUrl(room.tenant.image)}
                                 alt={room.tenant.name || "Tenant"}
                                 className="h-full w-full object-cover"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.style.display = "none";
+                                  e.target.parentElement.innerHTML =
+                                    '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>';
+                                }}
                               />
                             ) : (
                               <User size={17} />
@@ -292,51 +292,59 @@ export default function RoomTable({
                       )}
                     </td>
 
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-1">
-                    {/* View - Eye Icon - Opens Unit Details */}
-                    <Link
-                      href={`/dashboard/buildings/${buildingId}/rooms/${room.id}`}
-                      className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
-                      title="View unit"
-                    >
-                      <Eye size={17} />
-                    </Link>
-
-                    {/* Edit - Pencil Icon - Opens Edit Page */}
-                    <Link
-                      href={`/dashboard/buildings/${buildingId}/rooms/${room.id}/edit`}
-                      className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
-                      title="Edit unit"
-                    >
-                      <Pencil size={17} />
-                    </Link>
-
-                    {rented && (
-                      <>
-                        {/* Pay Rent - Opens Modal */}
-                        <button
-                          type="button"
-                          onClick={() => openPayRent(room)}
-                          className="rounded-lg p-2 text-slate-500 transition hover:bg-emerald-500/10 hover:text-emerald-400"
-                          title="Pay rent"
+                    {/* Actions */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-1">
+                        <Link
+                          href={viewUrl}
+                          className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                          title="View unit"
                         >
-                          <Wallet size={17} />
-                        </button>
+                          <Eye size={17} />
+                        </Link>
 
-                        {/* Clear Rental - Opens Modal */}
-                        <button
-                          type="button"
-                          onClick={() => openClearRental(room)}
-                          className="rounded-lg p-2 text-slate-500 transition hover:bg-red-500/10 hover:text-red-400"
-                          title="Clear rental"
+                        <Link
+                          href={editUrl}
+                          className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                          title="Edit unit"
                         >
-                          <UserMinus size={17} />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </td>
+                          <Pencil size={17} />
+                        </Link>
+
+                        {rented && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => openPayRent(room)}
+                              className="rounded-lg p-2 text-slate-500 transition hover:bg-emerald-500/10 hover:text-emerald-400"
+                              title="Pay rent"
+                            >
+                              <Wallet size={17} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => openClearRental(room)}
+                              className="rounded-lg p-2 text-slate-500 transition hover:bg-red-500/10 hover:text-red-400"
+                              title="Clear rental"
+                            >
+                              <UserMinus size={17} />
+                            </button>
+                          </>
+                        )}
+
+                        {/* ✅ Delete Button - Admin only */}
+                        {isAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteClick(room)}
+                            className="rounded-lg p-2 text-slate-500 transition hover:bg-red-500/10 hover:text-red-400"
+                            title="Delete unit"
+                          >
+                            <Trash2 size={17} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -354,7 +362,7 @@ export default function RoomTable({
         </div>
       </div>
 
-      {/* Pay Rent Modal */}
+      {/* Modals */}
       {modal === "payRent" && selectedRoom && (
         <PayRentModal
           buildingId={buildingId}
@@ -362,13 +370,25 @@ export default function RoomTable({
           onClose={closeModal}
         />
       )}
-
-      {/* Clear Rental Modal */}
       {modal === "clearRental" && selectedRoom && (
         <ClearRentalModal
           buildingId={buildingId}
           room={selectedRoom}
           onClose={closeModal}
+        />
+      )}
+      {showDeleteModal && selectedRoom && (
+        <DeleteConfirmModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setSelectedRoom(null);
+          }}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Unit"
+          message={`Are you sure you want to delete unit ${selectedRoom.unitNo}? This action cannot be undone and will remove all associated records.`}
+          itemName={`${selectedRoom.type} ${selectedRoom.unitNo}`}
+          loading={deleteLoading}
         />
       )}
     </>

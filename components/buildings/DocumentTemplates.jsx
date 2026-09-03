@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, Plus, ChevronDown, ChevronUp, Eye } from "lucide-react";
+import { FileText, ChevronDown, ChevronUp, Eye } from "lucide-react";
 import { documentTemplates } from "@/data/documentTemplates";
 
 export default function DocumentTemplates({ 
@@ -62,7 +62,11 @@ export default function DocumentTemplates({
             </div>
             <button
               type="button"
-              onClick={() => onViewExisting?.(selectedTemplate)}
+              onClick={() => {
+                if (onViewExisting) {
+                  onViewExisting(selectedTemplate);
+                }
+              }}
               className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-white"
               title="View existing documents"
             >
@@ -74,7 +78,7 @@ export default function DocumentTemplates({
 
       {/* Templates List */}
       {expanded && (
-        <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-2 space-y-2">
+        <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-2 space-y-2 max-h-48 overflow-y-auto">
           {documentTemplates.map((template) => {
             const isSelected = selectedTemplate?.id === template.id;
             const hasExisting = existingDocuments.some(doc => doc.templateId === template.id);
