@@ -38,16 +38,18 @@ const leadSchema = new mongoose.Schema({
     default: '',
   },
   assignedTo: {
-    type: Number,
-    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Employee',
+    default: null,
   },
   assignedToName: {
     type: String,
     default: '',
   },
   createdBy: {
-    type: Number,
-    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
   },
   followUpDate: {
     type: String,
@@ -58,10 +60,14 @@ const leadSchema = new mongoose.Schema({
     default: null,
   },
   notes: [{
-    text: { type: String },
-    createdAt: { type: String },
-    createdBy: { type: Number },
-    createdByName: { type: String },
+    text: { type: String, default: '' },
+    createdAt: { type: String, default: '' },
+    createdBy: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'User',
+      default: null,
+    },
+    createdByName: { type: String, default: '' },
   }],
 }, {
   timestamps: true,

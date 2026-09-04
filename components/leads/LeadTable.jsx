@@ -19,8 +19,8 @@ export default function LeadTable({
   const filteredLeads = useMemo(() => {
     return leads.filter((lead) => {
       const matchesSearch =
-        lead.customerName.toLowerCase().includes(search.toLowerCase()) ||
-        lead.customerPhone.includes(search) ||
+        lead.customerName?.toLowerCase().includes(search.toLowerCase()) ||
+        lead.customerPhone?.includes(search) ||
         lead.customerEmail?.toLowerCase().includes(search.toLowerCase());
 
       const matchesStatus = statusFilter === "All" || lead.status === statusFilter;
@@ -33,6 +33,9 @@ export default function LeadTable({
     const statusObj = Object.values(LEAD_STATUS).find((s) => s.value === status);
     return statusObj || LEAD_STATUS.NEW;
   };
+
+  // ✅ Safe search function
+  const searchValue = search.toLowerCase();
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
@@ -107,10 +110,15 @@ export default function LeadTable({
               </tr>
             ) : (
               filteredLeads.map((lead) => {
+                const leadId = lead._id || lead.id;
                 const statusObj = getStatusBadge(lead.status);
+              const isAssignedToEmployee = 
+                (typeof lead.assignedTo === 'object' && lead.assignedTo?._id === employeeId) ||
+                lead.assignedTo === employeeId ||
+                lead.assignedTo === Number(employeeId);
 
                 return (
-                  <tr key={lead.id} className="border-b border-slate-800/70 transition hover:bg-slate-950/50">
+                  <tr key={leadId} className="border-b border-slate-800/70 transition hover:bg-slate-950/50">
                     <td className="px-6 py-4">
                       <div>
                         <p className="text-sm font-medium text-slate-200">{lead.customerName}</p>
@@ -127,8 +135,10 @@ export default function LeadTable({
                         {statusObj.value}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-300">
-                      {lead.assignedToName || "Unassigned"}
+                      <td className="px-6 py-4 text-sm text-slate-300">
+                      {lead.assignedToName || 
+                      (typeof lead.assignedTo === 'object' ? lead.assignedTo?.name : null) || 
+                      "Unassigned"}
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-400">
                       {lead.followUpDate ? new Date(lead.followUpDate).toLocaleDateString() : "—"}
@@ -136,7 +146,7 @@ export default function LeadTable({
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1">
                         <button
-                          onClick={() => onView(lead)}
+                          onClick={() => onView?.(lead)}
                           className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
                           title="View"
                         >
@@ -144,9 +154,9 @@ export default function LeadTable({
                         </button>
 
                         {/* Edit - Only for assigned employee or admin */}
-                        {(lead.assignedTo === employeeId || userRole === "admin" || userRole === "super_admin") && (
+                        {(isAssignedToEmployee || userRole === "admin" || userRole === "super_admin") && (
                           <button
-                            onClick={() => onEdit(lead)}
+                            onClick={() => onEdit?.(lead)}
                             className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
                             title="Edit"
                           >
@@ -157,7 +167,7 @@ export default function LeadTable({
                         {/* Delete - Only for admin/super_admin */}
                         {(userRole === "admin" || userRole === "super_admin") && (
                           <button
-                            onClick={() => onDelete(lead.id)}
+                            onClick={() => onDelete?.(leadId)}
                             className="rounded-lg p-2 text-slate-500 transition hover:bg-red-500/10 hover:text-red-400"
                             title="Delete"
                           >

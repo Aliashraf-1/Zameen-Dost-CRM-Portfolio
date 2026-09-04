@@ -78,12 +78,7 @@ export default function UnitForm({
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [editingDocument, setEditingDocument] = useState(null);
 
-  /*
-   * ----------------------------------------------------
-   * BASIC CHANGE
-   * ----------------------------------------------------
-   */
-
+  // Basic Change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({
@@ -112,12 +107,7 @@ export default function UnitForm({
     }));
   };
 
-  /*
-   * ----------------------------------------------------
-   * IMAGE HANDLERS
-   * ----------------------------------------------------
-   */
-
+  // Image Handlers
   const handleUnitImage = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -152,12 +142,7 @@ export default function UnitForm({
     }));
   };
 
-  /*
-   * ----------------------------------------------------
-   * AGREEMENT FILES (MAX 5)
-   * ----------------------------------------------------
-   */
-
+  // Agreement Files (MAX 5)
   const handleAgreementFiles = (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -184,12 +169,7 @@ export default function UnitForm({
     setAgreementFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  /*
-   * ----------------------------------------------------
-   * DOCUMENT TEMPLATES
-   * ----------------------------------------------------
-   */
-
+  // Document Templates
   const handleSelectTemplate = (template) => {
     setSelectedTemplate(template);
     setEditingDocument(null);
@@ -217,12 +197,7 @@ export default function UnitForm({
     }
   };
 
-  /*
-   * ----------------------------------------------------
-   * PAYMENT CALCULATION
-   * ----------------------------------------------------
-   */
-
+  // Payment Calculation
   const paymentCalculation = useMemo(() => {
     const rent = Number(form.monthlyRent) || 0;
     const cash = Number(form.cashReceived) || 0;
@@ -246,123 +221,167 @@ export default function UnitForm({
       ? `${form.unitNo.trim()}-D${form.deskNo.trim().padStart(2, "0")}`
       : form.unitNo.trim();
 
-  /*
-   * ----------------------------------------------------
-   * SUBMIT - WITH FORMDATA SUPPORT
-   * ----------------------------------------------------
-   */
+  // ✅ SUBMIT - Complete Working Version
+ // ✅ SUBMIT - Complete Working Version with Image Preservation
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  if (form.purpose === "Desk" && !form.deskNo.trim()) {
+    alert("Please enter the desk number.");
+    return;
+  }
 
-    if (form.purpose === "Desk" && !form.deskNo.trim()) {
-      alert("Please enter the desk number.");
-      return;
-    }
+  setLoading(true);
 
-    setLoading(true);
+  const paymentDateTime =
+    form.status === "Rented" && Number(form.cashReceived) > 0
+      ? new Date().toISOString()
+      : null;
 
-    const paymentDateTime =
-      form.status === "Rented" && Number(form.cashReceived) > 0
-        ? new Date().toISOString()
-        : null;
+  // ✅ Prepare safe agreement data (without File objects)
+  const safeAgreement = agreementFiles.map((f) => ({
+    name: f.name,
+    url: null,
+  }));
 
-    // ✅ Prepare unitData (without file objects)
-    const unitData = {
-      unitNo: finalUnitNo,
-      deskNo: form.purpose === "Desk" ? form.deskNo.trim() : null,
-      type: form.type,
-      reference: form.reference,
-      monthlyRent: Number(form.monthlyRent) || 0,
-      purpose: form.purpose,
-      status: form.status,
-      rentStartDate: form.rentStartDate || null,
-      unitImage: null, // Will be set via FormData
-      tenant: form.status === "Rented" ? {
-        name: form.tenant.name || "",
-        cnic: form.tenant.cnic || "",
-        phone: form.tenant.phone || "",
-        reference: form.tenant.reference || "",
-        image: null, // Will be set via FormData
-        agreement: [], // Will be set via FormData
-        documents: savedDocuments, // Already safe
-      } : null,
-      initialPayment: form.status === "Rented" && paymentCalculation.rentPaid > 0 ? {
-        cashReceived: Number(form.cashReceived) || 0,
-        rentPaid: paymentCalculation.rentPaid,
-        securityReceived: paymentCalculation.securityReceived,
-        securityStatus: paymentCalculation.securityReceived > 0 ? "Held" : null,
-        paymentDateTime,
-        rentMonths: paymentCalculation.rentPaid > 0 ? 1 : 0,
-      } : null,
-      rentHistory: form.status === "Rented" && paymentCalculation.rentPaid > 0
-        ? [
-            {
-              month: form.rentStartDate?.slice(0, 7) || new Date().toISOString().slice(0, 7),
-              amount: paymentCalculation.rentPaid,
-              status: "Paid",
-              paidAt: paymentDateTime,
-            },
-          ]
-        : [],
-      securityHistory: form.status === "Rented" && paymentCalculation.securityReceived > 0
-        ? [
-            {
-              type: "received",
-              amount: paymentCalculation.securityReceived,
-              date: paymentDateTime,
-              note: "Initial security received",
-            },
-          ]
-        : [],
+  // ✅ Prepare tenant data
+  let tenantData = null;
+  if (form.status === "Rented") {
+    tenantData = {
+      name: form.tenant.name || "",
+      cnic: form.tenant.cnic || "",
+      phone: form.tenant.phone || "",
+      reference: form.tenant.reference || "",
+      image: null, // Will be set later
+      agreement: safeAgreement,
+      documents: savedDocuments,
     };
+  }
 
-    // ✅ Build FormData
-    const formData = new FormData();
-    formData.append('roomData', JSON.stringify(unitData));
-
-    // ✅ Append unit image if it's a File object
-    if (form.unitImage && form.unitImage instanceof File) {
-      formData.append('unitImage', form.unitImage);
-    }
-
-    // ✅ Append tenant image if it's a File object
-    if (form.tenant.image && form.tenant.image instanceof File) {
-      formData.append('tenantImage', form.tenant.image);
-    }
-
-    // ✅ Append agreement files
-    agreementFiles.forEach((item) => {
-      if (item.file) {
-        formData.append('agreementFiles', item.file);
-      }
-    });
-
-    // ✅ Log for debugging
-    console.log("FormData keys:", [...formData.keys()]);
-    console.log("Unit Data:", unitData);
-
-    try {
-      if (onSubmit) {
-        await onSubmit(formData);
-      } else {
-        const buildingIdStr = String(buildingId);
-        if (isEdit) {
-          const roomId = initialData._id || initialData.id;
-          await updateRoom(buildingIdStr, roomId, formData);
-        } else {
-          await addRoom(buildingIdStr, formData);
-        }
-        router.push(`/dashboard/buildings/${buildingIdStr}`);
-      }
-    } catch (error) {
-      console.error("Save error:", error);
-      const msg = error.response?.data?.message || error.message || "Failed to save unit.";
-      alert(msg);
-    } finally {
-      setLoading(false);
-    }
+  // ✅ Prepare unitData
+  const unitData = {
+    unitNo: finalUnitNo,
+    deskNo: form.purpose === "Desk" ? form.deskNo.trim() : null,
+    type: form.type,
+    reference: form.reference,
+    monthlyRent: Number(form.monthlyRent) || 0,
+    purpose: form.purpose,
+    status: form.status,
+    rentStartDate: form.rentStartDate || null,
+    unitImage: null, // Will be set later
+    tenant: tenantData,
+    initialPayment: form.status === "Rented" && paymentCalculation.rentPaid > 0 ? {
+      cashReceived: Number(form.cashReceived) || 0,
+      rentPaid: paymentCalculation.rentPaid,
+      securityReceived: paymentCalculation.securityReceived,
+      securityStatus: paymentCalculation.securityReceived > 0 ? "Held" : null,
+      paymentDateTime,
+      rentMonths: paymentCalculation.rentPaid > 0 ? 1 : 0,
+    } : null,
+    rentHistory: form.status === "Rented" && paymentCalculation.rentPaid > 0
+      ? [
+          {
+            month: form.rentStartDate?.slice(0, 7) || new Date().toISOString().slice(0, 7),
+            amount: paymentCalculation.rentPaid,
+            status: "Paid",
+            paidAt: paymentDateTime,
+          },
+        ]
+      : [],
+    securityHistory: form.status === "Rented" && paymentCalculation.securityReceived > 0
+      ? [
+          {
+            type: "received",
+            amount: paymentCalculation.securityReceived,
+            date: paymentDateTime,
+            note: "Initial security received",
+          },
+        ]
+      : [],
   };
+
+  // ✅ For edit mode, preserve existing data
+  if (isEdit && initialData) {
+    // ✅ PRESERVE IMAGES if not uploading new ones
+    if (!form.unitImage || !(form.unitImage instanceof File)) {
+      unitData.unitImage = initialData.unitImage || null;
+    }
+    if (form.status === "Rented" && initialData.tenant) {
+      if (!form.tenant.image || !(form.tenant.image instanceof File)) {
+        if (unitData.tenant) {
+          unitData.tenant.image = initialData.tenant.image || null;
+        }
+      }
+      // Preserve agreement and documents if not changed
+      if (unitData.tenant) {
+        if (!form.tenant.agreement || form.tenant.agreement.length === 0) {
+          unitData.tenant.agreement = initialData.tenant.agreement || [];
+        }
+        if (!form.tenant.documents || form.tenant.documents.length === 0) {
+          unitData.tenant.documents = initialData.tenant.documents || [];
+        }
+      }
+    }
+    // ✅ PRESERVE HISTORIES
+    if (initialData.rentHistory) {
+      unitData.rentHistory = initialData.rentHistory;
+    }
+    if (initialData.securityHistory) {
+      unitData.securityHistory = initialData.securityHistory;
+    }
+    if (initialData.clearanceHistory) {
+      unitData.clearanceHistory = initialData.clearanceHistory;
+    }
+    if (initialData.transactionHistory) {
+      unitData.transactionHistory = initialData.transactionHistory;
+    }
+  }
+
+  // ✅ Build FormData
+  const formData = new FormData();
+  formData.append('roomData', JSON.stringify(unitData));
+
+  // ✅ Append NEW unit image ONLY IF it's a File object (new upload)
+  if (form.unitImage && form.unitImage instanceof File) {
+    formData.append('unitImage', form.unitImage);
+  }
+
+  // ✅ Append NEW tenant image ONLY IF it's a File object (new upload)
+  if (form.tenant.image && form.tenant.image instanceof File) {
+    formData.append('tenantImage', form.tenant.image);
+  }
+
+  // ✅ Append agreement files
+  agreementFiles.forEach((item) => {
+    if (item.file) {
+      formData.append('agreementFiles', item.file);
+    }
+  });
+
+  console.log("📸 FormData keys:", [...formData.keys()]);
+  console.log("📦 Unit Data:", unitData);
+
+  try {
+    if (onSubmit) {
+      await onSubmit(formData);
+    } else {
+      const buildingIdStr = String(buildingId);
+      if (isEdit) {
+        const roomId = initialData._id || initialData.id;
+        await updateRoom(buildingIdStr, roomId, formData);
+      } else {
+        await addRoom(buildingIdStr, formData);
+      }
+      router.push(`/dashboard/buildings/${buildingIdStr}`);
+    }
+  } catch (error) {
+    console.error("❌ Save error:", error);
+    const msg = error.response?.data?.message || error.message || "Failed to save unit.";
+    alert(msg);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleCancel = () => {
     if (onCancel) {

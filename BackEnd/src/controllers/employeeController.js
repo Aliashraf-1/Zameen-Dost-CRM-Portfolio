@@ -48,6 +48,40 @@ exports.getEmployee = async (req, res) => {
 exports.createEmployee = async (req, res) => {
   try {
     const employeeData = req.body;
+
+    // ✅ If image uploaded, set path
+    if (req.file) {
+      employeeData.image = `/uploads/employees/${req.file.filename}`;
+    }
+
+    // ✅ Convert shiftTiming and attendanceSettings from string to object
+    if (typeof employeeData.shiftTiming === 'string') {
+      employeeData.shiftTiming = JSON.parse(employeeData.shiftTiming);
+    }
+    if (typeof employeeData.attendanceSettings === 'string') {
+      employeeData.attendanceSettings = JSON.parse(employeeData.attendanceSettings);
+    }
+
+    // ✅ Convert booleans
+    if (employeeData.canManageLeads === 'true' || employeeData.canManageLeads === true) {
+      employeeData.canManageLeads = true;
+    } else {
+      employeeData.canManageLeads = false;
+    }
+    
+    if (employeeData.hasLogin === 'true' || employeeData.hasLogin === true) {
+      employeeData.hasLogin = true;
+    } else {
+      employeeData.hasLogin = false;
+    }
+
+    // ✅ Remove empty strings
+    Object.keys(employeeData).forEach(key => {
+      if (employeeData[key] === "" || employeeData[key] === null || employeeData[key] === undefined) {
+        delete employeeData[key];
+      }
+    });
+
     const employee = await Employee.create(employeeData);
 
     res.status(201).json({
@@ -69,6 +103,39 @@ exports.updateEmployee = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
+
+    // ✅ If new image uploaded, update path
+    if (req.file) {
+      updates.image = `/uploads/employees/${req.file.filename}`;
+    }
+
+    // ✅ Convert shiftTiming and attendanceSettings from string to object
+    if (typeof updates.shiftTiming === 'string') {
+      updates.shiftTiming = JSON.parse(updates.shiftTiming);
+    }
+    if (typeof updates.attendanceSettings === 'string') {
+      updates.attendanceSettings = JSON.parse(updates.attendanceSettings);
+    }
+
+    // ✅ Convert booleans
+    if (updates.canManageLeads === 'true' || updates.canManageLeads === true) {
+      updates.canManageLeads = true;
+    } else if (updates.canManageLeads === 'false' || updates.canManageLeads === false) {
+      updates.canManageLeads = false;
+    }
+    
+    if (updates.hasLogin === 'true' || updates.hasLogin === true) {
+      updates.hasLogin = true;
+    } else if (updates.hasLogin === 'false' || updates.hasLogin === false) {
+      updates.hasLogin = false;
+    }
+
+    // ✅ Remove empty strings
+    Object.keys(updates).forEach(key => {
+      if (updates[key] === "" || updates[key] === null || updates[key] === undefined) {
+        delete updates[key];
+      }
+    });
 
     const employee = await Employee.findByIdAndUpdate(
       id,
@@ -124,6 +191,7 @@ exports.deleteEmployee = async (req, res) => {
 };
 
 // ✅ Mark attendance
+
 exports.markAttendance = async (req, res) => {
   try {
     const { id } = req.params;
@@ -137,7 +205,54 @@ exports.markAttendance = async (req, res) => {
       });
     }
 
-    employee.attendance.push(attendanceData);
+    const date = attendanceData.date || new Date().toISOString().split('T')[0];
+    const status = attendanceData.status || 'Present';
+    
+    // ✅ Check if Friday
+    const dayOfWeek = new Date(date).getDay();
+    const isFriday = dayOfWeek === 5;
+
+    let finalStatus = status;
+    let chargeableLateMinutes = 0;
+    let lateDeductionAmount = 0;
+    let leaveDeductionAmount = 0;
+
+    if (isFriday && status !== 'Present') {
+      finalStatus = 'Friday Off';
+    } else if (status === 'Present') {
+      const lateMinutes = Number(attendanceData.lateMinutes || 0);
+      const graceMinutes = employee.shiftTiming?.graceMinutes || 30;
+      const lateDeductionRate = employee.attendanceSettings?.lateDeduction || 10;
+      
+      chargeableLateMinutes = Math.max(lateMinutes - graceMinutes, 0);
+      lateDeductionAmount = chargeableLateMinutes * lateDeductionRate;
+    } else if (status === 'Leave' || status === 'Absent') {
+      const currentMonth = date.slice(0, 7);
+      const monthlyLeaves = employee.attendance.filter(a => 
+        a.date?.startsWith(currentMonth) && 
+        (a.status === 'Leave' || a.status === 'Absent')
+      ).length;
+      
+      const freeLeavesPerMonth = employee.shiftTiming?.monthlyLeaves || 1;
+      const leaveDeductionRate = employee.attendanceSettings?.leaveDeduction || 500;
+      
+      if (monthlyLeaves >= freeLeavesPerMonth) {
+        leaveDeductionAmount = leaveDeductionRate;
+      }
+    }
+
+    const attendanceRecord = {
+      date,
+      status: finalStatus,
+      checkIn: finalStatus === 'Present' ? attendanceData.checkIn : null,
+      checkOut: finalStatus === 'Present' ? attendanceData.checkOut : null,
+      lateMinutes: finalStatus === 'Present' ? Number(attendanceData.lateMinutes || 0) : 0,
+      chargeableLateMinutes,
+      lateDeductionAmount,
+      leaveDeductionAmount,
+    };
+
+    employee.attendance.push(attendanceRecord);
     await employee.save();
 
     res.status(200).json({
@@ -208,7 +323,9 @@ exports.updateTask = async (req, res) => {
     }
 
     Object.keys(updates).forEach(key => {
-      task[key] = updates[key];
+      if (updates[key] !== undefined && updates[key] !== null) {
+        task[key] = updates[key];
+      }
     });
 
     await employee.save();

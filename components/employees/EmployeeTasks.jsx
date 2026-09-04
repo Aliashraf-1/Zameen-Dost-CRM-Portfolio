@@ -4,12 +4,12 @@ import { useState } from "react";
 import { CheckCircle2, Clock, AlertCircle, XCircle, Plus, Eye, ChevronDown, ChevronUp } from "lucide-react";
 import TaskModal from "./TaskModal";
 
-export default function EmployeeTasks({ employee, onTaskUpdate }) {
+export default function EmployeeTasks({ employee, onTaskAdd, onTaskUpdate }) {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [expandedTask, setExpandedTask] = useState(null);
   const [showAllTasks, setShowAllTasks] = useState(false);
-  const [showPreviousTasks, setShowPreviousTasks] = useState(false); // ✅ New state for previous tasks
+  const [showPreviousTasks, setShowPreviousTasks] = useState(false);
 
   const getStatusBadge = (status) => {
     const variants = {
@@ -30,10 +30,7 @@ export default function EmployeeTasks({ employee, onTaskUpdate }) {
     return variants[priority] || variants.Medium;
   };
 
-  // ✅ All tasks
   const allTasks = employee?.tasks || [];
-
-  // ✅ Recent tasks: not older than 1 day OR completed/failed
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const oneDayAgo = new Date(today);
@@ -48,25 +45,32 @@ export default function EmployeeTasks({ employee, onTaskUpdate }) {
     return task.status === "Completed" || task.status === "Failed";
   };
 
-  // ✅ Separate recent + completed/failed (always visible)
   const activeTasks = allTasks.filter(task => isRecent(task) || isCompletedOrFailed(task));
-
-  // ✅ Old pending tasks (hidden by default)
   const oldPendingTasks = allTasks.filter(task => !isRecent(task) && !isCompletedOrFailed(task));
 
-  // ✅ Display tasks: activeTasks + (if showPreviousTasks) oldPendingTasks
   const displayTasks = showAllTasks 
     ? (showPreviousTasks ? [...activeTasks, ...oldPendingTasks] : activeTasks)
     : (showPreviousTasks ? [...activeTasks.slice(0, 3), ...oldPendingTasks] : activeTasks.slice(0, 3));
 
-  // ✅ Counts
   const totalTasks = allTasks.length;
   const hiddenOldCount = oldPendingTasks.length;
 
   const handleSaveTask = async (taskData) => {
-    await onTaskUpdate(taskData);
-    setShowTaskModal(false);
-    setEditingTask(null);
+    try {
+      if (editingTask) {
+        // Update existing task
+        const taskId = editingTask._id || editingTask.id;
+        await onTaskUpdate({ ...taskData, _id: taskId, id: taskId });
+      } else {
+        // Add new task
+        const { id, _id, ...cleanData } = taskData;
+        await onTaskAdd(cleanData);
+      }
+      setShowTaskModal(false);
+      setEditingTask(null);
+    } catch (error) {
+      console.error("Task save failed:", error);
+    }
   };
 
   return (
@@ -104,13 +108,14 @@ export default function EmployeeTasks({ employee, onTaskUpdate }) {
           </div>
         ) : (
           displayTasks.map((task) => {
+            const taskId = task._id || task.id;
             const statusBadge = getStatusBadge(task.status);
-            const isExpanded = expandedTask === task.id;
+            const isExpanded = expandedTask === taskId;
             const isOld = !isRecent(task) && !isCompletedOrFailed(task);
 
             return (
               <div
-                key={task.id}
+                key={taskId}
                 className={`rounded-xl border p-4 transition hover:border-slate-700 ${
                   isOld
                     ? "border-amber-500/30 bg-amber-500/5"
@@ -119,7 +124,7 @@ export default function EmployeeTasks({ employee, onTaskUpdate }) {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-wrap">
                       <h3 className="font-medium text-slate-200">{task.title}</h3>
                       <span className={`rounded-lg px-2 py-0.5 text-xs font-medium ${getPriorityBadge(task.priority)}`}>
                         {task.priority}
@@ -150,7 +155,7 @@ export default function EmployeeTasks({ employee, onTaskUpdate }) {
                   </div>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => setExpandedTask(isExpanded ? null : task.id)}
+                      onClick={() => setExpandedTask(isExpanded ? null : taskId)}
                       className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
                     >
                       <Eye size={16} />
@@ -194,7 +199,7 @@ export default function EmployeeTasks({ employee, onTaskUpdate }) {
         )}
       </div>
 
-      {/* ✅ Show More (Recent) */}
+      {/* Show More (Recent) */}
       {activeTasks.length > 3 && (
         <div className="mt-4 border-t border-slate-800 pt-3 text-center">
           <button
@@ -216,7 +221,7 @@ export default function EmployeeTasks({ employee, onTaskUpdate }) {
         </div>
       )}
 
-      {/* ✅ Show Previous (Old Tasks) */}
+      {/* Show Previous (Old Tasks) */}
       {hiddenOldCount > 0 && (
         <div className="mt-2 border-t border-slate-800 pt-3 text-center">
           <button

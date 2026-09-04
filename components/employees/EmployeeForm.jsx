@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+
+import Image from "next/image";
+import { getImageUrl } from "@/lib/imageHelper";
 import {
   User,
   Save,
@@ -43,6 +46,10 @@ export default function EmployeeForm({
     emergencyContact: initialData?.emergencyContact || "",
     emergencyName: initialData?.emergencyName || "",
     image: initialData?.image || null,
+    role: initialData?.role || "employee",
+  canManageLeads: initialData?.canManageLeads || false,
+  hasLogin: initialData?.hasLogin || false,
+
     // ✅ Time Table / Shift Timing
     shiftTiming: {
       startTime: initialData?.shiftTiming?.startTime || "09:00",
@@ -109,42 +116,46 @@ export default function EmployeeForm({
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!form.name || !form.email || !form.phone || !form.salary) {
-      setError("Please fill in all required fields.");
-      return;
+  if (!form.name || !form.email || !form.phone || !form.salary || !form.cnic) {
+    setError("Please fill in all required fields.");
+    return;
+  }
+
+  setLoading(true);
+  setError("");
+
+  try {
+    const employeeData = {
+      ...form,
+      salary: Number(form.salary),
+      joiningDate: form.joiningDate || new Date().toISOString().split("T")[0],
+      // ✅ Remove attendance and salaryHistory - let backend handle defaults
+      // attendance: initialData?.attendance || [],
+      // salaryHistory: initialData?.salaryHistory || [],
+      shiftTiming: form.shiftTiming,
+      attendanceSettings: form.attendanceSettings,
+    };
+
+    // ✅ Delete these fields so backend uses schema defaults
+    delete employeeData.attendance;
+    delete employeeData.salaryHistory;
+
+    if (onSubmit) {
+      await onSubmit(employeeData);
+    } else {
+      console.log("Employee Data:", employeeData);
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      router.push("/dashboard/employees");
     }
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const employeeData = {
-        ...form,
-        id: initialData?.id || Date.now(),
-        salary: Number(form.salary),
-        joiningDate: form.joiningDate || new Date().toISOString().split("T")[0],
-        attendance: initialData?.attendance || [],
-        salaryHistory: initialData?.salaryHistory || [],
-        shiftTiming: form.shiftTiming,
-        attendanceSettings: form.attendanceSettings,
-      };
-
-      if (onSubmit) {
-        await onSubmit(employeeData);
-      } else {
-        console.log("Employee Data:", employeeData);
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        router.push("/dashboard/employees");
-      }
-    } catch (error) {
-      console.error(error);
-      setError("Something went wrong while saving the employee.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error(error);
+    setError("Something went wrong while saving the employee.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleCancel = () => {
     if (onCancel) {
@@ -199,7 +210,7 @@ export default function EmployeeForm({
       )}
 
       {/* Fields */}
-      <div className="grid gap-5 p-6 md:grid-cols-2">
+    <div className="grid gap-5 p-6 md:grid-cols-2">
         {/* Name */}
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-300">
@@ -263,15 +274,15 @@ export default function EmployeeForm({
           <label className="mb-2 block text-sm font-medium text-slate-300">
             CNIC
           </label>
-          <input
-            name="cnic"
-            value={form.cnic}
-            onChange={handleChange}
-            placeholder="37405-1234567-1"
-            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
-          />
-        </div>
-
+              <input
+        name="cnic"
+        value={form.cnic}
+        onChange={handleChange}
+        placeholder="37405-1234567-1"
+        required   // ✅ ADD THIS
+        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+      />
+           </div>
         {/* Designation */}
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-300">
@@ -322,13 +333,14 @@ export default function EmployeeForm({
               size={17}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
             />
-            <input
-              type="date"
-              name="joiningDate"
-              value={form.joiningDate}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-11 pr-4 text-sm text-slate-300 outline-none focus:border-indigo-500"
-            />
+       <input
+          type="date"
+          name="joiningDate"
+          value={form.joiningDate}
+          onChange={handleChange}
+          required   // ✅ ADD THIS
+          className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-11 pr-4 text-sm text-slate-300 outline-none focus:border-indigo-500"
+        />
           </div>
         </div>
 
@@ -462,32 +474,44 @@ export default function EmployeeForm({
           </label>
 
           {imagePreview ? (
-            <div className="relative h-40 w-40 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950">
-              <img
-                src={imagePreview}
+          <div className="relative h-40 w-40 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950">
+            {typeof imagePreview === 'string' && !imagePreview.startsWith('blob:') ? (
+              <Image
+                src={getImageUrl(imagePreview)}
                 alt="Profile preview"
+                width={160}
+                height={160}
                 className="h-full w-full object-cover"
               />
-              <button
-                type="button"
-                onClick={removeImage}
-                className="absolute right-2 top-2 rounded-lg bg-black/70 p-2 text-white transition hover:bg-red-500"
-              >
-                <Trash2 size={15} />
-              </button>
-            </div>
-          ) : (
-            <label className="flex h-40 w-40 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-slate-700 bg-slate-950/50 transition hover:border-indigo-500 hover:bg-indigo-500/5">
-              <Upload size={28} className="text-slate-600" />
-              <span className="mt-2 text-xs text-slate-500">Upload Picture</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
+            ) : (
+              <Image
+                src={imagePreview}
+                alt="Profile preview"
+                width={160}
+                height={160}
+                className="h-full w-full object-cover"
               />
-            </label>
-          )}
+            )}
+            <button
+              type="button"
+              onClick={removeImage}
+              className="absolute right-2 top-2 rounded-lg bg-black/70 p-2 text-white transition hover:bg-red-500"
+            >
+              <Trash2 size={15} />
+            </button>
+          </div>
+        ) : (
+          <label className="flex h-40 w-40 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-slate-700 bg-slate-950/50 transition hover:border-indigo-500 hover:bg-indigo-500/5">
+            <Upload size={28} className="text-slate-600" />
+            <span className="mt-2 text-xs text-slate-500">Upload Picture</span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+          </label>
+        )}
         </div>
       </div>
 

@@ -1,6 +1,10 @@
 "use client";
 
 import { useMemo, useState, useCallback, useReducer } from "react";
+import Image from "next/image";
+import { getImageUrl, getFallbackImage } from "@/lib/imageHelper";
+
+
 import Link from "next/link";
 import {
   Search,
@@ -28,19 +32,30 @@ const tableReducer = (state, action) => {
   switch (action.type) {
     case "SET_SEARCH":
       return { ...state, search: action.payload };
+
     case "SET_STATUS":
       return { ...state, status: action.payload };
+
     case "SET_DEPARTMENT":
       return { ...state, department: action.payload };
+
     case "RESET_FILTERS":
-      return { search: "", status: "All", department: "All" };
+      return {
+        search: "",
+        status: "All",
+        department: "All",
+      };
+
     default:
       return state;
   }
 };
 
-export default function EmployeeTable({ employees = [], onDelete, onMarkAttendance }) {
-  // Use reducer for filter state
+export default function EmployeeTable({
+  employees = [],
+  onDelete,
+  onMarkAttendance,
+}) {
   const [filterState, dispatch] = useReducer(tableReducer, {
     search: "",
     status: "All",
@@ -51,84 +66,114 @@ export default function EmployeeTable({ employees = [], onDelete, onMarkAttendan
   const [showPayModal, setShowPayModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
   const { paySalary, getEmployeeSalaryStatus } = useEmployees();
 
-  // Memoized filtered employees
+  // Filter employees
   const filteredEmployees = useMemo(() => {
     const { search, status, department } = filterState;
     const searchValue = search.toLowerCase().trim();
 
     return employees.filter((employee) => {
       const matchesSearch =
-        employee.name.toLowerCase().includes(searchValue) ||
-        employee.email.toLowerCase().includes(searchValue) ||
-        employee.phone.includes(searchValue) ||
-        employee.designation.toLowerCase().includes(searchValue);
+        employee.name?.toLowerCase().includes(searchValue) ||
+        employee.email?.toLowerCase().includes(searchValue) ||
+        employee.phone?.includes(searchValue) ||
+        employee.designation?.toLowerCase().includes(searchValue);
 
-      const matchesStatus = status === "All" || employee.status === status;
+      const matchesStatus =
+        status === "All" || employee.status === status;
+
       const matchesDepartment =
-        department === "All" || employee.department === department;
+        department === "All" ||
+        employee.department === department;
 
-      return matchesSearch && matchesStatus && matchesDepartment;
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesDepartment
+      );
     });
   }, [employees, filterState]);
 
-  // Memoized status badge renderer
+  // Status badge
   const getStatusBadge = useCallback((status) => {
     const variants = {
       Active: {
         class: "bg-emerald-500/10 text-emerald-400",
         icon: <CheckCircle2 size={14} />,
       },
+
       Inactive: {
         class: "bg-red-500/10 text-red-400",
         icon: <XCircle size={14} />,
       },
+
       "On Leave": {
         class: "bg-amber-500/10 text-amber-400",
         icon: <Clock size={14} />,
       },
     };
+
     return variants[status] || variants.Inactive;
   }, []);
 
-  // Handle filter changes with useCallback
+  // Search
   const handleSearchChange = useCallback((e) => {
-    dispatch({ type: "SET_SEARCH", payload: e.target.value });
+    dispatch({
+      type: "SET_SEARCH",
+      payload: e.target.value,
+    });
   }, []);
 
+  // Status filter
   const handleStatusChange = useCallback((e) => {
-    dispatch({ type: "SET_STATUS", payload: e.target.value });
+    dispatch({
+      type: "SET_STATUS",
+      payload: e.target.value,
+    });
   }, []);
 
+  // Department filter
   const handleDepartmentChange = useCallback((e) => {
-    dispatch({ type: "SET_DEPARTMENT", payload: e.target.value });
+    dispatch({
+      type: "SET_DEPARTMENT",
+      payload: e.target.value,
+    });
   }, []);
 
-  // Handle pay salary
+  // Pay salary
   const handlePayClick = useCallback((employee) => {
     setSelectedEmployee(employee);
     setShowPayModal(true);
   }, []);
 
-  const handlePaySalary = useCallback(async (employeeId, amount) => {
-    try {
-      const result = await paySalary(employeeId, amount);
-      console.log("Salary payment recorded:", {
-        employeeId,
-        amount,
-        timestamp: result.timestamp,
-        month: result.month,
-        status: result.status,
-      });
-      return result;
-    } catch (error) {
-      console.error("Payment failed:", error);
-      throw error;
-    }
-  }, [paySalary]);
+  const handlePaySalary = useCallback(
+    async (employeeId, amount) => {
+      try {
+        const result = await paySalary(
+          employeeId,
+          amount
+        );
 
-  // Handle delete
+        console.log("Salary payment recorded:", {
+          employeeId,
+          amount,
+          timestamp: result.timestamp,
+          month: result.month,
+          status: result.status,
+        });
+
+        return result;
+      } catch (error) {
+        console.error("Payment failed:", error);
+        throw error;
+      }
+    },
+    [paySalary]
+  );
+
+  // Delete
   const handleDeleteClick = useCallback((employee) => {
     setSelectedEmployee(employee);
     setShowDeleteModal(true);
@@ -136,10 +181,15 @@ export default function EmployeeTable({ employees = [], onDelete, onMarkAttendan
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!selectedEmployee) return;
-    
+
+    const employeeId =
+      selectedEmployee._id || selectedEmployee.id;
+
     setDeleteLoading(true);
+
     try {
-      await onDelete(selectedEmployee.id);
+      await onDelete(employeeId);
+
       setShowDeleteModal(false);
       setSelectedEmployee(null);
     } catch (error) {
@@ -154,32 +204,43 @@ export default function EmployeeTable({ employees = [], onDelete, onMarkAttendan
     setSelectedEmployee(null);
   }, []);
 
-  // Memoized salary status calculation
-  const getSalaryStatusDisplay = useCallback((employee) => {
-    const salaryStatus = getEmployeeSalaryStatus(employee.id);
-    
-    const statusConfig = {
-      Paid: {
-        class: "bg-emerald-500/10 text-emerald-400",
-        icon: <CheckCircle2 size={14} />,
-      },
-      Partial: {
-        class: "bg-amber-500/10 text-amber-400",
-        icon: <Clock size={14} />,
-      },
-      Pending: {
-        class: "bg-red-500/10 text-red-400",
-        icon: <AlertCircle size={14} />,
-      },
-    };
+  // Salary status
+  const getSalaryStatusDisplay = useCallback(
+    (employee) => {
+      const employeeId =
+        employee._id || employee.id;
 
-    const config = statusConfig[salaryStatus.status] || statusConfig.Pending;
+      const salaryStatus =
+        getEmployeeSalaryStatus(employeeId);
 
-    return {
-      ...salaryStatus,
-      ...config,
-    };
-  }, [getEmployeeSalaryStatus]);
+      const statusConfig = {
+        Paid: {
+          class: "bg-emerald-500/10 text-emerald-400",
+          icon: <CheckCircle2 size={14} />,
+        },
+
+        Partial: {
+          class: "bg-amber-500/10 text-amber-400",
+          icon: <Clock size={14} />,
+        },
+
+        Pending: {
+          class: "bg-red-500/10 text-red-400",
+          icon: <AlertCircle size={14} />,
+        },
+      };
+
+      const config =
+        statusConfig[salaryStatus.status] ||
+        statusConfig.Pending;
+
+      return {
+        ...salaryStatus,
+        ...config,
+      };
+    },
+    [getEmployeeSalaryStatus]
+  );
 
   return (
     <>
@@ -188,18 +249,23 @@ export default function EmployeeTable({ employees = [], onDelete, onMarkAttendan
         <div className="border-b border-slate-800 p-5 sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h2 className="text-lg font-semibold">Employees</h2>
+              <h2 className="text-lg font-semibold">
+                Employees
+              </h2>
+
               <p className="mt-1 text-sm text-slate-500">
                 Manage your workforce and track attendance.
               </p>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
+              {/* Search */}
               <div className="relative">
                 <Search
                   size={17}
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
                 />
+
                 <input
                   value={filterState.search}
                   onChange={handleSearchChange}
@@ -208,29 +274,62 @@ export default function EmployeeTable({ employees = [], onDelete, onMarkAttendan
                 />
               </div>
 
+              {/* Status */}
               <select
                 value={filterState.status}
                 onChange={handleStatusChange}
                 className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-300 outline-none focus:border-indigo-500"
               >
-                <option value="All">All Status</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-                <option value="On Leave">On Leave</option>
+                <option value="All">
+                  All Status
+                </option>
+
+                <option value="Active">
+                  Active
+                </option>
+
+                <option value="Inactive">
+                  Inactive
+                </option>
+
+                <option value="On Leave">
+                  On Leave
+                </option>
               </select>
 
+              {/* Department */}
               <select
                 value={filterState.department}
                 onChange={handleDepartmentChange}
                 className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-300 outline-none focus:border-indigo-500"
               >
-                <option value="All">All Departments</option>
-                <option value="Operations">Operations</option>
-                <option value="Finance">Finance</option>
-                <option value="Maintenance">Maintenance</option>
-                <option value="Security">Security</option>
-                <option value="HR">HR</option>
-                <option value="Marketing">Marketing</option>
+                <option value="All">
+                  All Departments
+                </option>
+
+                <option value="Operations">
+                  Operations
+                </option>
+
+                <option value="Finance">
+                  Finance
+                </option>
+
+                <option value="Maintenance">
+                  Maintenance
+                </option>
+
+                <option value="Security">
+                  Security
+                </option>
+
+                <option value="HR">
+                  HR
+                </option>
+
+                <option value="Marketing">
+                  Marketing
+                </option>
               </select>
             </div>
           </div>
@@ -244,24 +343,31 @@ export default function EmployeeTable({ employees = [], onDelete, onMarkAttendan
                 <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
                   Employee
                 </th>
+
                 <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
                   Designation
                 </th>
+
                 <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
                   Department
                 </th>
+
                 <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
                   Contact
                 </th>
+
                 <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
                   Salary
                 </th>
+
                 <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
                   Salary Status
                 </th>
+
                 <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
                   Status
                 </th>
+
                 <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
                   Action
                 </th>
@@ -270,31 +376,45 @@ export default function EmployeeTable({ employees = [], onDelete, onMarkAttendan
 
             <tbody>
               {filteredEmployees.map((employee) => {
-                const statusBadge = getStatusBadge(employee.status);
-                const salaryStatus = getSalaryStatusDisplay(employee);
+                const employeeId =
+                  employee._id || employee.id;
+
+                const statusBadge =
+                  getStatusBadge(employee.status);
+
+                const salaryStatus =
+                  getSalaryStatusDisplay(employee);
 
                 return (
                   <tr
-                    key={employee.id}
+                    key={employeeId}
                     className="border-b border-slate-800/70 transition hover:bg-slate-950/50"
                   >
+                    {/* Employee */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-500/10 text-indigo-400">
-                          {employee.image ? (
-                            <img
-                              src={employee.image}
-                              alt={employee.name}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <User size={18} />
-                          )}
+                      {employee.image ? (
+                        <Image
+                          src={getImageUrl(employee.image)}
+                          alt={employee.name}
+                          width={40}
+                          height={40}
+                          className="h-10 w-10 object-cover rounded-full"
+                          onError={(e) => {
+                            e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%236366f1'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-size='16'%3E{employee.name[0]}%3C/text%3E%3C/svg%3E";
+                          }}
+                        />
+                      ) : (
+                        <User size={18} />
+                      )}
                         </div>
+
                         <div>
                           <p className="text-sm font-medium text-slate-200">
                             {employee.name}
                           </p>
+
                           <p className="mt-1 text-xs text-slate-500">
                             {employee.email}
                           </p>
@@ -302,33 +422,44 @@ export default function EmployeeTable({ employees = [], onDelete, onMarkAttendan
                       </div>
                     </td>
 
+                    {/* Designation */}
                     <td className="px-6 py-4">
                       <span className="text-sm text-slate-300">
                         {employee.designation}
                       </span>
                     </td>
 
+                    {/* Department */}
                     <td className="px-6 py-4">
                       <span className="rounded-lg bg-slate-800 px-2.5 py-1.5 text-xs text-slate-400">
                         {employee.department}
                       </span>
                     </td>
 
+                    {/* Contact */}
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1 text-sm">
-                        <span className="text-slate-300">{employee.phone}</span>
+                        <span className="text-slate-300">
+                          {employee.phone}
+                        </span>
+
                         <span className="text-xs text-slate-500">
                           {employee.cnic}
                         </span>
                       </div>
                     </td>
 
+                    {/* Salary */}
                     <td className="px-6 py-4">
                       <span className="text-sm font-medium text-emerald-400">
-                        Rs. {employee.salary.toLocaleString()}
+                        Rs.{" "}
+                        {Number(
+                          employee.salary || 0
+                        ).toLocaleString()}
                       </span>
                     </td>
 
+                    {/* Salary Status */}
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1">
                         <span
@@ -337,28 +468,40 @@ export default function EmployeeTable({ employees = [], onDelete, onMarkAttendan
                           {salaryStatus.icon}
                           {salaryStatus.status}
                         </span>
-                        
+
                         {salaryStatus.amount > 0 && (
                           <span className="text-xs text-slate-500">
-                            Paid: Rs. {salaryStatus.amount.toLocaleString()}
-                          </span>
-                        )}
-                        
-                        {salaryStatus.remaining > 0 && salaryStatus.status !== "Paid" && (
-                          <span className="text-xs text-amber-400">
-                            Remaining: Rs. {salaryStatus.remaining.toLocaleString()}
+                            Paid: Rs.{" "}
+                            {Number(
+                              salaryStatus.amount
+                            ).toLocaleString()}
                           </span>
                         )}
 
+                        {salaryStatus.remaining > 0 &&
+                          salaryStatus.status !==
+                            "Paid" && (
+                            <span className="text-xs text-amber-400">
+                              Remaining: Rs.{" "}
+                              {Number(
+                                salaryStatus.remaining
+                              ).toLocaleString()}
+                            </span>
+                          )}
+
                         {salaryStatus.paidAt && (
-                          <span className="text-xs text-slate-600 flex items-center gap-1">
+                          <span className="flex items-center gap-1 text-xs text-slate-600">
                             <Calendar size={12} />
-                            {new Date(salaryStatus.paidAt).toLocaleString()}
+
+                            {new Date(
+                              salaryStatus.paidAt
+                            ).toLocaleString()}
                           </span>
                         )}
                       </div>
                     </td>
 
+                    {/* Status */}
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium ${statusBadge.class}`}
@@ -368,43 +511,56 @@ export default function EmployeeTable({ employees = [], onDelete, onMarkAttendan
                       </span>
                     </td>
 
+                    {/* Actions */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1">
+                        {/* View */}
                         <Link
-                          href={`/dashboard/employees/${employee.id}`}
+                          href={`/dashboard/employees/${employeeId}`}
                           className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
                           title="View employee"
                         >
                           <Eye size={17} />
                         </Link>
 
+                        {/* Edit */}
                         <Link
-                          href={`/dashboard/employees/edit/${employee.id}`}
+                          href={`/dashboard/employees/edit/${employeeId}`}
                           className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
                           title="Edit employee"
                         >
                           <Pencil size={17} />
                         </Link>
 
-                        {/* ✅ Mark Attendance Button */}
+                        {/* Attendance */}
                         <button
-                          onClick={() => onMarkAttendance?.(employee)}
+                          onClick={() =>
+                            onMarkAttendance?.(
+                              employee
+                            )
+                          }
                           className="rounded-lg p-2 text-slate-500 transition hover:bg-emerald-500/10 hover:text-emerald-400"
                           title="Mark attendance"
                         >
                           <CalendarCheck size={17} />
                         </button>
 
+                        {/* Pay Salary */}
                         <button
-                          onClick={() => handlePayClick(employee)}
+                          onClick={() =>
+                            handlePayClick(employee)
+                          }
                           className="rounded-lg p-2 text-slate-500 transition hover:bg-emerald-500/10 hover:text-emerald-400"
                           title="Pay salary"
                         >
                           <Wallet size={17} />
                         </button>
 
+                        {/* Delete */}
                         <button
-                          onClick={() => handleDeleteClick(employee)}
+                          onClick={() =>
+                            handleDeleteClick(employee)
+                          }
                           className="rounded-lg p-2 text-slate-500 transition hover:bg-red-500/10 hover:text-red-400"
                           title="Delete employee"
                         >
@@ -418,9 +574,13 @@ export default function EmployeeTable({ employees = [], onDelete, onMarkAttendan
             </tbody>
           </table>
 
+          {/* Empty State */}
           {filteredEmployees.length === 0 && (
             <div className="py-16 text-center">
-              <p className="text-sm font-medium">No employees found</p>
+              <p className="text-sm font-medium">
+                No employees found
+              </p>
+
               <p className="mt-1 text-xs text-slate-500">
                 Try changing your search or filter.
               </p>

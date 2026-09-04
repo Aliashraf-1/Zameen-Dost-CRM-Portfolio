@@ -261,6 +261,7 @@ exports.addRoom = async (req, res) => {
 // ✅ Update room with file upload support
 // ✅ Update room - Fixed to handle roomData
 // ✅ Update room - Fixed to handle null properly
+// ✅ Update room - Preserve existing data
 exports.updateRoom = async (req, res) => {
   try {
     const { id, roomId } = req.params;
@@ -288,7 +289,7 @@ exports.updateRoom = async (req, res) => {
       });
     }
 
-    // ✅ Parse roomData from FormData
+    // ✅ Parse roomData
     let updates = {};
     if (req.body.roomData) {
       try {
@@ -305,7 +306,7 @@ exports.updateRoom = async (req, res) => {
       updates = req.body;
     }
 
-    // ✅ Handle file uploads if any
+    // ✅ Handle file uploads
     if (req.files) {
       if (req.files.unitImage && req.files.unitImage[0]) {
         updates.unitImage = `/uploads/unit-images/${req.files.unitImage[0].filename}`;
@@ -321,24 +322,42 @@ exports.updateRoom = async (req, res) => {
           size: file.size,
           mimeType: file.mimetype,
         }));
-        const existing = updates.tenant?.agreement || [];
+        const existing = updates.tenant?.agreement || room.tenant?.agreement || [];
         if (!updates.tenant) updates.tenant = {};
         updates.tenant.agreement = [...existing, ...newAgreements];
       }
     }
 
-    // ✅ Apply updates with proper null handling
+    // ✅ Preserve history fields if not being updated
+    const historyFields = ['rentHistory', 'securityHistory', 'clearanceHistory', 'transactionHistory'];
+    historyFields.forEach(field => {
+      if (!updates[field] && room[field]) {
+        updates[field] = room[field];
+      }
+    });
+
+    // ✅ Preserve tenant data if not being overwritten
+    if (!updates.tenant && room.tenant) {
+      updates.tenant = room.tenant;
+    }
+
+    // ✅ Preserve initialPayment if not being overwritten
+    if (!updates.initialPayment && room.initialPayment) {
+      updates.initialPayment = room.initialPayment;
+    }
+
+    // ✅ Apply updates with null handling
     Object.keys(updates).forEach(key => {
       if (key === 'tenant') {
         if (updates[key] === null) {
           room.tenant = null;
-        } else {
+        } else if (typeof updates[key] === 'object') {
           room.tenant = { ...(room.tenant || {}), ...updates[key] };
         }
       } else if (key === 'initialPayment') {
         if (updates[key] === null) {
           room.initialPayment = null;
-        } else {
+        } else if (typeof updates[key] === 'object') {
           room.initialPayment = { ...(room.initialPayment || {}), ...updates[key] };
         }
       } else {

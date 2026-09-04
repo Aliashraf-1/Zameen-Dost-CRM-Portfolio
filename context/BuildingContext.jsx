@@ -122,22 +122,69 @@ export function BuildingProvider({ children }) {
   };
 
   // Update room
-  const updateRoom = async (buildingId, roomId, formData) => {
-    try {
-      const response = await buildingAPI.updateRoom(buildingId, roomId, formData);
-      const updatedBuilding = response.data.data;
+ // ✅ Update room - Preserve rent history and related data
+const updateRoom = async (buildingId, roomId, formData) => {
+  try {
+    // Get the existing room data
+    const building = buildings.find((b) => b._id === buildingId);
+    if (!building) throw new Error("Building not found");
 
-      setBuildings((prev) =>
-        prev.map((b) => (b._id === buildingId ? updatedBuilding : b))
-      );
+    const existingRoom = building.rooms?.find(
+      (r) => r._id === roomId || r.id === roomId
+    );
 
-      return updatedBuilding;
-    } catch (error) {
-      console.error("Failed to update room:", error);
-      throw error;
+    // ✅ Parse the update data from FormData
+    let updates = {};
+    const roomDataStr = formData.get('roomData');
+    if (roomDataStr) {
+      try {
+        updates = JSON.parse(roomDataStr);
+      } catch (e) {
+        console.error("Failed to parse roomData:", e);
+      }
     }
-  };
 
+    // ✅ IMPORTANT: Preserve rent history if not being updated
+    if (existingRoom && !updates.rentHistory) {
+      updates.rentHistory = existingRoom.rentHistory || [];
+    }
+    if (existingRoom && !updates.rentStartDate) {
+      updates.rentStartDate = existingRoom.rentStartDate;
+    }
+    if (existingRoom && !updates.securityHistory) {
+      updates.securityHistory = existingRoom.securityHistory || [];
+    }
+    if (existingRoom && !updates.clearanceHistory) {
+      updates.clearanceHistory = existingRoom.clearanceHistory || [];
+    }
+    if (existingRoom && !updates.transactionHistory) {
+      updates.transactionHistory = existingRoom.transactionHistory || [];
+    }
+
+    // ✅ Preserve tenant agreement and documents if not provided
+    if (existingRoom?.tenant && updates.tenant) {
+      if (!updates.tenant.agreement) {
+        updates.tenant.agreement = existingRoom.tenant.agreement || [];
+      }
+      if (!updates.tenant.documents) {
+        updates.tenant.documents = existingRoom.tenant.documents || [];
+      }
+    }
+
+    // ✅ Send update to API
+    const response = await buildingAPI.updateRoom(buildingId, roomId, formData);
+    const updatedBuilding = response.data.data;
+
+    setBuildings((prev) =>
+      prev.map((b) => (b._id === buildingId ? updatedBuilding : b))
+    );
+
+    return updatedBuilding;
+  } catch (error) {
+    console.error("Failed to update room:", error);
+    throw error;
+  }
+};
   // Delete room
   const deleteRoom = async (buildingId, roomId) => {
     try {
@@ -156,92 +203,99 @@ export function BuildingProvider({ children }) {
   };
 
   // ✅ Pay Rent - Fixed
-  const payRent = async (buildingId, unitId, months, remarks = "") => {
-    try {
-      const building = buildings.find((b) => b._id === buildingId);
-      if (!building) throw new Error("Building not found");
+ // ✅ Pay Rent - Fixed with proper status update
+const payRent = async (buildingId, unitId, months, remarks = "") => {
+  try {
+    const building = buildings.find((b) => b._id === buildingId);
+    if (!building) throw new Error("Building not found");
 
-      const room = building.rooms?.find(
-        (r) => r._id === unitId || r.id === unitId || String(r._id) === String(unitId)
-      );
-      if (!room) throw new Error("Room not found");
+    const room = building.rooms?.find(
+      (r) => r._id === unitId || r.id === unitId || String(r._id) === String(unitId)
+    );
+    if (!room) throw new Error("Room not found");
 
-      const roomId = getRoomId(room);
+    const roomId = getRoomId(room);
 
-      const numberOfMonths = Number(months);
-      if (!numberOfMonths || numberOfMonths < 1) {
-        throw new Error("Invalid number of months.");
-      }
+    const numberOfMonths = Number(months);
+    if (!numberOfMonths || numberOfMonths < 1) {
+      throw new Error("Invalid number of months.");
+    }
 
-      const paymentDateTime = new Date().toISOString();
-      const monthlyRent = Number(room.monthlyRent || 0);
-      const amount = monthlyRent * numberOfMonths;
+    const paymentDateTime = new Date().toISOString();
+    const monthlyRent = Number(room.monthlyRent || 0);
+    const amount = monthlyRent * numberOfMonths;
 
-      // Prepare rent history
-      const existingHistory = room.rentHistory || [];
-      const newHistory = [];
+    // ✅ Prepare rent history
+    const existingHistory = room.rentHistory || [];
+    const newHistory = [];
 
-      let nextDate = new Date(room.rentStartDate || paymentDateTime);
+    let nextDate = new Date(room.rentStartDate || paymentDateTime);
 
-      if (existingHistory.length > 0) {
-        const lastPayment = existingHistory[existingHistory.length - 1];
-        nextDate = new Date(`${lastPayment.month}-01T00:00:00`);
-        nextDate.setMonth(nextDate.getMonth() + 1);
-      }
+    // ✅ Find next pending month
+    if (existingHistory.length > 0) {
+      const lastPayment = existingHistory[existingHistory.length - 1];
+      // Check if last payment was for a different month
+      const lastMonth = lastPayment.month;
+      const lastMonthDate = new Date(`${lastMonth}-01T00:00:00`);
+      const nextMonthDate = new Date(lastMonthDate);
+      nextMonthDate.setMonth(nextMonthDate.getMonth() + 1);
+      nextDate = nextMonthDate;
+    }
 
-      for (let i = 0; i < numberOfMonths; i++) {
-        const year = nextDate.getFullYear();
-        const month = String(nextDate.getMonth() + 1).padStart(2, "0");
+    // ✅ Create rent history entries for each month
+    for (let i = 0; i < numberOfMonths; i++) {
+      const year = nextDate.getFullYear();
+      const month = String(nextDate.getMonth() + 1).padStart(2, "0");
 
-        newHistory.push({
-          month: `${year}-${month}`,
-          amount: monthlyRent,
-          status: "Paid",
-          paidAt: paymentDateTime,
-          remarks: remarks || "Monthly rent payment",
-        });
+      newHistory.push({
+        month: `${year}-${month}`,
+        amount: monthlyRent,
+        status: "Paid",
+        paidAt: paymentDateTime,
+        remarks: remarks || "Monthly rent payment",
+      });
 
-        nextDate.setMonth(nextDate.getMonth() + 1);
-      }
+      nextDate.setMonth(nextDate.getMonth() + 1);
+    }
 
-      // ✅ Update room with rent history
-      const updatedRoomData = {
-        ...room,
-        rentHistory: [...existingHistory, ...newHistory],
-        lastRentPayment: {
-          amount,
-          months: numberOfMonths,
-          paidAt: paymentDateTime,
-          remarks: remarks || "Monthly rent payment",
-        },
-      };
-
-      const formData = new FormData();
-      formData.append("roomData", JSON.stringify(updatedRoomData));
-
-      const response = await buildingAPI.updateRoom(buildingId, roomId, formData);
-      const updatedBuilding = response.data.data;
-
-      setBuildings((prev) =>
-        prev.map((b) => (b._id === buildingId ? updatedBuilding : b))
-      );
-
-      return {
-        type: "rent",
-        buildingId,
-        unitId,
-        unitNo: room.unitNo,
-        tenantName: room.tenant?.name,
+    // ✅ Update room with rent history
+    const updatedRoomData = {
+      ...room,
+      rentHistory: [...existingHistory, ...newHistory],
+      lastRentPayment: {
         amount,
         months: numberOfMonths,
         paidAt: paymentDateTime,
         remarks: remarks || "Monthly rent payment",
-      };
-    } catch (error) {
-      console.error("Failed to pay rent:", error);
-      throw error;
-    }
-  };
+      },
+    };
+
+    const formData = new FormData();
+    formData.append("roomData", JSON.stringify(updatedRoomData));
+
+    const response = await buildingAPI.updateRoom(buildingId, roomId, formData);
+    const updatedBuilding = response.data.data;
+
+    setBuildings((prev) =>
+      prev.map((b) => (b._id === buildingId ? updatedBuilding : b))
+    );
+
+    return {
+      type: "rent",
+      buildingId,
+      unitId,
+      unitNo: room.unitNo,
+      tenantName: room.tenant?.name,
+      amount,
+      months: numberOfMonths,
+      paidAt: paymentDateTime,
+      remarks: remarks || "Monthly rent payment",
+    };
+  } catch (error) {
+    console.error("Failed to pay rent:", error);
+    throw error;
+  }
+};
 
   // ✅ Clear Rental - Fixed WITHOUT useRevenue hook
   const clearRental = async (buildingId, unitId, settlement) => {

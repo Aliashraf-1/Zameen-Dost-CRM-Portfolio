@@ -84,19 +84,20 @@ const employeeSchema = new mongoose.Schema({
     lateDeduction: { type: Number, default: 10 },
     taskFailureDeduction: { type: Number, default: 1000 },
   },
-  attendance: [{
-    date: { type: String },
-    status: { 
-      type: String, 
-      enum: ['Present', 'Absent', 'Leave', 'Friday Off'],
-      default: 'Present'
-    },
-    checkIn: { type: String, default: null },
-    checkOut: { type: String, default: null },
-    lateMinutes: { type: Number, default: 0 },
-    leaveDeduction: { type: Number, default: 0 },
-    lateDeduction: { type: Number, default: 0 },
-  }],
+    attendance: [{
+      date: { type: String },
+      status: { 
+        type: String, 
+        enum: ['Present', 'Absent', 'Leave', 'Friday Off'],
+        default: 'Present'
+      },
+      checkIn: { type: String, default: null },
+      checkOut: { type: String, default: null },
+      lateMinutes: { type: Number, default: 0 },
+      chargeableLateMinutes: { type: Number, default: 0 }, // ✅ Added
+      lateDeductionAmount: { type: Number, default: 0 }, // ✅ Added
+      leaveDeductionAmount: { type: Number, default: 0 }, // ✅ Added
+    }],
   tasks: [{
     title: { type: String, required: true },
     description: { type: String, default: '' },
@@ -117,6 +118,11 @@ const employeeSchema = new mongoose.Schema({
     failureReason: { type: String, default: '' },
     failureDeduction: { type: Number, default: 0 },
   }],
+  leads: [{
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Lead',
+}],
+
   salaryHistory: [{
     month: { type: String },
     amount: { type: Number },

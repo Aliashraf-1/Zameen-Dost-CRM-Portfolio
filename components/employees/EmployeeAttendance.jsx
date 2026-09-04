@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, Calendar } from "lucide-react";
+import { useState, useMemo } from "react";
+import { CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, Calendar, Wallet } from "lucide-react";
 
 export default function EmployeeAttendance({ attendance = [] }) {
   const [showAll, setShowAll] = useState(false);
@@ -30,31 +30,119 @@ export default function EmployeeAttendance({ attendance = [] }) {
 
   // ✅ Check if a date is Friday
   const isFriday = (dateStr) => {
+    if (!dateStr) return false;
     const date = new Date(dateStr);
-    return date.getDay() === 5; // 5 = Friday
+    return date.getDay() === 5;
   };
 
-  // ✅ Process attendance - mark Fridays as "Friday Off" if not already marked
-  const processedAttendance = attendance.map((record) => {
-    if (isFriday(record.date) && record.status !== "Present") {
-      return { ...record, status: "Friday Off" };
-    }
-    return record;
-  });
+  // ✅ Process attendance - mark Fridays, calculate deductions
+  const processedAttendance = useMemo(() => {
+    const sorted = attendance
+      .filter(record => record && record.date)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  // Get last 30 days of attendance (most recent first)
-  const recentAttendance = processedAttendance.slice(-30).reverse();
+    // ✅ Track monthly leaves for free leave logic
+    let monthlyLeaveCount = 0;
+
+    return sorted.map((record) => {
+      // ✅ Friday Off - No deduction
+      if (isFriday(record.date) && record.status !== "Present") {
+        return { 
+          ...record, 
+          status: "Friday Off",
+          chargeableLateMinutes: 0,
+          lateDeductionAmount: 0,
+          leaveDeductionAmount: 0,
+        };
+      }
+
+      // ✅ Calculate leave deduction (1 free leave per month)
+      if (record.status === "Leave") {
+        monthlyLeaveCount++;
+        const isFreeLeave = monthlyLeaveCount <= 1;
+        return {
+          ...record,
+          leaveDeductionAmount: isFreeLeave ? 0 : (record.leaveDeductionAmount || 0),
+          isFreeLeave: isFreeLeave,
+        };
+      }
+
+      // ✅ For Present - show late deduction if any
+      if (record.status === "Present") {
+        return {
+          ...record,
+          chargeableLateMinutes: record.chargeableLateMinutes || 0,
+          lateDeductionAmount: record.lateDeductionAmount || 0,
+          leaveDeductionAmount: 0,
+        };
+      }
+
+      // ✅ For Absent - count as leave
+      if (record.status === "Absent") {
+        monthlyLeaveCount++;
+        const isFreeLeave = monthlyLeaveCount <= 1;
+        return {
+          ...record,
+          leaveDeductionAmount: isFreeLeave ? 0 : (record.leaveDeductionAmount || 0),
+          isFreeLeave: isFreeLeave,
+        };
+      }
+
+      return record;
+    });
+  }, [attendance]);
+
+  // Get last 30 days (most recent first)
+  const recentAttendance = useMemo(() => {
+    return processedAttendance.slice(-30).reverse();
+  }, [processedAttendance]);
+
+  // ✅ Statistics with deductions
+  const stats = useMemo(() => {
+    const total = recentAttendance.length;
+    const present = recentAttendance.filter(a => a.status === "Present").length;
+    const absent = recentAttendance.filter(a => a.status === "Absent").length;
+    const leaves = recentAttendance.filter(a => a.status === "Leave").length;
+    const fridayOff = recentAttendance.filter(a => a.status === "Friday Off").length;
+    const lateCount = recentAttendance.filter(a => a.lateMinutes > 0).length;
+    const totalLateMinutes = recentAttendance.reduce((sum, a) => sum + (a.lateMinutes || 0), 0);
+    const chargeableLateMinutes = recentAttendance.reduce((sum, a) => sum + (a.chargeableLateMinutes || 0), 0);
+    const totalLateDeduction = recentAttendance.reduce((sum, a) => sum + (a.lateDeductionAmount || 0), 0);
+    const totalLeaveDeduction = recentAttendance.reduce((sum, a) => sum + (a.leaveDeductionAmount || 0), 0);
+    const totalDeduction = totalLateDeduction + totalLeaveDeduction;
+    
+    const workingDays = total - fridayOff;
+    const attendanceRate = workingDays > 0 ? Math.round((present / workingDays) * 100) : 0;
+    
+    return {
+      total,
+      present,
+      absent,
+      leaves,
+      fridayOff,
+      lateCount,
+      totalLateMinutes,
+      chargeableLateMinutes,
+      totalLateDeduction,
+      totalLeaveDeduction,
+      totalDeduction,
+      attendanceRate,
+    };
+  }, [recentAttendance]);
 
   // Show only 4 records initially
   const displayAttendance = showAll ? recentAttendance : recentAttendance.slice(0, 4);
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+      {/* Header */}
       <div className="border-b border-slate-800 p-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold">Attendance History</h2>
-            <p className="mt-1 text-sm text-slate-500">Last 30 days of attendance records.</p>
+            <p className="mt-1 text-sm text-slate-500">
+              Last 30 days of attendance records
+            </p>
           </div>
           {recentAttendance.length > 4 && (
             <button
@@ -75,74 +163,115 @@ export default function EmployeeAttendance({ attendance = [] }) {
             </button>
           )}
         </div>
+
+        {/* ✅ Stats Summary with Deductions */}
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-lg bg-slate-950/50 p-3">
+            <p className="text-xs text-slate-500">Attendance Rate</p>
+            <p className="mt-1 text-lg font-semibold text-emerald-400">
+              {stats.attendanceRate}%
+            </p>
+          </div>
+          <div className="rounded-lg bg-slate-950/50 p-3">
+            <p className="text-xs text-slate-500">Present</p>
+            <p className="mt-1 text-lg font-semibold text-slate-200">
+              {stats.present}/{stats.total - stats.fridayOff} days
+            </p>
+          </div>
+          <div className="rounded-lg bg-slate-950/50 p-3">
+            <p className="text-xs text-slate-500">Late Deduction</p>
+            <p className="mt-1 text-lg font-semibold text-amber-400">
+              Rs. {stats.totalLateDeduction.toLocaleString()}
+            </p>
+            {stats.chargeableLateMinutes > 0 && (
+              <p className="text-xs text-slate-500">{stats.chargeableLateMinutes} min charged</p>
+            )}
+          </div>
+          <div className="rounded-lg bg-slate-950/50 p-3">
+            <p className="text-xs text-slate-500">Leave Deduction</p>
+            <p className="mt-1 text-lg font-semibold text-red-400">
+              Rs. {stats.totalLeaveDeduction.toLocaleString()}
+            </p>
+          </div>
+        </div>
       </div>
 
+      {/* Table */}
       {recentAttendance.length === 0 ? (
         <div className="p-10 text-center">
           <p className="text-sm text-slate-500">No attendance records available.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[800px]">
             <thead>
               <tr className="border-b border-slate-800 text-left">
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Date
-                </th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Status
-                </th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Check In
-                </th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Check Out
-                </th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Late (min)
-                </th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Date</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Day</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Status</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Check In</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Check Out</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Late (min)</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Deduction</th>
               </tr>
             </thead>
 
             <tbody>
               {displayAttendance.map((record, index) => {
                 const statusBadge = getStatusBadge(record.status);
+                const recordDate = new Date(record.date);
+                const dayName = recordDate.toLocaleDateString("en-US", { weekday: "long" });
+                const isFridayOff = record.status === "Friday Off";
+                const totalRecordDeduction = (record.lateDeductionAmount || 0) + (record.leaveDeductionAmount || 0);
 
                 return (
                   <tr
-                    key={index}
+                    key={record._id || index}
                     className="border-b border-slate-800/70 transition hover:bg-slate-950/50"
                   >
                     <td className="px-6 py-4 text-sm text-slate-300">
-                      {new Date(record.date).toLocaleDateString("en-US", {
-                        weekday: "short",
+                      {recordDate.toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "short",
                         day: "numeric",
                       })}
                     </td>
+                    <td className="px-6 py-4 text-sm text-slate-500">{dayName}</td>
                     <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium ${statusBadge.class}`}
-                      >
+                      <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium ${statusBadge.class}`}>
                         {statusBadge.icon}
                         {record.status}
                       </span>
-                      {record.status === "Friday Off" && (
+                      {isFridayOff && (
                         <span className="ml-2 text-xs text-blue-400/70">(Weekly Off)</span>
                       )}
+                      {record.isFreeLeave && (
+                        <span className="ml-2 text-xs text-green-400/70">(Free)</span>
+                      )}
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-400">
-                      {record.checkIn || "—"}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-400">
-                      {record.checkOut || "—"}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-400">
+                    <td className="px-6 py-4 text-sm text-slate-400">{record.checkIn || "—"}</td>
+                    <td className="px-6 py-4 text-sm text-slate-400">{record.checkOut || "—"}</td>
+                    <td className="px-6 py-4 text-sm">
                       {record.lateMinutes > 0 ? (
-                        <span className="text-amber-400">{record.lateMinutes}</span>
+                        <span className="inline-flex items-center gap-1 text-amber-400">
+                          <Clock size={12} />
+                          {record.lateMinutes}
+                          {record.chargeableLateMinutes > 0 && (
+                            <span className="text-xs text-slate-500">({record.chargeableLateMinutes} charged)</span>
+                          )}
+                        </span>
                       ) : (
-                        "0"
+                        <span className="text-slate-600">0</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      {totalRecordDeduction > 0 ? (
+                        <span className="inline-flex items-center gap-1 text-red-400">
+                          <Wallet size={12} />
+                          Rs. {totalRecordDeduction.toLocaleString()}
+                        </span>
+                      ) : (
+                        <span className="text-slate-600">—</span>
                       )}
                     </td>
                   </tr>

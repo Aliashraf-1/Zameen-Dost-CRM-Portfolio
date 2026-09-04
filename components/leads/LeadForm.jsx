@@ -4,6 +4,9 @@ import { useState } from "react";
 import { X, Save, User, Phone, Mail, CreditCard, Building2, Tag } from "lucide-react";
 import { LEAD_STATUS, LEAD_TYPES, LEAD_SOURCES } from "@/constants/leadStatus";
 
+
+import ModalPortal from "@/components/common/ModalPortal";
+
 export default function LeadForm({
   employee,
   onClose,
@@ -23,7 +26,7 @@ export default function LeadForm({
     source: initialData?.source || "Referral",
     remarks: initialData?.remarks || "",
     followUpDate: initialData?.followUpDate || "",
-    assignedTo: initialData?.assignedTo || employee?.id || null,
+    assignedTo: initialData?.assignedTo || employee?._id || employee?.id || null,
     assignedToName: initialData?.assignedToName || employee?.name || "",
   });
 
@@ -44,25 +47,46 @@ export default function LeadForm({
     setError("");
 
     try {
+      // ✅ Build lead data for backend
       const leadData = {
-        ...form,
-        createdBy: employee?.id || 1,
-        createdAt: initialData?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        notes: initialData?.notes || [],
-        convertedToUnit: initialData?.convertedToUnit || null,
+        customerName: form.customerName,
+        customerPhone: form.customerPhone,
+        customerEmail: form.customerEmail || "",
+        customerCNIC: form.customerCNIC || "",
+        type: form.type,
+        status: form.status,
+        source: form.source,
+        remarks: form.remarks || "",
+        followUpDate: form.followUpDate || null,
+        assignedTo: form.assignedTo,
+        assignedToName: form.assignedToName,
       };
+
+      // ✅ If editing, preserve existing fields
+      if (isEdit && initialData) {
+        leadData.createdBy = initialData.createdBy;
+        leadData.createdAt = initialData.createdAt;
+        leadData.notes = initialData.notes || [];
+        leadData.convertedToUnit = initialData.convertedToUnit || null;
+      } else {
+        leadData.createdBy = employee?._id || employee?.id || null;
+        leadData.createdAt = new Date().toISOString();
+        leadData.notes = [];
+        leadData.convertedToUnit = null;
+      }
 
       await onSave(leadData);
       onClose();
     } catch (error) {
-      setError(error.message || "Failed to save lead.");
+      console.error("Lead save error:", error);
+      setError(error.response?.data?.message || error.message || "Failed to save lead.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
+      <ModalPortal>
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
       <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
         {/* Header */}
@@ -128,21 +152,7 @@ export default function LeadForm({
               </div>
             </div>
           </div>
-
-          {/* CNIC */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">CNIC</label>
-            <div className="relative">
-              <CreditCard size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-              <input
-                name="customerCNIC"
-                value={form.customerCNIC}
-                onChange={handleChange}
-                placeholder="37405-1234567-1"
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-11 pr-4 text-sm outline-none focus:border-indigo-500"
-              />
-            </div>
-          </div>
+       
 
           {/* Type & Source */}
           <div className="grid grid-cols-2 gap-4">
@@ -248,5 +258,6 @@ export default function LeadForm({
         </form>
       </div>
     </div>
+    </ModalPortal>
   );
 }

@@ -117,7 +117,9 @@ export default function PaySalaryModal({
     if (e.target === e.currentTarget) onClose();
   };
 
-  const handleSubmit = async (e) => {
+ // In PaySalaryModal.jsx, find handleSubmit function and update:
+
+const handleSubmit = async (e) => {
     e.preventDefault();
 
     const payAmount = Number(amount);
@@ -136,7 +138,12 @@ export default function PaySalaryModal({
     setError("");
 
     try {
-      const result = await onPay(employee.id, payAmount, applyDeductions ? deductions : null);
+      // ✅ Fix: Get correct employee ID
+      const employeeId = employee._id || employee.id;
+      
+      // ✅ Fix: Pass deductions as third argument
+      const result = await onPay(employeeId, payAmount, applyDeductions ? deductions : null);
+      
       setSuccess(true);
       setTimeout(() => {
         onClose();

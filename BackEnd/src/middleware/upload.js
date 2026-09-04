@@ -2,14 +2,15 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// ✅ Create upload directories - FIXED typo
+// ✅ Create upload directories
 const uploadDir = path.join(__dirname, '../../uploads');
 const unitImagesDir = path.join(uploadDir, 'unit-images');
 const tenantImagesDir = path.join(uploadDir, 'tenant-images');
 const agreementsDir = path.join(uploadDir, 'agreements');
+const employeeImagesDir = path.join(uploadDir, 'employees'); // ✅ ADDED
 
-// ✅ FIXED: uploadDir (not uploaDir)
-[uploadDir, unitImagesDir, tenantImagesDir, agreementsDir].forEach(dir => {
+// ✅ Create all directories
+[uploadDir, unitImagesDir, tenantImagesDir, agreementsDir, employeeImagesDir].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -23,6 +24,8 @@ const storage = multer.diskStorage({
       cb(null, tenantImagesDir);
     } else if (file.fieldname === 'agreementFiles') {
       cb(null, agreementsDir);
+    } else if (file.fieldname === 'image') {
+      cb(null, employeeImagesDir); // ✅ Employee image
     } else {
       cb(null, uploadDir);
     }

@@ -14,13 +14,13 @@ const {
 // ✅ All routes protected
 router.use(verifyToken);
 
-// ✅ Lead routes
+// ✅ Lead CRUD
 router.get('/', getLeads);
-router.get('/:id', getLead);
 router.get('/employee/:employeeId', getLeadsByEmployee);
+router.get('/:id', getLead);
 router.post('/', createLead);
 router.put('/:id', updateLead);
 router.post('/:id/notes', addNote);
-router.delete('/:id', checkRole(['admin', 'super_admin']), deleteLead);
+router.delete('/:id', deleteLead);
 
 module.exports = router;

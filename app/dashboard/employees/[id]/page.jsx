@@ -1,19 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import { useEmployees } from "@/context/EmployeeContext";
 import EmployeeDetails from "@/components/employees/EmployeeDetails";
 
 export default function EmployeeDetailsPage() {
   const params = useParams();
-  const { employees, setEmployees, paySalary } = useEmployees();
+  const router = useRouter();
+  const { employees, setEmployees, paySalary, deleteEmployee, markAttendance, addTask, updateTask } = useEmployees();
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (params.id) {
-      const found = employees.find((item) => item.id === Number(params.id));
+      const found = employees.find(
+        (item) => item._id === params.id || item.id === params.id || item.id === Number(params.id)
+      );
       if (found) {
         setEmployee(found);
       }
@@ -21,63 +24,60 @@ export default function EmployeeDetailsPage() {
     }
   }, [params.id, employees]);
 
-  const handlePaySalary = async (employeeId, amount) => {
+  const handlePaySalary = async (employeeId, amount, deductions) => {
     try {
-      await paySalary(employeeId, amount);
-      // Update local employee state
-      const updated = employees.find((emp) => emp.id === employeeId);
-      if (updated) {
-        setEmployee(updated);
-      }
+      const updated = await paySalary(employeeId, amount, deductions);
+      setEmployee(updated);
+      return updated;
     } catch (error) {
       console.error("Payment failed:", error);
       throw error;
     }
   };
 
-  const handleDelete = (id) => {
-    setEmployees(employees.filter((e) => e.id !== id));
-  };
-
-  const handleAttendanceUpdate = (employeeId, attendanceData) => {
-    setEmployees((prev) =>
-      prev.map((emp) => {
-        if (emp.id !== employeeId) return emp;
-        return {
-          ...emp,
-          attendance: [...(emp.attendance || []), attendanceData],
-        };
-      })
-    );
-    // Update current employee
-    const updated = employees.find((emp) => emp.id === employeeId);
-    if (updated) {
-      setEmployee(updated);
+  const handleDelete = async (id) => {
+    try {
+      await deleteEmployee(id);
+      router.push("/dashboard/employees");
+    } catch (error) {
+      console.error("Delete failed:", error);
     }
   };
 
-  const handleTaskUpdate = (taskData) => {
-    setEmployees((prev) =>
-      prev.map((emp) => {
-        if (emp.id !== employee.id) return emp;
-        const tasks = emp.tasks || [];
-        const existingIndex = tasks.findIndex((t) => t.id === taskData.id);
-        let updatedTasks;
-        if (existingIndex !== -1) {
-          updatedTasks = tasks.map((t) => (t.id === taskData.id ? taskData : t));
-        } else {
-          updatedTasks = [...tasks, taskData];
-        }
-        return {
-          ...emp,
-          tasks: updatedTasks,
-        };
-      })
-    );
-    // Update current employee
-    const updated = employees.find((emp) => emp.id === employee.id);
-    if (updated) {
+ const handleAttendanceUpdate = async (employeeId, attendanceData) => {
+  try {
+    const updated = await markAttendance(employeeId, attendanceData);
+    setEmployee(updated);
+    return updated;
+  } catch (error) {
+    console.error("Attendance update failed:", error);
+    throw error;
+  }
+};
+
+  // ✅ Add this function
+  const handleTaskAdd = async (taskData) => {
+    try {
+      const employeeId = employee._id || employee.id;
+      const updated = await addTask(employeeId, taskData);
       setEmployee(updated);
+      return updated;
+    } catch (error) {
+      console.error("Task add failed:", error);
+      throw error;
+    }
+  };
+
+  const handleTaskUpdate = async (taskData) => {
+    try {
+      const employeeId = employee._id || employee.id;
+      const taskId = taskData._id || taskData.id;
+      const updated = await updateTask(employeeId, taskId, taskData);
+      setEmployee(updated);
+      return updated;
+    } catch (error) {
+      console.error("Task update failed:", error);
+      throw error;
     }
   };
 
@@ -99,6 +99,7 @@ export default function EmployeeDetailsPage() {
       onPaySalary={handlePaySalary}
       onDelete={handleDelete}
       onAttendanceUpdate={handleAttendanceUpdate}
+      onTaskAdd={handleTaskAdd}  // ✅ Pass this
       onTaskUpdate={handleTaskUpdate}
     />
   );

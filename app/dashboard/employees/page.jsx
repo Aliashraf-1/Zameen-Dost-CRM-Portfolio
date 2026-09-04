@@ -1,22 +1,27 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Plus, CalendarCheck, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useEmployees } from "@/context/EmployeeContext";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
 import EmployeeStats from "@/components/employees/EmployeeStats";
 import EmployeeTable from "@/components/employees/EmployeeTable";
 import AttendanceModal from "@/components/employees/AttendanceModal";
-import ProtectedRoute from "@/components/common/ProtectedRoute";
 
 export default function EmployeesPage() {
-  const { employees, setEmployees } = useEmployees();
+  const { employees, loadEmployees, loading } = useEmployees();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
   const [department, setDepartment] = useState("All");
   const [showAttendanceModal, setShowAttendanceModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showEmployeeSelect, setShowEmployeeSelect] = useState(false);
+
+  // ✅ Reload employees on mount
+  useEffect(() => {
+    loadEmployees();
+  }, []);
 
   const filteredEmployees = useMemo(() => {
     return employees.filter((employee) => {
@@ -35,35 +40,10 @@ export default function EmployeesPage() {
     });
   }, [employees, search, status, department]);
 
-  const handleDelete = (id) => {
-    if (confirm("Are you sure you want to delete this employee?")) {
-      setEmployees(employees.filter((e) => e.id !== id));
-    }
-  };
-
-  const handleAttendanceSave = (employeeId, attendanceData) => {
-    setEmployees((prev) =>
-      prev.map((emp) => {
-        if (emp.id !== employeeId) return emp;
-        return {
-          ...emp,
-          attendance: [...(emp.attendance || []), attendanceData],
-        };
-      })
-    );
-    setShowAttendanceModal(false);
-    setSelectedEmployee(null);
-    setShowEmployeeSelect(false);
-  };
-
   const openAttendanceModal = (employee) => {
     setSelectedEmployee(employee);
     setShowAttendanceModal(true);
     setShowEmployeeSelect(false);
-  };
-
-  const toggleEmployeeSelect = () => {
-    setShowEmployeeSelect(!showEmployeeSelect);
   };
 
   const selectEmployee = (employee) => {
@@ -71,10 +51,19 @@ export default function EmployeesPage() {
     setShowEmployeeSelect(false);
     setShowAttendanceModal(true);
   };
-    
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="animate-pulse text-slate-500">Loading employees...</div>
+      </div>
+    );
+  }
+
   return (
     <ProtectedRoute requiredRoles={["admin", "super_admin"]}>
       <div className="mx-auto max-w-[1600px]">
+        {/* Header */}
         <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-medium text-indigo-400">Human Resources</p>
@@ -87,10 +76,10 @@ export default function EmployeesPage() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            {/* ✅ Mark Attendance Button with Dropdown */}
+            {/* Mark Attendance Button */}
             <div className="relative">
               <button
-                onClick={toggleEmployeeSelect}
+                onClick={() => setShowEmployeeSelect(!showEmployeeSelect)}
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-500"
               >
                 <CalendarCheck size={17} />
@@ -98,15 +87,9 @@ export default function EmployeesPage() {
                 <ChevronDown size={16} className={`transition-transform duration-200 ${showEmployeeSelect ? 'rotate-180' : ''}`} />
               </button>
 
-              {/* Dropdown */}
               {showEmployeeSelect && (
                 <>
-                  {/* Backdrop */}
-                  <div 
-                    className="fixed inset-0 z-40"
-                    onClick={() => setShowEmployeeSelect(false)}
-                  />
-                  
+                  <div className="fixed inset-0 z-40" onClick={() => setShowEmployeeSelect(false)} />
                   <div className="absolute right-0 top-full mt-2 z-50 w-64 rounded-xl border border-slate-700 bg-slate-800 shadow-2xl">
                     <div className="max-h-64 overflow-y-auto p-2">
                       <div className="px-3 py-2 text-xs font-medium text-slate-400 border-b border-slate-700">
@@ -115,15 +98,12 @@ export default function EmployeesPage() {
                       {filteredEmployees.length > 0 ? (
                         filteredEmployees.map((employee) => (
                           <button
-                            key={employee.id}
+                            key={employee._id}
                             onClick={() => selectEmployee(employee)}
                             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-slate-700"
                           >
                             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-xs font-medium text-indigo-400">
-                              {employee.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
+                              {employee.name.split(" ").map((n) => n[0]).join("")}
                             </div>
                             <div className="text-left">
                               <p className="text-sm font-medium">{employee.name}</p>
@@ -157,12 +137,10 @@ export default function EmployeesPage() {
         <div className="mt-6">
           <EmployeeTable
             employees={filteredEmployees}
-            onDelete={handleDelete}
             onMarkAttendance={openAttendanceModal}
           />
         </div>
 
-        {/* ✅ Attendance Modal */}
         {showAttendanceModal && selectedEmployee && (
           <AttendanceModal
             employee={selectedEmployee}
@@ -171,9 +149,12 @@ export default function EmployeesPage() {
               setSelectedEmployee(null);
               setShowEmployeeSelect(false);
             }}
-            onSave={(attendanceData) => 
-              handleAttendanceSave(selectedEmployee.id, attendanceData)
-            }
+            onSave={(attendanceData) => {
+              // Attendance save handled by modal
+              setShowAttendanceModal(false);
+              setSelectedEmployee(null);
+              setShowEmployeeSelect(false);
+            }}
           />
         )}
       </div>

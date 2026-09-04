@@ -2,15 +2,25 @@
 
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
-import { TrendingUp, TrendingDown, Clock, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { TrendingUp, TrendingDown, Clock, CheckCircle2, XCircle, AlertCircle, Target } from "lucide-react";
+import { useLeads } from "@/context/LeadContext";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export default function EmployeePerformance({ employee }) {
   const attendance = employee?.attendance || [];
   const tasks = employee?.tasks || [];
+  const { getLeadsByEmployee } = useLeads();
 
-  // Calculate stats
+  const employeeId = employee?._id || employee?.id;
+  const employeeLeads = employeeId ? getLeadsByEmployee(employeeId) : [];
+  const leadStats = useMemo(() => {
+    const total = employeeLeads.length;
+    const converted = employeeLeads.filter(l => l.status === "Converted" || l.status === "Closed").length;
+    const conversionRate = total > 0 ? Math.round((converted / total) * 100) : 0;
+    return { total, converted, conversionRate };
+  }, [employeeLeads]);
+
   const stats = useMemo(() => {
     const totalDays = attendance.length;
     const present = attendance.filter(a => a.status === "Present").length;
@@ -30,6 +40,11 @@ export default function EmployeePerformance({ employee }) {
     const taskFailureDeduction = failed * (employee?.attendanceSettings?.taskFailureDeduction || 1000);
     const totalDeduction = lateDeduction + leaveDeduction + taskFailureDeduction;
 
+    // ✅ Overall performance score (attendance 40%, tasks 40%, leads 20%)
+    const overallScore = Math.round(
+      (attendanceRate * 0.4) + (taskCompletionRate * 0.4) + (leadStats.conversionRate * 0.2)
+    );
+
     return {
       totalDays,
       present,
@@ -46,99 +61,15 @@ export default function EmployeePerformance({ employee }) {
       leaveDeduction,
       taskFailureDeduction,
       totalDeduction,
+      overallScore,
     };
-  }, [attendance, tasks, employee]);
+  }, [attendance, tasks, employee, leadStats]);
 
-  // Chart options for attendance
-  const attendanceChartOptions = {
-    chart: {
-      type: "donut",
-      toolbar: { show: false },
-      background: "transparent",
-    },
-    labels: ["Present", "Absent", "Leave"],
-    colors: ["#10b981", "#ef4444", "#f59e0b"],
-    legend: {
-      position: "bottom",
-      labels: { colors: "#94a3b8" },
-    },
-    plotOptions: {
-      pie: {
-        donut: {
-          size: "70%",
-          labels: {
-            show: true,
-            total: {
-              show: true,
-              label: "Attendance",
-              color: "#94a3b8",
-              fontSize: "14px",
-              formatter: () => `${stats.attendanceRate}%`,
-            },
-          },
-        },
-      },
-    },
-    responsive: [
-      {
-        breakpoint: 480,
-        options: {
-          chart: { width: 300 },
-          legend: { position: "bottom" },
-        },
-      },
-    ],
-  };
-
-  const attendanceSeries = [stats.present, stats.absent, stats.leaves];
-
-  // Chart options for tasks
-  const tasksChartOptions = {
-    chart: {
-      type: "donut",
-      toolbar: { show: false },
-      background: "transparent",
-    },
-    labels: ["Completed", "Failed", "Pending"],
-    colors: ["#10b981", "#ef4444", "#f59e0b"],
-    legend: {
-      position: "bottom",
-      labels: { colors: "#94a3b8" },
-    },
-    plotOptions: {
-      pie: {
-        donut: {
-          size: "70%",
-          labels: {
-            show: true,
-            total: {
-              show: true,
-              label: "Tasks",
-              color: "#94a3b8",
-              fontSize: "14px",
-              formatter: () => `${stats.taskCompletionRate}%`,
-            },
-          },
-        },
-      },
-    },
-    responsive: [
-      {
-        breakpoint: 480,
-        options: {
-          chart: { width: 300 },
-          legend: { position: "bottom" },
-        },
-      },
-    ],
-  };
-
-  const tasksSeries = [stats.completed, stats.failed, stats.pending];
-
+  // ... rest of component same, add lead stats display
   return (
     <div className="space-y-6">
-      {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* Stats Grid - Add lead stats */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <Clock size={16} />
@@ -157,6 +88,16 @@ export default function EmployeePerformance({ employee }) {
           <p className="text-xs text-slate-500">{stats.completed}/{stats.totalTasks} completed</p>
         </div>
 
+        {/* ✅ Lead Stats */}
+        <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Target size={16} className="text-indigo-400" />
+            Lead Conversion
+          </div>
+          <p className="mt-2 text-2xl font-bold">{leadStats.conversionRate}%</p>
+          <p className="text-xs text-slate-500">{leadStats.converted}/{leadStats.total} converted</p>
+        </div>
+
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <TrendingDown size={16} className="text-red-400" />
@@ -170,33 +111,80 @@ export default function EmployeePerformance({ employee }) {
           </p>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <AlertCircle size={16} className="text-amber-400" />
-            Task Status
+        {/* ✅ Overall Score */}
+        <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/5 p-4">
+          <div className="flex items-center gap-2 text-sm text-indigo-400">
+            <TrendingUp size={16} />
+            Overall Score
           </div>
-          <p className="mt-2 text-2xl font-bold">{stats.pending}</p>
-          <p className="text-xs text-slate-500">Pending tasks</p>
+          <p className="mt-2 text-2xl font-bold text-indigo-400">{stats.overallScore}%</p>
+          <p className="text-xs text-slate-500">Performance rating</p>
         </div>
       </div>
 
-      {/* Charts */}
+      {/* Charts - same as before */}
       <div className="grid gap-6 md:grid-cols-2">
+        {/* Attendance Chart */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
           <h3 className="mb-4 text-lg font-semibold">Attendance Distribution</h3>
           <Chart
-            options={attendanceChartOptions}
-            series={attendanceSeries}
+            options={{
+              chart: { type: "donut", toolbar: { show: false }, background: "transparent" },
+              labels: ["Present", "Absent", "Leave"],
+              colors: ["#10b981", "#ef4444", "#f59e0b"],
+              legend: { position: "bottom", labels: { colors: "#94a3b8" } },
+              plotOptions: {
+                pie: {
+                  donut: {
+                    size: "70%",
+                    labels: {
+                      show: true,
+                      total: {
+                        show: true,
+                        label: "Attendance",
+                        color: "#94a3b8",
+                        fontSize: "14px",
+                        formatter: () => `${stats.attendanceRate}%`,
+                      },
+                    },
+                  },
+                },
+              },
+            }}
+            series={[stats.present, stats.absent, stats.leaves]}
             type="donut"
             height={280}
           />
         </div>
 
+        {/* Task Chart */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
           <h3 className="mb-4 text-lg font-semibold">Task Distribution</h3>
           <Chart
-            options={tasksChartOptions}
-            series={tasksSeries}
+            options={{
+              chart: { type: "donut", toolbar: { show: false }, background: "transparent" },
+              labels: ["Completed", "Failed", "Pending"],
+              colors: ["#10b981", "#ef4444", "#f59e0b"],
+              legend: { position: "bottom", labels: { colors: "#94a3b8" } },
+              plotOptions: {
+                pie: {
+                  donut: {
+                    size: "70%",
+                    labels: {
+                      show: true,
+                      total: {
+                        show: true,
+                        label: "Tasks",
+                        color: "#94a3b8",
+                        fontSize: "14px",
+                        formatter: () => `${stats.taskCompletionRate}%`,
+                      },
+                    },
+                  },
+                },
+              },
+            }}
+            series={[stats.completed, stats.failed, stats.pending]}
             type="donut"
             height={280}
           />

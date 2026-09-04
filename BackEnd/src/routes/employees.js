@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { verifyToken, checkRole } = require('../middleware/auth');
+const upload = require('../middleware/upload'); // ✅ Import multer
 const {
   getEmployees,
   getEmployee,
@@ -19,8 +20,9 @@ router.use(verifyToken);
 // ✅ Employee CRUD
 router.get('/', getEmployees);
 router.get('/:id', getEmployee);
-router.post('/', checkRole(['admin', 'super_admin']), createEmployee);
-router.put('/:id', checkRole(['admin', 'super_admin']), updateEmployee);
+// ✅ Add upload.single('image') for create and update
+router.post('/', checkRole(['admin', 'super_admin']), upload.single('image'), createEmployee);
+router.put('/:id', checkRole(['admin', 'super_admin']), upload.single('image'), updateEmployee);
 router.delete('/:id', checkRole(['admin', 'super_admin']), deleteEmployee);
 
 // ✅ Attendance

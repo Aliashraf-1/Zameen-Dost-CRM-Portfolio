@@ -428,31 +428,37 @@ export default function UnitDetailsPage() {
   // Get documents from tenant
   const documents = unit?.tenant?.documents || [];
 
-// ✅ Handle delete previous customer record with API
+// ✅ Handle delete previous customer record - Working
 const handleDeletePreviousCustomer = async (recordId) => {
   try {
-    // Filter out the record from clearanceHistory
-    const updatedClearanceHistory = unit.clearanceHistory.filter(
+    // Filter out the record
+    const updatedClearanceHistory = (unit.clearanceHistory || []).filter(
       (record) => record.id !== recordId
     );
 
-    // Prepare updated room data
+    // ✅ Prepare updated room data - maintain all fields
     const updatedRoomData = {
       ...unit,
       clearanceHistory: updatedClearanceHistory,
     };
 
-    // Send update to backend via context
+    // Send update to backend
     const buildingId = building._id || building.id;
     const roomId = unit._id || unit.id;
-    await updateRoom(buildingId, roomId, updatedRoomData);
 
-    // Update local state (optional, handled by context)
-    // But we can also directly update UI via setBuilding (already done in context)
-    // No need to manually update state; context will update after API call
-    console.log("Previous customer record deleted successfully");
+    // ✅ Use FormData to send the update
+    const formData = new FormData();
+    formData.append("roomData", JSON.stringify(updatedRoomData));
+
+    // ✅ Call updateRoom from context
+    await updateRoom(buildingId, roomId, formData);
+
+    // ✅ Update local state to reflect change immediately
+    setUnit(updatedRoomData);
+
+    console.log("✅ Previous customer record deleted successfully");
   } catch (error) {
-    console.error("Failed to delete previous customer record:", error);
+    console.error("❌ Failed to delete previous customer record:", error);
     alert("Failed to delete record. Please try again.");
   }
 };

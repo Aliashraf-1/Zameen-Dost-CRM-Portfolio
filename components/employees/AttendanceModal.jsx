@@ -11,8 +11,6 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
   const [checkOut, setCheckOut] = useState("17:00");
   const [lateMinutes, setLateMinutes] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [leaveDeduction, setLeaveDeduction] = useState(employee?.attendanceSettings?.leaveDeduction || 500);
-  const [lateDeduction, setLateDeduction] = useState(employee?.attendanceSettings?.lateDeduction || 10);
 
   // Close on Escape key
   useEffect(() => {
@@ -33,18 +31,23 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
     setLoading(true);
 
     try {
-      await onSave({
-        date,
-        status,
+      const employeeId = employee._id || employee.id;
+      
+      // ✅ Build clean attendance data
+      const attendanceData = {
+        date: date,
+        status: status,
         checkIn: status === "Present" ? checkIn : null,
         checkOut: status === "Present" ? checkOut : null,
-        lateMinutes: status === "Present" ? lateMinutes : 0,
-        leaveDeduction,
-        lateDeduction,
-      });
+        lateMinutes: status === "Present" ? Number(lateMinutes) : 0,
+      };
+
+      // ✅ Call onSave with employeeId and attendanceData
+      await onSave(employeeId, attendanceData);
       onClose();
     } catch (error) {
       console.error("Failed to save attendance:", error);
+      alert("Failed to save attendance. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -56,7 +59,6 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
         className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
         onClick={handleBackdropClick}
       >
-        {/* Modal - Viewport ke center mein */}
         <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
           {/* Header */}
           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800 bg-slate-900 p-5">
@@ -105,8 +107,8 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
                     setCheckIn("09:00");
                     setCheckOut("17:00");
                   } else {
-                    setCheckIn(null);
-                    setCheckOut(null);
+                    setCheckIn("");
+                    setCheckOut("");
                     setLateMinutes(0);
                   }
                 }}
@@ -162,47 +164,6 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
                   className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
                   placeholder="0"
                 />
-              </div>
-            )}
-
-            {/* Deduction Settings - For Leave */}
-            {status === "Leave" && (
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
-                  Leave Deduction (Rs.)
-                  <span className="ml-2 text-xs text-slate-500">per day</span>
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={leaveDeduction}
-                  onChange={(e) => setLeaveDeduction(Number(e.target.value))}
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
-                  placeholder="Enter leave deduction amount"
-                />
-                <p className="mt-1 text-xs text-slate-500">
-                  Default: Rs. {employee?.attendanceSettings?.leaveDeduction || 500}
-                </p>
-              </div>
-            )}
-
-            {/* Deduction Settings - For Late */}
-            {status === "Present" && (
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
-                  Late Deduction (Rs. per minute)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={lateDeduction}
-                  onChange={(e) => setLateDeduction(Number(e.target.value))}
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
-                  placeholder="Enter late deduction per minute"
-                />
-                <p className="mt-1 text-xs text-slate-500">
-                  Default: Rs. {employee?.attendanceSettings?.lateDeduction || 10}/min
-                </p>
               </div>
             )}
 

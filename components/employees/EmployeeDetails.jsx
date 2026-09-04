@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   ArrowLeft,
   User,
@@ -19,6 +20,7 @@ import {
   AlertCircle,
   Trash2,
   Plus,
+  Target,
 } from "lucide-react";
 import EmployeeAttendance from "./EmployeeAttendance";
 import EmployeeSalaryHistory from "./EmployeeSalaryHistory";
@@ -27,8 +29,10 @@ import EmployeeTasks from "./EmployeeTasks";
 import PaySalaryModal from "./PaySalaryModal";
 import DeleteConfirmModal from "@/components/common/DeleteConfirmModal";
 import AttendanceModal from "./AttendanceModal";
-import { useLeads } from "@/context/LeadContext"; // ✅ Added new
-import LeadTable from "@/components/leads/LeadTable"; // ✅ Added new
+import LeadForm from "@/components/leads/LeadForm";
+import LeadTable from "@/components/leads/LeadTable";
+import { useLeads } from "@/context/LeadContext";
+import { getImageUrl } from "@/lib/imageHelper";
 
 function InfoItem({ icon: Icon, label, value }) {
   return (
@@ -42,12 +46,17 @@ function InfoItem({ icon: Icon, label, value }) {
   );
 }
 
-export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAttendanceUpdate, onTaskUpdate }) {
+export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAttendanceUpdate, onTaskAdd, onTaskUpdate }) {
   const router = useRouter();
   const [showPayModal, setShowPayModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAttendanceModal, setShowAttendanceModal] = useState(false);
+  const [showLeadModal, setShowLeadModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const employeeId = employee._id || employee.id;
+
+  const { getLeadsByEmployee, addLead, updateLead, deleteLead } = useLeads();
 
   const getStatusBadge = useCallback((status) => {
     const variants = {
@@ -60,7 +69,8 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
 
   const getSalaryStatus = useCallback(() => {
     const history = employee.salaryHistory || [];
-    const lastPayment = history[history.length - 1];
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const lastPayment = history.find(h => h.month === currentMonth) || history[history.length - 1];
     const monthlySalary = Number(employee.salary || 0);
 
     if (!lastPayment) {
@@ -110,7 +120,7 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
     setDeleteLoading(true);
     try {
       if (onDelete) {
-        await onDelete(employee.id);
+        await onDelete(employeeId);
         router.push("/dashboard/employees");
       }
     } catch (error) {
@@ -119,18 +129,41 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
       setDeleteLoading(false);
       setShowDeleteModal(false);
     }
-  }, [employee, onDelete, router]);
+  }, [employeeId, onDelete, router]);
 
-  const handleAttendanceSave = async (attendanceData) => {
-    await onAttendanceUpdate(employee.id, attendanceData);
+ const handleAttendanceSave = async (employeeId, attendanceData) => {
+  try {
+    await onAttendanceUpdate(employeeId, attendanceData);
     setShowAttendanceModal(false);
+  } catch (error) {
+    console.error("Attendance save failed:", error);
+    alert("Failed to save attendance. Please try again.");
+  }
+};
+
+  const handlePaySalary = async (empId, amount, deductions) => {
+    await onPaySalary(employeeId, amount, deductions);
+    setShowPayModal(false);
+  };
+
+  // ✅ Lead handlers
+  const handleLeadAdd = async (leadData) => {
+    await addLead(leadData);
+    setShowLeadModal(false);
+  };
+
+  const handleLeadEdit = async (leadData) => {
+    const leadId = leadData._id || leadData.id;
+    await updateLead(leadId, leadData);
+  };
+
+  const handleLeadDelete = async (leadId) => {
+    await deleteLead(leadId);
   };
 
   const salaryStatus = getSalaryStatus();
-
-  const { getLeadsByEmployee } = useLeads();
-const employeeLeads = getLeadsByEmployee(employee.id);
-const isLeadManager = employee.role === "lead_manager" || employee.canManageLeads;
+  const employeeLeads = getLeadsByEmployee(employeeId);
+  const isLeadManager = employee.role === "lead_manager" || employee.canManageLeads || employee.role === "admin" || employee.role === "super_admin";
 
   return (
     <>
@@ -153,6 +186,15 @@ const isLeadManager = employee.role === "lead_manager" || employee.canManageLead
               <Plus size={16} />
               Mark Attendance
             </button>
+            {isLeadManager && (
+              <button
+                onClick={() => setShowLeadModal(true)}
+                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500"
+              >
+                <Target size={16} />
+                Add Lead
+              </button>
+            )}
             <button
               onClick={() => setShowDeleteModal(true)}
               className="inline-flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-500/20"
@@ -168,7 +210,13 @@ const isLeadManager = employee.role === "lead_manager" || employee.canManageLead
           <div className="flex items-center gap-4">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-indigo-500/10 text-indigo-400">
               {employee.image ? (
-                <img src={employee.image} alt={employee.name} className="h-full w-full object-cover" />
+                <Image
+                  src={getImageUrl(employee.image)}
+                  alt={employee.name}
+                  width={64}
+                  height={64}
+                  className="h-full w-full object-cover"
+                />
               ) : (
                 <User size={28} />
               )}
@@ -189,7 +237,7 @@ const isLeadManager = employee.role === "lead_manager" || employee.canManageLead
 
           <div className="flex gap-3">
             <Link
-              href={`/dashboard/employees/edit/${employee.id}`}
+              href={`/dashboard/employees/edit/${employeeId}`}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm font-medium text-slate-300 transition hover:border-slate-700 hover:bg-slate-800 hover:text-white"
             >
               Edit Employee
@@ -225,7 +273,7 @@ const isLeadManager = employee.role === "lead_manager" || employee.canManageLead
               <InfoItem icon={Briefcase} label="Designation" value={employee.designation} />
               <InfoItem icon={Calendar} label="Department" value={employee.department} />
               <InfoItem icon={Calendar} label="Joining Date" value={employee.joiningDate} />
-              <InfoItem icon={Wallet} label="Monthly Salary" value={`Rs. ${employee.salary.toLocaleString()}`} />
+              <InfoItem icon={Wallet} label="Monthly Salary" value={`Rs. ${Number(employee.salary).toLocaleString()}`} />
               <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -268,30 +316,44 @@ const isLeadManager = employee.role === "lead_manager" || employee.canManageLead
           <EmployeePerformance employee={employee} />
         </div>
 
-        {/* Tasks Section - with Show Previous */}
+        {/* Tasks Section */}
         <div className="mt-6">
-          <EmployeeTasks employee={employee} onTaskUpdate={onTaskUpdate} />
+          <EmployeeTasks employee={employee} onTaskAdd={onTaskAdd} onTaskUpdate={onTaskUpdate} />
         </div>
+
+        {/* Leads Section */}
         {isLeadManager && (
-  <div className="mt-6">
-    <LeadTable
-      leads={employeeLeads}
-      userRole={employee.role}
-      employeeId={employee.id}
-      onAdd={() => {/* open add lead modal */}}
-      onEdit={(lead) => {/* open edit modal */}}
-      onDelete={(id) => {/* handle delete */}}
-    />
-  </div>
-)}
+          <div className="mt-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Assigned Leads ({employeeLeads.length})</h2>
+              <button
+                onClick={() => setShowLeadModal(true)}
+                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500"
+              >
+                <Plus size={16} />
+                Add Lead
+              </button>
+            </div>
+            <LeadTable
+              leads={employeeLeads}
+              userRole={employee.role}
+              employeeId={employeeId}
+              onAdd={() => setShowLeadModal(true)}
+              onEdit={(lead) => {
+                // Open edit modal with lead data
+                setShowLeadModal(true);
+              }}
+              onDelete={handleLeadDelete}
+            />
+          </div>
+        )}
 
-
-        {/* Attendance History - already has Show More */}
+        {/* Attendance History */}
         <div className="mt-6">
           <EmployeeAttendance attendance={employee.attendance || []} />
         </div>
 
-        {/* Salary History - already has Show More */}
+        {/* Salary History */}
         <div className="mt-6">
           <EmployeeSalaryHistory salaryHistory={employee.salaryHistory || []} />
         </div>
@@ -302,7 +364,7 @@ const isLeadManager = employee.role === "lead_manager" || employee.canManageLead
         <PaySalaryModal
           employee={employee}
           onClose={() => setShowPayModal(false)}
-          onPay={onPaySalary}
+          onPay={handlePaySalary}
         />
       )}
 
@@ -325,6 +387,15 @@ const isLeadManager = employee.role === "lead_manager" || employee.canManageLead
           employee={employee}
           onClose={() => setShowAttendanceModal(false)}
           onSave={handleAttendanceSave}
+        />
+      )}
+
+      {/* Lead Modal */}
+      {showLeadModal && (
+        <LeadForm
+          employee={employee}
+          onClose={() => setShowLeadModal(false)}
+          onSave={handleLeadAdd}
         />
       )}
     </>

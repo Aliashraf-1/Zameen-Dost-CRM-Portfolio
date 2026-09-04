@@ -10,7 +10,6 @@ export function LeadProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ Load leads from API
   useEffect(() => {
     loadLeads();
   }, []);
@@ -29,7 +28,6 @@ export function LeadProvider({ children }) {
     }
   };
 
-  // ✅ Add lead
   const addLead = async (leadData) => {
     try {
       const response = await leadAPI.create(leadData);
@@ -42,12 +40,11 @@ export function LeadProvider({ children }) {
     }
   };
 
-  // ✅ Update lead
   const updateLead = async (id, leadData) => {
     try {
       const response = await leadAPI.update(id, leadData);
       const updatedLead = response.data.data;
-      setLeads(prev => prev.map(l => l._id === id ? updatedLead : l));
+      setLeads(prev => prev.map(l => (l._id === id || l.id === id) ? updatedLead : l));
       return updatedLead;
     } catch (error) {
       console.error("Failed to update lead:", error);
@@ -55,23 +52,21 @@ export function LeadProvider({ children }) {
     }
   };
 
-  // ✅ Delete lead
   const deleteLead = async (id) => {
     try {
       await leadAPI.delete(id);
-      setLeads(prev => prev.filter(l => l._id !== id));
+      setLeads(prev => prev.filter(l => l._id !== id && l.id !== id));
     } catch (error) {
       console.error("Failed to delete lead:", error);
       throw error;
     }
   };
 
-  // ✅ Add note to lead
   const addNote = async (leadId, noteData) => {
     try {
       const response = await leadAPI.addNote(leadId, noteData);
       const updatedLead = response.data.data;
-      setLeads(prev => prev.map(l => l._id === leadId ? updatedLead : l));
+      setLeads(prev => prev.map(l => (l._id === leadId || l.id === leadId) ? updatedLead : l));
       return updatedLead;
     } catch (error) {
       console.error("Failed to add note:", error);
@@ -79,22 +74,39 @@ export function LeadProvider({ children }) {
     }
   };
 
-  // ✅ Get leads by employee
-  const getLeadsByEmployee = (employeeId) => {
-    return leads.filter((lead) => lead.assignedTo === Number(employeeId) || lead.assignedTo === employeeId);
-  };
+  // ✅ Fixed: Handle MongoDB ObjectId comparison
+const getLeadsByEmployee = (employeeId) => {
+  if (!employeeId) return [];
+  const empIdStr = String(employeeId);
+  
+  return leads.filter((lead) => {
+    const assignedTo = lead.assignedTo;
+    if (!assignedTo) return false;
+    
+    // ✅ If assignedTo is populated object
+    if (typeof assignedTo === 'object' && assignedTo !== null) {
+      const assignedId = assignedTo._id || assignedTo.id;
+      return String(assignedId) === empIdStr;
+    }
+    
+    // ✅ If assignedTo is primitive (string/number)
+    return String(assignedTo) === empIdStr || assignedTo === Number(employeeId);
+  });
+};
 
-  // ✅ Get lead stats
+  // ✅ Fixed: Get lead stats with proper counting
   const getLeadStats = (employeeId = null) => {
     const filtered = employeeId ? getLeadsByEmployee(employeeId) : leads;
     const total = filtered.length;
     const newLeads = filtered.filter((l) => l.status === "New").length;
     const contacted = filtered.filter((l) => l.status === "Contacted").length;
     const qualified = filtered.filter((l) => l.status === "Qualified").length;
-    const converted = filtered.filter((l) => l.status === "Converted").length;
+    const converted = filtered.filter((l) => l.status === "Converted" || l.status === "Closed").length;
     const lost = filtered.filter((l) => l.status === "Lost").length;
+    
+    const conversionRate = total > 0 ? Math.round((converted / total) * 100) : 0;
 
-    return { total, new: newLeads, contacted, qualified, converted, lost };
+    return { total, new: newLeads, contacted, qualified, converted, lost, conversionRate };
   };
 
   const value = useMemo(

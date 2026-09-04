@@ -24,8 +24,11 @@ export default function EmployeeSalaryHistory({ salaryHistory = [] }) {
     return variants[status] || variants.Pending;
   };
 
+  // ✅ Show latest first (reverse order)
+  const sortedHistory = [...salaryHistory].reverse();
+  
   // Show only 3 rows initially
-  const displayHistory = showAll ? salaryHistory : salaryHistory.slice(0, 3);
+  const displayHistory = showAll ? sortedHistory : sortedHistory.slice(0, 3);
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
@@ -37,7 +40,7 @@ export default function EmployeeSalaryHistory({ salaryHistory = [] }) {
               Monthly salary payment records.
             </p>
           </div>
-          {salaryHistory.length > 3 && (
+          {sortedHistory.length > 3 && (
             <button
               onClick={() => setShowAll(!showAll)}
               className="flex items-center gap-1 rounded-lg border border-slate-800 px-3 py-1.5 text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white"
@@ -50,7 +53,7 @@ export default function EmployeeSalaryHistory({ salaryHistory = [] }) {
               ) : (
                 <>
                   <ChevronDown size={16} />
-                  Show More ({salaryHistory.length - 3} more)
+                  Show More ({sortedHistory.length - 3} more)
                 </>
               )}
             </button>
@@ -58,7 +61,7 @@ export default function EmployeeSalaryHistory({ salaryHistory = [] }) {
         </div>
       </div>
 
-      {salaryHistory.length === 0 ? (
+      {sortedHistory.length === 0 ? (
         <div className="p-10 text-center">
           <p className="text-sm text-slate-500">No salary records available.</p>
         </div>
@@ -86,20 +89,21 @@ export default function EmployeeSalaryHistory({ salaryHistory = [] }) {
             </thead>
 
             <tbody>
-              {displayHistory.map((record) => {
+              {displayHistory.map((record, index) => {
                 const statusBadge = getStatusBadge(record.status);
                 const totalDeduction = record.deductions?.total || 0;
+                const recordKey = record._id || record.id || index;
 
                 return (
                   <tr
-                    key={record.id}
+                    key={recordKey}
                     className="border-b border-slate-800/70 transition hover:bg-slate-950/50"
                   >
                     <td className="px-6 py-4 text-sm font-medium text-slate-300">
                       {record.month}
                     </td>
                     <td className="px-6 py-4 text-sm font-medium text-emerald-400">
-                      Rs. {record.amount.toLocaleString()}
+                      Rs. {Number(record.amount || 0).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 text-sm">
                       {totalDeduction > 0 ? (
@@ -129,7 +133,7 @@ export default function EmployeeSalaryHistory({ salaryHistory = [] }) {
             </tbody>
           </table>
 
-          {salaryHistory.length > 3 && (
+          {sortedHistory.length > 3 && (
             <div className="border-t border-slate-800 p-3 text-center">
               <button
                 onClick={() => setShowAll(!showAll)}
@@ -143,7 +147,7 @@ export default function EmployeeSalaryHistory({ salaryHistory = [] }) {
                 ) : (
                   <>
                     <ChevronDown size={16} />
-                    View All ({salaryHistory.length} records)
+                    View All ({sortedHistory.length} records)
                   </>
                 )}
               </button>

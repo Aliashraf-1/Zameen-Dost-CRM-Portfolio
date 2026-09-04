@@ -7,11 +7,25 @@ import ModalPortal from "@/components/common/ModalPortal";
 export default function TaskModal({ employee, onClose, onSave, task = null }) {
   const isEdit = !!task;
   const [loading, setLoading] = useState(false);
+  
+  // ✅ Helper: Convert ISO to datetime-local format
+  const toDateTimeLocal = (dateStr) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   const [form, setForm] = useState({
     title: task?.title || "",
     description: task?.description || "",
-    assignedDate: task?.assignedDate || new Date().toISOString().slice(0, 16),
-    dueDate: task?.dueDate || "",
+    assignedDate: toDateTimeLocal(task?.assignedDate) || toDateTimeLocal(new Date().toISOString()),
+    dueDate: toDateTimeLocal(task?.dueDate) || "",
     priority: task?.priority || "Medium",
     status: task?.status || "Pending",
     failureReason: task?.failureReason || "",
@@ -27,7 +41,6 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
     return () => document.removeEventListener("keydown", handleEscape);
   }, [onClose]);
 
-  // Close on outside click
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
@@ -42,14 +55,25 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
     setLoading(true);
 
     try {
-      await onSave({
-        ...form,
-        id: task?.id || Date.now(),
-        assignedDate: new Date(form.assignedDate).toISOString(),
-        dueDate: new Date(form.dueDate).toISOString(),
-        completedAt: form.status === "Completed" ? new Date().toISOString() : null,
+      const taskData = {
+        title: form.title,
+        description: form.description,
+        assignedDate: form.assignedDate ? new Date(form.assignedDate).toISOString() : new Date().toISOString(),
+        dueDate: form.dueDate ? new Date(form.dueDate).toISOString() : null,
+        priority: form.priority,
+        status: form.status,
+        failureReason: form.status === "Failed" ? form.failureReason : "",
         failureDeduction: form.status === "Failed" ? Number(form.failureDeduction) : 0,
-      });
+        completedAt: form.status === "Completed" ? new Date().toISOString() : null,
+      };
+      
+      // If editing, include task ID
+      if (task) {
+        taskData._id = task._id || task.id;
+        taskData.id = task._id || task.id;
+      }
+      
+      await onSave(taskData);
       onClose();
     } catch (error) {
       console.error("Failed to save task:", error);
@@ -64,10 +88,9 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
         className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
         onClick={handleBackdropClick}
       >
-        {/* Modal - Viewport ke center mein */}
         <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b backdrop-blur border-slate-800 p-5">
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800 bg-slate-900 p-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
                 <Plus size={20} />
@@ -201,7 +224,6 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-300">
                     Task Failure Deduction (Rs.)
-                    <span className="ml-2 text-xs text-slate-500">custom amount</span>
                   </label>
                   <input
                     type="number"
@@ -212,9 +234,6 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
                     className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
                     placeholder="Enter deduction amount"
                   />
-                  <p className="mt-1 text-xs text-slate-500">
-                    Default: Rs. {employee?.attendanceSettings?.taskFailureDeduction || 1000}
-                  </p>
                 </div>
               </>
             )}
