@@ -11,9 +11,14 @@ const toObjectId = (value) => {
 };
 
 // ✅ Get all leads
+// ✅ Get all leads - Populate assignedTo
 exports.getLeads = async (req, res) => {
   try {
-    const leads = await Lead.find().populate('assignedTo', 'name email phone designation');
+    const leads = await Lead.find()
+      .populate('assignedTo', 'name email phone designation')
+      .populate('createdBy', 'name email')
+      .sort({ createdAt: -1 });
+    
     res.status(200).json({
       success: true,
       count: leads.length,
@@ -32,7 +37,9 @@ exports.getLeads = async (req, res) => {
 exports.getLead = async (req, res) => {
   try {
     const { id } = req.params;
-    const lead = await Lead.findById(id).populate('assignedTo', 'name email phone designation');
+    const lead = await Lead.findById(id)
+      .populate('assignedTo', 'name email phone designation')
+      .populate('createdBy', 'name email');
 
     if (!lead) {
       return res.status(404).json({
@@ -68,7 +75,9 @@ exports.getLeadsByEmployee = async (req, res) => {
       query = { assignedTo: employeeId };
     }
     
-    const leads = await Lead.find(query).populate('assignedTo', 'name email phone designation');
+    const leads = await Lead.find(query)
+      .populate('assignedTo', 'name email phone designation')
+      .populate('createdBy', 'name email');
     
     res.status(200).json({
       success: true,
@@ -101,7 +110,6 @@ exports.createLead = async (req, res) => {
       if (mongoose.Types.ObjectId.isValid(leadData.assignedTo)) {
         leadData.assignedTo = new mongoose.Types.ObjectId(leadData.assignedTo);
       } else if (!isNaN(leadData.assignedTo)) {
-        // Keep as number for legacy support
         leadData.assignedTo = Number(leadData.assignedTo);
       }
     }
@@ -114,8 +122,15 @@ exports.createLead = async (req, res) => {
       }
     }
 
+    // ✅ Ensure createdByName is set (if not provided)
+    if (!leadData.createdByName || leadData.createdByName === "") {
+      leadData.createdByName = leadData.createdByName || "Unknown";
+    }
+
     const lead = await Lead.create(leadData);
-    const populatedLead = await Lead.findById(lead._id).populate('assignedTo', 'name email phone designation');
+    const populatedLead = await Lead.findById(lead._id)
+      .populate('assignedTo', 'name email phone designation')
+      .populate('createdBy', 'name email');
 
     res.status(201).json({
       success: true,

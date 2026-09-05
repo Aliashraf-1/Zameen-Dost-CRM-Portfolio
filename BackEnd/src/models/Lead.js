@@ -38,7 +38,7 @@ const leadSchema = new mongoose.Schema({
     default: '',
   },
   assignedTo: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.Mixed,
     ref: 'Employee',
     default: null,
   },
@@ -47,10 +47,15 @@ const leadSchema = new mongoose.Schema({
     default: '',
   },
   createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.Mixed,
     ref: 'User',
     default: null,
   },
+ createdByName: {  // ✅ Ensure this exists
+    type: String,
+    default: '',
+  },
+
   followUpDate: {
     type: String,
     default: null,

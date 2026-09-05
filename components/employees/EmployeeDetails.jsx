@@ -32,6 +32,7 @@ import AttendanceModal from "./AttendanceModal";
 import LeadForm from "@/components/leads/LeadForm";
 import LeadTable from "@/components/leads/LeadTable";
 import { useLeads } from "@/context/LeadContext";
+import { useAuth } from "@/context/AuthContext";
 import { getImageUrl } from "@/lib/imageHelper";
 
 function InfoItem({ icon: Icon, label, value }) {
@@ -52,11 +53,17 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAttendanceModal, setShowAttendanceModal] = useState(false);
   const [showLeadModal, setShowLeadModal] = useState(false);
+  const [editingLead, setEditingLead] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const employeeId = employee._id || employee.id;
 
-  const { getLeadsByEmployee, addLead, updateLead, deleteLead } = useLeads();
+  const [leadToDelete, setLeadToDelete] = useState(null);
+
+  
+
+  const employeeId = employee._id || employee.id;
+  const { user } = useAuth();
+  const { getLeadsByEmployee, addLead, updateLead, deleteLead, leads: allLeads, loading: leadsLoading } = useLeads();
 
   const getStatusBadge = useCallback((status) => {
     const variants = {
@@ -131,39 +138,72 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
     }
   }, [employeeId, onDelete, router]);
 
- const handleAttendanceSave = async (employeeId, attendanceData) => {
-  try {
-    await onAttendanceUpdate(employeeId, attendanceData);
-    setShowAttendanceModal(false);
-  } catch (error) {
-    console.error("Attendance save failed:", error);
-    alert("Failed to save attendance. Please try again.");
-  }
-};
+  const handleAttendanceSave = async (employeeId, attendanceData) => {
+    try {
+      await onAttendanceUpdate(employeeId, attendanceData);
+      setShowAttendanceModal(false);
+    } catch (error) {
+      console.error("Attendance save failed:", error);
+      alert("Failed to save attendance. Please try again.");
+    }
+  };
 
   const handlePaySalary = async (empId, amount, deductions) => {
     await onPaySalary(employeeId, amount, deductions);
     setShowPayModal(false);
   };
 
-  // ✅ Lead handlers
-  const handleLeadAdd = async (leadData) => {
-    await addLead(leadData);
-    setShowLeadModal(false);
+  // ✅ Lead handlers with edit support
+  const handleLeadSave = async (leadData) => {
+    try {
+      if (editingLead) {
+        const leadId = editingLead._id || editingLead.id;
+        await updateLead(leadId, leadData);
+      } else {
+        await addLead(leadData);
+      }
+      setShowLeadModal(false);
+      setEditingLead(null);
+    } catch (error) {
+      console.error("Lead save failed:", error);
+      throw error;
+    }
   };
 
-  const handleLeadEdit = async (leadData) => {
-    const leadId = leadData._id || leadData.id;
-    await updateLead(leadId, leadData);
-  };
 
-  const handleLeadDelete = async (leadId) => {
-    await deleteLead(leadId);
-  };
+  const confirmLeadDelete = async () => {
+  try {
+    await deleteLead(leadToDelete);
+    setLeadToDelete(null);
+  } catch (error) {
+    console.error("Lead delete failed:", error);
+    setLeadToDelete(null);
+  }
+};
+
+ const handleLeadDelete = (leadId) => {
+  setLeadToDelete(leadId);
+};
 
   const salaryStatus = getSalaryStatus();
   const employeeLeads = getLeadsByEmployee(employeeId);
-  const isLeadManager = employee.role === "lead_manager" || employee.canManageLeads || employee.role === "admin" || employee.role === "super_admin";
+
+  // ✅ Role-based permission checks
+  const currentUserRole = user?.role || "";
+  const isAdmin = currentUserRole === "admin" || currentUserRole === "super_admin";
+  const isLeadManager = currentUserRole === "lead_manager" || isAdmin;
+  const isModerator = currentUserRole === "moderator";
+  const canManageLeads = employee.canManageLeads || isLeadManager || isModerator || isAdmin;
+  
+  // ✅ Can this user add leads?
+  const canAddLead = isAdmin || isLeadManager || isModerator || employee.canManageLeads;
+  
+  // ✅ Can this user edit leads?
+  const canEditAllLeads = isAdmin || isLeadManager;
+  const canEditOwnLeads = isModerator || employee.canManageLeads;
+  
+  // ✅ Can delete leads?
+  const canDeleteLeads = isAdmin;
 
   return (
     <>
@@ -186,22 +226,16 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
               <Plus size={16} />
               Mark Attendance
             </button>
-            {isLeadManager && (
+          
+            {isAdmin && (
               <button
-                onClick={() => setShowLeadModal(true)}
-                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500"
+                onClick={() => setShowDeleteModal(true)}
+                className="inline-flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-500/20"
               >
-                <Target size={16} />
-                Add Lead
+                <Trash2 size={16} />
+                Delete Employee
               </button>
             )}
-            <button
-              onClick={() => setShowDeleteModal(true)}
-              className="inline-flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-500/20"
-            >
-              <Trash2 size={16} />
-              Delete Employee
-            </button>
           </div>
         </div>
 
@@ -236,19 +270,23 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
           </div>
 
           <div className="flex gap-3">
-            <Link
-              href={`/dashboard/employees/edit/${employeeId}`}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm font-medium text-slate-300 transition hover:border-slate-700 hover:bg-slate-800 hover:text-white"
-            >
-              Edit Employee
-            </Link>
-            <button
-              onClick={() => setShowPayModal(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500"
-            >
-              <Wallet size={18} />
-              Pay Salary
-            </button>
+            {isAdmin && (
+              <Link
+                href={`/dashboard/employees/edit/${employeeId}`}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm font-medium text-slate-300 transition hover:border-slate-700 hover:bg-slate-800 hover:text-white"
+              >
+                Edit Employee
+              </Link>
+            )}
+            {isAdmin && (
+              <button
+                onClick={() => setShowPayModal(true)}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500"
+              >
+                <Wallet size={18} />
+                Pay Salary
+              </button>
+            )}
           </div>
         </div>
 
@@ -321,30 +359,70 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
           <EmployeeTasks employee={employee} onTaskAdd={onTaskAdd} onTaskUpdate={onTaskUpdate} />
         </div>
 
-        {/* Leads Section */}
-        {isLeadManager && (
+        {/* ✅ Leads Section - Always visible for users with lead permissions */}
+        {canManageLeads && (
           <div className="mt-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Assigned Leads ({employeeLeads.length})</h2>
-              <button
-                onClick={() => setShowLeadModal(true)}
-                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500"
-              >
-                <Plus size={16} />
-                Add Lead
-              </button>
+              <h2 className="text-lg font-semibold">
+                Assigned Leads ({employeeLeads.length})
+              </h2>
+              {canAddLead && (
+                <button
+                  onClick={() => {
+                    setEditingLead(null);
+                    setShowLeadModal(true);
+                  }}
+                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500"
+                >
+                  <Plus size={16} />
+                  Add Lead
+                </button>
+              )}
             </div>
-            <LeadTable
-              leads={employeeLeads}
-              userRole={employee.role}
-              employeeId={employeeId}
-              onAdd={() => setShowLeadModal(true)}
-              onEdit={(lead) => {
-                // Open edit modal with lead data
-                setShowLeadModal(true);
-              }}
-              onDelete={handleLeadDelete}
-            />
+
+            {leadsLoading ? (
+              <div className="rounded-xl border border-dashed border-slate-700 p-8 text-center">
+                <p className="text-sm text-slate-500">Loading leads...</p>
+              </div>
+            ) : employeeLeads.length > 0 ? (
+              <LeadTable
+                leads={employeeLeads}
+                userRole={currentUserRole}
+                employeeId={employeeId}
+                onAdd={canAddLead ? () => {
+                  setEditingLead(null);
+                  setShowLeadModal(true);
+                } : null}
+                onEdit={(lead) => {
+                  const canEdit = canEditAllLeads || (canEditOwnLeads && (
+                    String(lead.assignedTo) === String(employeeId) ||
+                    String(lead.assignedTo?._id) === String(employeeId) ||
+                    String(lead.createdBy) === String(employeeId)
+                  ));
+                  if (canEdit) {
+                    setEditingLead(lead);
+                    setShowLeadModal(true);
+                  }
+                }}
+                onDelete={canDeleteLeads ? handleLeadDelete : null}
+              />
+            ) : (
+              <div className="rounded-xl border border-dashed border-slate-700 p-8 text-center">
+                <p className="text-sm text-slate-500">No leads assigned yet</p>
+                {canAddLead && (
+                  <button
+                    onClick={() => {
+                      setEditingLead(null);
+                      setShowLeadModal(true);
+                    }}
+                    className="mt-3 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500"
+                  >
+                    <Plus size={16} />
+                    Add First Lead
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -394,10 +472,27 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
       {showLeadModal && (
         <LeadForm
           employee={employee}
-          onClose={() => setShowLeadModal(false)}
-          onSave={handleLeadAdd}
+          initialData={editingLead}
+          onClose={() => {
+            setShowLeadModal(false);
+            setEditingLead(null);
+          }}
+          onSave={handleLeadSave}
         />
       )}
+
+
+      {leadToDelete && (
+  <DeleteConfirmModal
+    isOpen={!!leadToDelete}
+    onClose={() => setLeadToDelete(null)}
+    onConfirm={confirmLeadDelete}
+    title="Delete Lead"
+    message="Are you sure you want to delete this lead? This action cannot be undone."
+    itemName="Lead"
+    loading={false}
+  />
+)}
     </>
   );
 }

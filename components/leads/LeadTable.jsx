@@ -1,18 +1,19 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Eye, Pencil, Trash2, Search, Filter, Plus } from "lucide-react";
-import { LEAD_STATUS, LEAD_TYPES } from "@/constants/leadStatus";
+import { useRouter } from "next/navigation";
+import { Eye, Pencil, Trash2, Search } from "lucide-react";
+import { LEAD_STATUS } from "@/constants/leadStatus";
 
 export default function LeadTable({
   leads = [],
   onView,
   onEdit,
   onDelete,
-  onAdd,
   userRole = "employee",
   employeeId = null,
 }) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
@@ -34,12 +35,18 @@ export default function LeadTable({
     return statusObj || LEAD_STATUS.NEW;
   };
 
-  // ✅ Safe search function
-  const searchValue = search.toLowerCase();
+  const handleView = (lead) => {
+    const leadId = lead._id || lead.id;
+    if (onView) {
+      onView(lead);
+    } else {
+      router.push(`/dashboard/leads/${leadId}`);
+    }
+  };
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
-      {/* Header */}
+      {/* Header - No Add button here */}
       <div className="border-b border-slate-800 p-5 sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -72,17 +79,6 @@ export default function LeadTable({
                 <option key={status.value} value={status.value}>{status.value}</option>
               ))}
             </select>
-
-            {/* Add Lead - Only for Lead Manager role */}
-            {(userRole === "lead_manager" || userRole === "admin" || userRole === "super_admin") && (
-              <button
-                onClick={onAdd}
-                className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500"
-              >
-                <Plus size={17} />
-                Add Lead
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -95,7 +91,7 @@ export default function LeadTable({
               <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Customer</th>
               <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Type</th>
               <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Status</th>
-              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Assigned To</th>
+              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Added By</th>
               <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Follow-up</th>
               <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Action</th>
             </tr>
@@ -112,10 +108,6 @@ export default function LeadTable({
               filteredLeads.map((lead) => {
                 const leadId = lead._id || lead.id;
                 const statusObj = getStatusBadge(lead.status);
-              const isAssignedToEmployee = 
-                (typeof lead.assignedTo === 'object' && lead.assignedTo?._id === employeeId) ||
-                lead.assignedTo === employeeId ||
-                lead.assignedTo === Number(employeeId);
 
                 return (
                   <tr key={leadId} className="border-b border-slate-800/70 transition hover:bg-slate-950/50">
@@ -135,41 +127,41 @@ export default function LeadTable({
                         {statusObj.value}
                       </span>
                     </td>
-                      <td className="px-6 py-4 text-sm text-slate-300">
-                      {lead.assignedToName || 
-                      (typeof lead.assignedTo === 'object' ? lead.assignedTo?.name : null) || 
-                      "Unassigned"}
+                    {/* ✅ Added By column */}
+                    <td className="px-6 py-4 text-sm text-slate-300">
+                      {lead.createdByName || "—"}
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-400">
                       {lead.followUpDate ? new Date(lead.followUpDate).toLocaleDateString() : "—"}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1">
+                        {/* View */}
                         <button
-                          onClick={() => onView?.(lead)}
+                          onClick={() => handleView(lead)}
                           className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
-                          title="View"
+                          title="View lead"
                         >
                           <Eye size={17} />
                         </button>
 
-                        {/* Edit - Only for assigned employee or admin */}
-                        {(isAssignedToEmployee || userRole === "admin" || userRole === "super_admin") && (
+                        {/* Edit */}
+                        {onEdit && (
                           <button
-                            onClick={() => onEdit?.(lead)}
+                            onClick={() => onEdit(lead)}
                             className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
-                            title="Edit"
+                            title="Edit lead"
                           >
                             <Pencil size={17} />
                           </button>
                         )}
 
-                        {/* Delete - Only for admin/super_admin */}
-                        {(userRole === "admin" || userRole === "super_admin") && (
+                        {/* Delete */}
+                        {onDelete && (
                           <button
-                            onClick={() => onDelete?.(leadId)}
+                            onClick={() => onDelete(leadId)}
                             className="rounded-lg p-2 text-slate-500 transition hover:bg-red-500/10 hover:text-red-400"
-                            title="Delete"
+                            title="Delete lead"
                           >
                             <Trash2 size={17} />
                           </button>

@@ -10,6 +10,7 @@ export function LeadProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ✅ Load leads from API
   useEffect(() => {
     loadLeads();
   }, []);
@@ -18,6 +19,7 @@ export function LeadProvider({ children }) {
     try {
       setLoading(true);
       const response = await leadAPI.getAll();
+      console.log("📋 Leads loaded:", response.data.data);
       setLeads(response.data.data || []);
       setError(null);
     } catch (error) {
@@ -29,16 +31,17 @@ export function LeadProvider({ children }) {
   };
 
   const addLead = async (leadData) => {
-    try {
-      const response = await leadAPI.create(leadData);
-      const newLead = response.data.data;
-      setLeads(prev => [newLead, ...prev]);
-      return newLead;
-    } catch (error) {
-      console.error("Failed to add lead:", error);
-      throw error;
-    }
-  };
+  try {
+    console.log("📤 LeadContext addLead:", leadData); // Debug
+    const response = await leadAPI.create(leadData);
+    const newLead = response.data.data;
+    setLeads(prev => [newLead, ...prev]);
+    return newLead;
+  } catch (error) {
+    console.error("Failed to add lead:", error);
+    throw error;
+  }
+};
 
   const updateLead = async (id, leadData) => {
     try {
@@ -74,27 +77,39 @@ export function LeadProvider({ children }) {
     }
   };
 
-  // ✅ Fixed: Handle MongoDB ObjectId comparison
-const getLeadsByEmployee = (employeeId) => {
-  if (!employeeId) return [];
-  const empIdStr = String(employeeId);
-  
-  return leads.filter((lead) => {
-    const assignedTo = lead.assignedTo;
-    if (!assignedTo) return false;
-    
-    // ✅ If assignedTo is populated object
-    if (typeof assignedTo === 'object' && assignedTo !== null) {
-      const assignedId = assignedTo._id || assignedTo.id;
-      return String(assignedId) === empIdStr;
+  // ✅ Fixed: Get leads by employee - Handle all ID formats
+  const getLeadsByEmployee = (employeeId) => {
+    if (!employeeId) {
+      console.log("❌ No employeeId provided");
+      return [];
     }
     
-    // ✅ If assignedTo is primitive (string/number)
-    return String(assignedTo) === empIdStr || assignedTo === Number(employeeId);
-  });
-};
+    const empIdStr = String(employeeId);
+    console.log("🔍 Searching leads for employee:", empIdStr);
+    console.log("📋 Total leads in context:", leads.length);
+    
+    const filtered = leads.filter((lead) => {
+      const assignedTo = lead.assignedTo;
+      
+      // ✅ If assignedTo is populated object
+      if (typeof assignedTo === 'object' && assignedTo !== null) {
+        const assignedId = assignedTo._id || assignedTo.id;
+        const match = String(assignedId) === empIdStr;
+        if (match) console.log("✅ Match found (object):", lead.customerName);
+        return match;
+      }
+      
+      // ✅ If assignedTo is primitive
+      const match = String(assignedTo) === empIdStr || assignedTo === Number(employeeId);
+      if (match) console.log("✅ Match found (primitive):", lead.customerName);
+      return match;
+    });
+    
+    console.log("📊 Leads found for employee:", filtered.length);
+    return filtered;
+  };
 
-  // ✅ Fixed: Get lead stats with proper counting
+  // ✅ Get lead stats
   const getLeadStats = (employeeId = null) => {
     const filtered = employeeId ? getLeadsByEmployee(employeeId) : leads;
     const total = filtered.length;
