@@ -11,8 +11,8 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
   const [checkOut, setCheckOut] = useState("17:00");
   const [lateMinutes, setLateMinutes] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(""); // ✅ Error state
 
-  // Close on Escape key
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape") onClose();
@@ -21,7 +21,6 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
     return () => document.removeEventListener("keydown", handleEscape);
   }, [onClose]);
 
-  // Close on outside click
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
@@ -29,11 +28,11 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError(""); // ✅ Clear previous error
 
     try {
       const employeeId = employee._id || employee.id;
       
-      // ✅ Build clean attendance data
       const attendanceData = {
         date: date,
         status: status,
@@ -42,12 +41,12 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
         lateMinutes: status === "Present" ? Number(lateMinutes) : 0,
       };
 
-      // ✅ Call onSave with employeeId and attendanceData
       await onSave(employeeId, attendanceData);
       onClose();
     } catch (error) {
       console.error("Failed to save attendance:", error);
-      alert("Failed to save attendance. Please try again.");
+      // ✅ Inline error message set karo
+      setError(error.response?.data?.message || "Failed to save attendance. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -82,9 +81,7 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
           <form onSubmit={handleSubmit} className="space-y-4 p-5">
             {/* Date */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
-                Date
-              </label>
+              <label className="mb-2 block text-sm font-medium text-slate-300">Date</label>
               <input
                 type="date"
                 value={date}
@@ -96,9 +93,7 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
 
             {/* Status */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
-                Status
-              </label>
+              <label className="mb-2 block text-sm font-medium text-slate-300">Status</label>
               <select
                 value={status}
                 onChange={(e) => {
@@ -124,9 +119,7 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
             {status === "Present" && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
-                    Check In
-                  </label>
+                  <label className="mb-2 block text-sm font-medium text-slate-300">Check In</label>
                   <input
                     type="time"
                     value={checkIn}
@@ -136,9 +129,7 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
-                    Check Out
-                  </label>
+                  <label className="mb-2 block text-sm font-medium text-slate-300">Check Out</label>
                   <input
                     type="time"
                     value={checkOut}
@@ -153,9 +144,7 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
             {/* Late Minutes */}
             {status === "Present" && (
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
-                  Late Minutes
-                </label>
+                <label className="mb-2 block text-sm font-medium text-slate-300">Late Minutes</label>
                 <input
                   type="number"
                   min="0"
@@ -164,6 +153,14 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
                   className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
                   placeholder="0"
                 />
+              </div>
+            )}
+
+            {/* ✅ Inline Error Display */}
+            {error && (
+              <div className="flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-sm text-red-400">
+                <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                <span>{error}</span>
               </div>
             )}
 

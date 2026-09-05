@@ -3,8 +3,6 @@
 import { useMemo, useState, useCallback, useReducer } from "react";
 import Image from "next/image";
 import { getImageUrl, getFallbackImage } from "@/lib/imageHelper";
-
-
 import Link from "next/link";
 import {
   Search,
@@ -32,20 +30,12 @@ const tableReducer = (state, action) => {
   switch (action.type) {
     case "SET_SEARCH":
       return { ...state, search: action.payload };
-
     case "SET_STATUS":
       return { ...state, status: action.payload };
-
     case "SET_DEPARTMENT":
       return { ...state, department: action.payload };
-
     case "RESET_FILTERS":
-      return {
-        search: "",
-        status: "All",
-        department: "All",
-      };
-
+      return { search: "", status: "All", department: "All" };
     default:
       return state;
   }
@@ -55,6 +45,7 @@ export default function EmployeeTable({
   employees = [],
   onDelete,
   onMarkAttendance,
+   canDelete = false,
 }) {
   const [filterState, dispatch] = useReducer(tableReducer, {
     search: "",
@@ -68,6 +59,9 @@ export default function EmployeeTable({
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const { paySalary, getEmployeeSalaryStatus } = useEmployees();
+
+  // ✅ Today's date for attendance check (component-level, no employee)
+  const todayStr = new Date().toISOString().split('T')[0];
 
   // Filter employees
   const filteredEmployees = useMemo(() => {
@@ -85,14 +79,9 @@ export default function EmployeeTable({
         status === "All" || employee.status === status;
 
       const matchesDepartment =
-        department === "All" ||
-        employee.department === department;
+        department === "All" || employee.department === department;
 
-      return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesDepartment
-      );
+      return matchesSearch && matchesStatus && matchesDepartment;
     });
   }, [employees, filterState]);
 
@@ -103,43 +92,31 @@ export default function EmployeeTable({
         class: "bg-emerald-500/10 text-emerald-400",
         icon: <CheckCircle2 size={14} />,
       },
-
       Inactive: {
         class: "bg-red-500/10 text-red-400",
         icon: <XCircle size={14} />,
       },
-
       "On Leave": {
         class: "bg-amber-500/10 text-amber-400",
         icon: <Clock size={14} />,
       },
     };
-
     return variants[status] || variants.Inactive;
   }, []);
 
   // Search
   const handleSearchChange = useCallback((e) => {
-    dispatch({
-      type: "SET_SEARCH",
-      payload: e.target.value,
-    });
+    dispatch({ type: "SET_SEARCH", payload: e.target.value });
   }, []);
 
   // Status filter
   const handleStatusChange = useCallback((e) => {
-    dispatch({
-      type: "SET_STATUS",
-      payload: e.target.value,
-    });
+    dispatch({ type: "SET_STATUS", payload: e.target.value });
   }, []);
 
   // Department filter
   const handleDepartmentChange = useCallback((e) => {
-    dispatch({
-      type: "SET_DEPARTMENT",
-      payload: e.target.value,
-    });
+    dispatch({ type: "SET_DEPARTMENT", payload: e.target.value });
   }, []);
 
   // Pay salary
@@ -151,19 +128,8 @@ export default function EmployeeTable({
   const handlePaySalary = useCallback(
     async (employeeId, amount) => {
       try {
-        const result = await paySalary(
-          employeeId,
-          amount
-        );
-
-        console.log("Salary payment recorded:", {
-          employeeId,
-          amount,
-          timestamp: result.timestamp,
-          month: result.month,
-          status: result.status,
-        });
-
+        const result = await paySalary(employeeId, amount);
+        console.log("Salary payment recorded:", { employeeId, amount });
         return result;
       } catch (error) {
         console.error("Payment failed:", error);
@@ -178,26 +144,27 @@ export default function EmployeeTable({
     setSelectedEmployee(employee);
     setShowDeleteModal(true);
   }, []);
+  
+const handleDeleteConfirm = useCallback(async () => {
+  if (!selectedEmployee) return;
 
-  const handleDeleteConfirm = useCallback(async () => {
-    if (!selectedEmployee) return;
+  const employeeId = selectedEmployee._id || selectedEmployee.id;
 
-    const employeeId =
-      selectedEmployee._id || selectedEmployee.id;
+  setDeleteLoading(true);
 
-    setDeleteLoading(true);
-
-    try {
+  try {
+    // ✅ Check if onDelete exists
+    if (onDelete) {
       await onDelete(employeeId);
-
-      setShowDeleteModal(false);
-      setSelectedEmployee(null);
-    } catch (error) {
-      console.error("Delete failed:", error);
-    } finally {
-      setDeleteLoading(false);
     }
-  }, [selectedEmployee, onDelete]);
+    setShowDeleteModal(false);
+    setSelectedEmployee(null);
+  } catch (error) {
+    console.error("Delete failed:", error);
+  } finally {
+    setDeleteLoading(false);
+  }
+}, [selectedEmployee, onDelete]);
 
   const handleCloseDeleteModal = useCallback(() => {
     setShowDeleteModal(false);
@@ -207,37 +174,17 @@ export default function EmployeeTable({
   // Salary status
   const getSalaryStatusDisplay = useCallback(
     (employee) => {
-      const employeeId =
-        employee._id || employee.id;
-
-      const salaryStatus =
-        getEmployeeSalaryStatus(employeeId);
+      const employeeId = employee._id || employee.id;
+      const salaryStatus = getEmployeeSalaryStatus(employeeId);
 
       const statusConfig = {
-        Paid: {
-          class: "bg-emerald-500/10 text-emerald-400",
-          icon: <CheckCircle2 size={14} />,
-        },
-
-        Partial: {
-          class: "bg-amber-500/10 text-amber-400",
-          icon: <Clock size={14} />,
-        },
-
-        Pending: {
-          class: "bg-red-500/10 text-red-400",
-          icon: <AlertCircle size={14} />,
-        },
+        Paid: { class: "bg-emerald-500/10 text-emerald-400", icon: <CheckCircle2 size={14} /> },
+        Partial: { class: "bg-amber-500/10 text-amber-400", icon: <Clock size={14} /> },
+        Pending: { class: "bg-red-500/10 text-red-400", icon: <AlertCircle size={14} /> },
       };
 
-      const config =
-        statusConfig[salaryStatus.status] ||
-        statusConfig.Pending;
-
-      return {
-        ...salaryStatus,
-        ...config,
-      };
+      const config = statusConfig[salaryStatus.status] || statusConfig.Pending;
+      return { ...salaryStatus, ...config };
     },
     [getEmployeeSalaryStatus]
   );
@@ -249,23 +196,14 @@ export default function EmployeeTable({
         <div className="border-b border-slate-800 p-5 sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h2 className="text-lg font-semibold">
-                Employees
-              </h2>
-
-              <p className="mt-1 text-sm text-slate-500">
-                Manage your workforce and track attendance.
-              </p>
+              <h2 className="text-lg font-semibold">Employees</h2>
+              <p className="mt-1 text-sm text-slate-500">Manage your workforce and track attendance.</p>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
               {/* Search */}
               <div className="relative">
-                <Search
-                  size={17}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
-                />
-
+                <Search size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
                 <input
                   value={filterState.search}
                   onChange={handleSearchChange}
@@ -280,21 +218,10 @@ export default function EmployeeTable({
                 onChange={handleStatusChange}
                 className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-300 outline-none focus:border-indigo-500"
               >
-                <option value="All">
-                  All Status
-                </option>
-
-                <option value="Active">
-                  Active
-                </option>
-
-                <option value="Inactive">
-                  Inactive
-                </option>
-
-                <option value="On Leave">
-                  On Leave
-                </option>
+                <option value="All">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="On Leave">On Leave</option>
               </select>
 
               {/* Department */}
@@ -303,33 +230,13 @@ export default function EmployeeTable({
                 onChange={handleDepartmentChange}
                 className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-300 outline-none focus:border-indigo-500"
               >
-                <option value="All">
-                  All Departments
-                </option>
-
-                <option value="Operations">
-                  Operations
-                </option>
-
-                <option value="Finance">
-                  Finance
-                </option>
-
-                <option value="Maintenance">
-                  Maintenance
-                </option>
-
-                <option value="Security">
-                  Security
-                </option>
-
-                <option value="HR">
-                  HR
-                </option>
-
-                <option value="Marketing">
-                  Marketing
-                </option>
+                <option value="All">All Departments</option>
+                <option value="Operations">Operations</option>
+                <option value="Finance">Finance</option>
+                <option value="Maintenance">Maintenance</option>
+                <option value="Security">Security</option>
+                <option value="HR">HR</option>
+                <option value="Marketing">Marketing</option>
               </select>
             </div>
           </div>
@@ -340,181 +247,122 @@ export default function EmployeeTable({
           <table className="w-full min-w-[1400px]">
             <thead>
               <tr className="border-b border-slate-800 text-left">
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Employee
-                </th>
-
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Designation
-                </th>
-
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Department
-                </th>
-
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Contact
-                </th>
-
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Salary
-                </th>
-
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Salary Status
-                </th>
-
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Status
-                </th>
-
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Action
-                </th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Employee</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Designation</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Department</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Contact</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Salary</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Salary Status</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Status</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Action</th>
               </tr>
             </thead>
 
             <tbody>
               {filteredEmployees.map((employee) => {
-                const employeeId =
-                  employee._id || employee.id;
-
-                const statusBadge =
-                  getStatusBadge(employee.status);
-
-                const salaryStatus =
-                  getSalaryStatusDisplay(employee);
+                const employeeId = employee._id || employee.id;
+                const statusBadge = getStatusBadge(employee.status);
+                const salaryStatus = getSalaryStatusDisplay(employee);
+                const todayAttendance = employee.attendance?.find(a => a.date === todayStr);
 
                 return (
-                  <tr
-                    key={employeeId}
-                    className="border-b border-slate-800/70 transition hover:bg-slate-950/50"
-                  >
+                  <tr key={employeeId} className="border-b border-slate-800/70 transition hover:bg-slate-950/50">
                     {/* Employee */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-500/10 text-indigo-400">
-                      {employee.image ? (
-                        <Image
-                          src={getImageUrl(employee.image)}
-                          alt={employee.name}
-                          width={40}
-                          height={40}
-                          className="h-10 w-10 object-cover rounded-full"
-                          onError={(e) => {
-                            e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%236366f1'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-size='16'%3E{employee.name[0]}%3C/text%3E%3C/svg%3E";
-                          }}
-                        />
-                      ) : (
-                        <User size={18} />
-                      )}
+                          {employee.image ? (
+                            <Image
+                              src={getImageUrl(employee.image)}
+                              alt={employee.name}
+                              width={40}
+                              height={40}
+                              className="h-10 w-10 object-cover rounded-full"
+                              onError={(e) => {
+                                e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%236366f1'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-size='16'%3E{employee.name[0]}%3C/text%3E%3C/svg%3E";
+                              }}
+                            />
+                          ) : (
+                            <User size={18} />
+                          )}
                         </div>
-
                         <div>
-                          <p className="text-sm font-medium text-slate-200">
-                            {employee.name}
-                          </p>
-
-                          <p className="mt-1 text-xs text-slate-500">
-                            {employee.email}
-                          </p>
+                          <p className="text-sm font-medium text-slate-200">{employee.name}</p>
+                          <p className="mt-1 text-xs text-slate-500">{employee.email}</p>
                         </div>
                       </div>
                     </td>
 
                     {/* Designation */}
                     <td className="px-6 py-4">
-                      <span className="text-sm text-slate-300">
-                        {employee.designation}
-                      </span>
+                      <span className="text-sm text-slate-300">{employee.designation}</span>
                     </td>
 
                     {/* Department */}
                     <td className="px-6 py-4">
-                      <span className="rounded-lg bg-slate-800 px-2.5 py-1.5 text-xs text-slate-400">
-                        {employee.department}
-                      </span>
+                      <span className="rounded-lg bg-slate-800 px-2.5 py-1.5 text-xs text-slate-400">{employee.department}</span>
                     </td>
 
                     {/* Contact */}
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1 text-sm">
-                        <span className="text-slate-300">
-                          {employee.phone}
-                        </span>
-
-                        <span className="text-xs text-slate-500">
-                          {employee.cnic}
-                        </span>
+                        <span className="text-slate-300">{employee.phone}</span>
+                        <span className="text-xs text-slate-500">{employee.cnic}</span>
                       </div>
                     </td>
 
                     {/* Salary */}
                     <td className="px-6 py-4">
                       <span className="text-sm font-medium text-emerald-400">
-                        Rs.{" "}
-                        {Number(
-                          employee.salary || 0
-                        ).toLocaleString()}
+                        Rs. {Number(employee.salary || 0).toLocaleString()}
                       </span>
                     </td>
 
                     {/* Salary Status */}
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1">
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium ${salaryStatus.class}`}
-                        >
+                        <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium ${salaryStatus.class}`}>
                           {salaryStatus.icon}
                           {salaryStatus.status}
                         </span>
 
                         {salaryStatus.amount > 0 && (
                           <span className="text-xs text-slate-500">
-                            Paid: Rs.{" "}
-                            {Number(
-                              salaryStatus.amount
-                            ).toLocaleString()}
+                            Paid: Rs. {Number(salaryStatus.amount).toLocaleString()}
                           </span>
                         )}
 
-                        {salaryStatus.remaining > 0 &&
-                          salaryStatus.status !==
-                            "Paid" && (
-                            <span className="text-xs text-amber-400">
-                              Remaining: Rs.{" "}
-                              {Number(
-                                salaryStatus.remaining
-                              ).toLocaleString()}
-                            </span>
-                          )}
+                        {salaryStatus.remaining > 0 && salaryStatus.status !== "Paid" && (
+                          <span className="text-xs text-amber-400">
+                            Remaining: Rs. {Number(salaryStatus.remaining).toLocaleString()}
+                          </span>
+                        )}
 
                         {salaryStatus.paidAt && (
                           <span className="flex items-center gap-1 text-xs text-slate-600">
                             <Calendar size={12} />
-
-                            {new Date(
-                              salaryStatus.paidAt
-                            ).toLocaleString()}
+                            {new Date(salaryStatus.paidAt).toLocaleString()}
                           </span>
                         )}
                       </div>
                     </td>
 
-                    {/* Status */}
+                    {/* Status - with mini attendance status */}
                     <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium ${statusBadge.class}`}
-                      >
+                      <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium ${statusBadge.class}`}>
                         {statusBadge.icon}
                         {employee.status}
                       </span>
+                      {todayAttendance && todayAttendance.status !== 'Present' && (
+                        <p className="mt-1 text-xs text-amber-400">
+                          {todayAttendance.status}
+                        </p>
+                      )}
                     </td>
 
                     {/* Actions */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1">
-                        {/* View */}
                         <Link
                           href={`/dashboard/employees/${employeeId}`}
                           className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
@@ -523,7 +371,6 @@ export default function EmployeeTable({
                           <Eye size={17} />
                         </Link>
 
-                        {/* Edit */}
                         <Link
                           href={`/dashboard/employees/edit/${employeeId}`}
                           className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
@@ -532,40 +379,30 @@ export default function EmployeeTable({
                           <Pencil size={17} />
                         </Link>
 
-                        {/* Attendance */}
                         <button
-                          onClick={() =>
-                            onMarkAttendance?.(
-                              employee
-                            )
-                          }
+                          onClick={() => onMarkAttendance?.(employee)}
                           className="rounded-lg p-2 text-slate-500 transition hover:bg-emerald-500/10 hover:text-emerald-400"
                           title="Mark attendance"
                         >
                           <CalendarCheck size={17} />
                         </button>
 
-                        {/* Pay Salary */}
                         <button
-                          onClick={() =>
-                            handlePayClick(employee)
-                          }
+                          onClick={() => handlePayClick(employee)}
                           className="rounded-lg p-2 text-slate-500 transition hover:bg-emerald-500/10 hover:text-emerald-400"
                           title="Pay salary"
                         >
                           <Wallet size={17} />
                         </button>
-
-                        {/* Delete */}
+                        {canDelete && onDelete && (
                         <button
-                          onClick={() =>
-                            handleDeleteClick(employee)
-                          }
+                          onClick={() => handleDeleteClick(employee)}
                           className="rounded-lg p-2 text-slate-500 transition hover:bg-red-500/10 hover:text-red-400"
                           title="Delete employee"
                         >
                           <Trash2 size={17} />
                         </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -577,13 +414,8 @@ export default function EmployeeTable({
           {/* Empty State */}
           {filteredEmployees.length === 0 && (
             <div className="py-16 text-center">
-              <p className="text-sm font-medium">
-                No employees found
-              </p>
-
-              <p className="mt-1 text-xs text-slate-500">
-                Try changing your search or filter.
-              </p>
+              <p className="text-sm font-medium">No employees found</p>
+              <p className="mt-1 text-xs text-slate-500">Try changing your search or filter.</p>
             </div>
           )}
         </div>

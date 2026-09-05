@@ -20,11 +20,9 @@ export default function EditEmployeePage() {
       const found = employees.find(
         (item) => item._id === params.id || item.id === params.id || item.id === Number(params.id)
       );
-      if (found) {
-        setEmployee(found);
-      }
-      setLoading(false);
+      setEmployee(found);
     }
+    setLoading(false);
   }, [params.id, employees]);
 
   const handleSubmit = async (employeeData) => {

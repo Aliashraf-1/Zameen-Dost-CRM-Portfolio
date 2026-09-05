@@ -4,13 +4,17 @@ import { useState, useMemo, useEffect } from "react";
 import { Plus, CalendarCheck, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useEmployees } from "@/context/EmployeeContext";
+import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import EmployeeStats from "@/components/employees/EmployeeStats";
 import EmployeeTable from "@/components/employees/EmployeeTable";
 import AttendanceModal from "@/components/employees/AttendanceModal";
 
 export default function EmployeesPage() {
-  const { employees, loadEmployees, loading } = useEmployees();
+  // ✅ Sab hooks top-level par
+  const { employees, loadEmployees, loading, deleteEmployee, markAttendance } = useEmployees();
+  const { user } = useAuth();
+  
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
   const [department, setDepartment] = useState("All");
@@ -18,7 +22,9 @@ export default function EmployeesPage() {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showEmployeeSelect, setShowEmployeeSelect] = useState(false);
 
-  // ✅ Reload employees on mount
+  // ✅ Check if current user is admin/super_admin
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
+
   useEffect(() => {
     loadEmployees();
   }, []);
@@ -33,8 +39,7 @@ export default function EmployeesPage() {
         employee.designation.toLowerCase().includes(searchValue);
 
       const matchesStatus = status === "All" || employee.status === status;
-      const matchesDepartment =
-        department === "All" || employee.department === department;
+      const matchesDepartment = department === "All" || employee.department === department;
 
       return matchesSearch && matchesStatus && matchesDepartment;
     });
@@ -52,6 +57,26 @@ export default function EmployeesPage() {
     setShowAttendanceModal(true);
   };
 
+  const handleDeleteEmployee = async (employeeId) => {
+    try {
+      await deleteEmployee(employeeId);
+    } catch (error) {
+      console.error("Delete failed:", error);
+      throw error;
+    }
+  };
+
+  const handleAttendanceSave = async (employeeId, attendanceData) => {
+    try {
+      await markAttendance(employeeId, attendanceData);
+      setShowAttendanceModal(false);
+      setSelectedEmployee(null);
+    } catch (error) {
+      console.error("Attendance failed:", error);
+      throw error; // ✅ Error propagate to modal
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -67,9 +92,7 @@ export default function EmployeesPage() {
         <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-medium text-indigo-400">Human Resources</p>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
-              Employees
-            </h1>
+            <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Employees</h1>
             <p className="mt-2 max-w-2xl text-sm text-slate-500">
               Manage employees, track attendance, and process salaries.
             </p>
@@ -112,9 +135,7 @@ export default function EmployeesPage() {
                           </button>
                         ))
                       ) : (
-                        <div className="px-3 py-4 text-center text-sm text-slate-500">
-                          No employees found
-                        </div>
+                        <div className="px-3 py-4 text-center text-sm text-slate-500">No employees found</div>
                       )}
                     </div>
                   </div>
@@ -138,6 +159,8 @@ export default function EmployeesPage() {
           <EmployeeTable
             employees={filteredEmployees}
             onMarkAttendance={openAttendanceModal}
+            onDelete={isAdmin ? handleDeleteEmployee : null} // ✅ Sirf admin delete kar sakta
+            canDelete={isAdmin} // ✅ Delete button conditional
           />
         </div>
 
@@ -149,12 +172,7 @@ export default function EmployeesPage() {
               setSelectedEmployee(null);
               setShowEmployeeSelect(false);
             }}
-            onSave={(attendanceData) => {
-              // Attendance save handled by modal
-              setShowAttendanceModal(false);
-              setSelectedEmployee(null);
-              setShowEmployeeSelect(false);
-            }}
+            onSave={handleAttendanceSave}
           />
         )}
       </div>

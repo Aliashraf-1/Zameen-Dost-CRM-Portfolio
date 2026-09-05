@@ -190,8 +190,10 @@ exports.deleteEmployee = async (req, res) => {
   }
 };
 
-// ✅ Mark attendance
 
+
+// ✅ Mark attendance - Prevent duplicate date
+// ✅ Mark attendance - Complete Fixed
 exports.markAttendance = async (req, res) => {
   try {
     const { id } = req.params;
@@ -208,6 +210,15 @@ exports.markAttendance = async (req, res) => {
     const date = attendanceData.date || new Date().toISOString().split('T')[0];
     const status = attendanceData.status || 'Present';
     
+    // ✅ Check duplicate attendance
+    const existingAttendance = employee.attendance.find(a => a.date === date);
+    if (existingAttendance) {
+      return res.status(400).json({
+        success: false,
+        message: 'Attendance already marked for this date.',
+      });
+    }
+
     // ✅ Check if Friday
     const dayOfWeek = new Date(date).getDay();
     const isFriday = dayOfWeek === 5;
@@ -241,15 +252,16 @@ exports.markAttendance = async (req, res) => {
       }
     }
 
+    // ✅ Define attendanceRecord BEFORE pushing
     const attendanceRecord = {
-      date,
+      date: date,
       status: finalStatus,
       checkIn: finalStatus === 'Present' ? attendanceData.checkIn : null,
       checkOut: finalStatus === 'Present' ? attendanceData.checkOut : null,
       lateMinutes: finalStatus === 'Present' ? Number(attendanceData.lateMinutes || 0) : 0,
-      chargeableLateMinutes,
-      lateDeductionAmount,
-      leaveDeductionAmount,
+      chargeableLateMinutes: chargeableLateMinutes,
+      lateDeductionAmount: lateDeductionAmount,
+      leaveDeductionAmount: leaveDeductionAmount,
     };
 
     employee.attendance.push(attendanceRecord);
@@ -344,7 +356,8 @@ exports.updateTask = async (req, res) => {
   }
 };
 
-// ✅ Pay salary
+
+// ✅ Pay salary - Updated logic
 exports.paySalary = async (req, res) => {
   try {
     const { id } = req.params;
@@ -358,10 +371,23 @@ exports.paySalary = async (req, res) => {
       });
     }
 
+    const monthlySalary = Number(employee.salary || 0);
+    const paidAmount = Number(amount || monthlySalary);
+    
+    // ✅ Calculate total deductions (from provided object or sum of parts)
+    const totalDeductions = deductions?.total || 
+      (deductions?.leaves || 0) + (deductions?.late || 0) + (deductions?.taskFailure || 0) || 0;
+
+    // ✅ Expected amount after deductions
+    const expectedAmount = monthlySalary - totalDeductions;
+
+    // ✅ Status logic: Paid if paidAmount >= expectedAmount, else Partial
+    const status = paidAmount >= expectedAmount ? 'Paid' : 'Partial';
+
     const salaryRecord = {
       month: month || new Date().toISOString().slice(0, 7),
-      amount: amount || employee.salary,
-      status: amount >= employee.salary ? 'Paid' : 'Partial',
+      amount: paidAmount,
+      status: status,
       paidAt: new Date().toISOString(),
       remarks: 'Salary payment',
       deductions: deductions || { leaves: 0, late: 0, taskFailure: 0, total: 0 },

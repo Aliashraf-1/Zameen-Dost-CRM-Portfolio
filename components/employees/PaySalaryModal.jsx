@@ -27,38 +27,28 @@ export default function PaySalaryModal({
 
   const monthlySalary = Number(employee.salary || 0);
 
-  // ✅ Calculate deductions for current month with 30 minutes grace time
   const deductions = useMemo(() => {
     const attendance = employee.attendance || [];
     const tasks = employee.tasks || [];
     const currentMonth = new Date().toISOString().slice(0, 7);
     
-    // Filter current month attendance
     const currentMonthAttendance = attendance.filter(a => a.date?.startsWith(currentMonth));
     
-    // Count leaves (excluding Fridays)
     const leaves = currentMonthAttendance.filter(a => a.status === "Leave").length;
-    
-    // Count absent (excluding Fridays)
     const absent = currentMonthAttendance.filter(a => a.status === "Absent").length;
     
-    // ✅ Calculate late minutes with 30 minutes grace time
     const totalLateMinutes = currentMonthAttendance.reduce((sum, a) => {
       const lateMins = a.lateMinutes || 0;
-      // ✅ Grace time: 30 minutes free
       const chargeableLate = Math.max(lateMins - 30, 0);
       return sum + chargeableLate;
     }, 0);
     
-    // Count failed tasks
     const failedTasks = tasks.filter(t => t.status === "Failed").length;
     
-    // Get deduction rates
     const leaveDeduction = employee.attendanceSettings?.leaveDeduction || 500;
     const lateDeduction = employee.attendanceSettings?.lateDeduction || 10;
     const taskFailureDeduction = employee.attendanceSettings?.taskFailureDeduction || 1000;
     
-    // Get failed tasks with custom deductions
     const failedTasksWithDeduction = tasks.filter(t => t.status === "Failed" && t.failureDeduction);
     const customTaskDeductions = failedTasksWithDeduction.reduce(
       (sum, t) => sum + (t.failureDeduction || 0), 0
@@ -66,12 +56,16 @@ export default function PaySalaryModal({
     
     const totalTaskDeduction = customTaskDeductions > 0 ? customTaskDeductions : (failedTasks * taskFailureDeduction);
     
-    // ✅ Count leaves (excluding Fridays) - 1 free leave per month allowed
-    const chargeableLeaves = Math.max(leaves - 1, 0); // 1 leave free per month
+    const chargeableLeaves = Math.max(leaves - 1, 0);
+    const chargeableAbsent = Math.max(absent - 1, 0);
+
+    const leaveAmount = chargeableLeaves * leaveDeduction;
+    const absentAmount = chargeableAbsent * leaveDeduction;
+    const lateAmount = totalLateMinutes * lateDeduction;
+    const taskAmount = totalTaskDeduction;
     
-    const totalDeduction = (chargeableLeaves * leaveDeduction) + (totalLateMinutes * lateDeduction) + totalTaskDeduction;
+    const totalDeduction = leaveAmount + absentAmount + lateAmount + taskAmount;
     
-    // ✅ Calculate grace time used (free minutes)
     const totalLateMinutesWithGrace = currentMonthAttendance.reduce((sum, a) => sum + (a.lateMinutes || 0), 0);
     const freeLateMinutes = Math.min(totalLateMinutesWithGrace, 30 * currentMonthAttendance.filter(a => a.lateMinutes > 0).length || 0);
     const chargeableLateMinutes = Math.max(totalLateMinutesWithGrace - freeLateMinutes, 0);
@@ -81,6 +75,7 @@ export default function PaySalaryModal({
       chargeableLeaves,
       freeLeaves: Math.min(leaves, 1),
       absent,
+      chargeableAbsent, // ✅ Added
       totalLateMinutes: chargeableLateMinutes,
       freeLateMinutes,
       failedTasks,
@@ -88,22 +83,20 @@ export default function PaySalaryModal({
       lateDeduction,
       taskFailureDeduction,
       totalDeduction,
-      leaveAmount: chargeableLeaves * leaveDeduction,
-      lateAmount: chargeableLateMinutes * lateDeduction,
-      taskAmount: totalTaskDeduction,
+      leaveAmount,
+      absentAmount,
+      lateAmount,
+      taskAmount,
       customTaskDeductions: failedTasksWithDeduction,
     };
   }, [employee]);
 
-  // ✅ Final amount after deductions
   const finalAmount = applyDeductions ? Math.max(monthlySalary - deductions.totalDeduction, 0) : monthlySalary;
 
-  // ✅ Set initial amount to final amount
   useEffect(() => {
     setAmount(finalAmount);
   }, [finalAmount]);
 
-  // Close on Escape key
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape") onClose();
@@ -112,14 +105,11 @@ export default function PaySalaryModal({
     return () => document.removeEventListener("keydown", handleEscape);
   }, [onClose]);
 
-  // Close on outside click
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
 
- // In PaySalaryModal.jsx, find handleSubmit function and update:
-
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const payAmount = Number(amount);
@@ -138,11 +128,17 @@ const handleSubmit = async (e) => {
     setError("");
 
     try {
-      // ✅ Fix: Get correct employee ID
       const employeeId = employee._id || employee.id;
       
-      // ✅ Fix: Pass deductions as third argument
-      const result = await onPay(employeeId, payAmount, applyDeductions ? deductions : null);
+      const deductionsToSend = applyDeductions ? {
+        leaves: deductions.leaveAmount,
+        late: deductions.lateAmount,
+        taskFailure: deductions.taskAmount,
+        absent: deductions.absentAmount,
+        total: deductions.totalDeduction,
+      } : null;
+      
+      const result = await onPay(employeeId, payAmount, deductionsToSend);
       
       setSuccess(true);
       setTimeout(() => {
@@ -156,15 +152,33 @@ const handleSubmit = async (e) => {
     }
   };
 
-  // Check current month payment status
   const history = employee.salaryHistory || [];
   const currentMonth = new Date().toISOString().slice(0, 7);
   const currentPayment = history.find((h) => h.month === currentMonth);
   
-  const isFullyPaid = currentPayment?.status === "Paid" && currentPayment?.amount >= monthlySalary;
-  const isPartiallyPaid = currentPayment?.status === "Partial";
-  const remainingAmount = isPartiallyPaid ? monthlySalary - (currentPayment?.amount || 0) : monthlySalary;
-  const paidAmount = currentPayment?.amount || 0;
+  let isFullyPaid = false;
+  let isPartiallyPaid = false;
+  let paidAmount = 0;
+  let remainingAmount = monthlySalary;
+
+  if (currentPayment) {
+    paidAmount = Number(currentPayment.amount || 0);
+    const totalDeductions = currentPayment.deductions?.total || 
+      (currentPayment.deductions?.leaves || 0) + 
+      (currentPayment.deductions?.late || 0) + 
+      (currentPayment.deductions?.taskFailure || 0) +
+      (currentPayment.deductions?.absent || 0) || 0;
+    
+    const expectedAmount = monthlySalary - totalDeductions;
+    
+    if (paidAmount >= expectedAmount) {
+      isFullyPaid = true;
+      remainingAmount = 0;
+    } else {
+      isPartiallyPaid = true;
+      remainingAmount = expectedAmount - paidAmount;
+    }
+  }
 
   return (
     <ModalPortal>
@@ -211,7 +225,7 @@ const handleSubmit = async (e) => {
               </div>
             </div>
 
-            {/* ✅ Deductions Section */}
+            {/* Deductions Section */}
             <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-amber-400">Deductions</span>
@@ -228,7 +242,6 @@ const handleSubmit = async (e) => {
 
               {applyDeductions && (
                 <div className="space-y-2 text-sm">
-                  {/* Free Leave */}
                   {deductions.freeLeaves > 0 && (
                     <div className="flex items-center justify-between text-green-400">
                       <span className="flex items-center gap-2">
@@ -239,7 +252,6 @@ const handleSubmit = async (e) => {
                     </div>
                   )}
 
-                  {/* Chargeable Leaves */}
                   {deductions.chargeableLeaves > 0 && (
                     <div className="flex items-center justify-between">
                       <span className="text-slate-400 flex items-center gap-2">
@@ -250,18 +262,19 @@ const handleSubmit = async (e) => {
                     </div>
                   )}
 
-                  {/* Absent */}
                   {deductions.absent > 0 && (
                     <div className="flex items-center justify-between">
                       <span className="text-slate-400 flex items-center gap-2">
                         <Clock size={14} />
                         Absent ({deductions.absent} days)
+                        {deductions.chargeableAbsent < deductions.absent && (
+                          <span className="text-xs text-green-400">(1 free)</span>
+                        )}
                       </span>
-                      <span className="text-red-400">- Rs. {(deductions.absent * deductions.leaveDeduction).toLocaleString()}</span>
+                      <span className="text-red-400">- Rs. {deductions.absentAmount.toLocaleString()}</span>
                     </div>
                   )}
 
-                  {/* Late with Grace Time */}
                   {deductions.totalLateMinutes > 0 && (
                     <div className="flex items-center justify-between">
                       <span className="text-slate-400 flex items-center gap-2">
@@ -275,7 +288,6 @@ const handleSubmit = async (e) => {
                     </div>
                   )}
 
-                  {/* Task Failure */}
                   {deductions.failedTasks > 0 && (
                     <div className="flex items-center justify-between">
                       <span className="text-slate-400 flex items-center gap-2">
@@ -286,7 +298,6 @@ const handleSubmit = async (e) => {
                     </div>
                   )}
 
-                  {/* Custom Task Deductions */}
                   {deductions.customTaskDeductions?.map((task, index) => (
                     <div key={index} className="flex items-center justify-between pl-6 text-xs">
                       <span className="text-slate-500">└ {task.title}</span>
@@ -294,7 +305,6 @@ const handleSubmit = async (e) => {
                     </div>
                   ))}
 
-                  {/* Total Deductions */}
                   {deductions.totalDeduction > 0 && (
                     <div className="border-t border-amber-500/20 pt-2 mt-2 flex items-center justify-between font-semibold">
                       <span className="text-amber-400 flex items-center gap-2">
@@ -332,7 +342,7 @@ const handleSubmit = async (e) => {
                   ) : isPartiallyPaid ? (
                     <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-400">
                       <Clock size={14} />
-                      Partial ({paidAmount.toLocaleString()})
+                      Partial
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 rounded-lg bg-red-500/10 px-2.5 py-1 text-xs font-medium text-red-400">
@@ -342,7 +352,6 @@ const handleSubmit = async (e) => {
                   )}
                 </div>
 
-                {/* ✅ Remaining Amount - Uper */}
                 {remainingAmount > 0 && !isFullyPaid && (
                   <div className="flex items-center justify-between border-t border-slate-800 pt-2">
                     <span className="text-xs text-slate-500">Remaining Salary</span>
@@ -352,7 +361,6 @@ const handleSubmit = async (e) => {
                   </div>
                 )}
 
-                {/* ✅ Final Amount - Nichay */}
                 {applyDeductions && deductions.totalDeduction > 0 && (
                   <div className="flex items-center justify-between border-t border-emerald-500/20 pt-2">
                     <span className="text-xs text-slate-500">Final Amount (After Deductions)</span>
@@ -364,7 +372,7 @@ const handleSubmit = async (e) => {
 
                 {paidAmount > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500">Already Paid</span>
+                    <span className="text-xs text-slate-500">Paid Amount</span>
                     <span className="text-xs font-medium text-emerald-400">
                       Rs. {paidAmount.toLocaleString()}
                     </span>
@@ -373,7 +381,7 @@ const handleSubmit = async (e) => {
               </div>
             </div>
 
-            {/* Amount Input - Auto-filled with final amount */}
+            {/* Amount Input */}
             {!isFullyPaid && (
               <div>
                 <label className="mb-2 block text-sm font-medium text-slate-300">
