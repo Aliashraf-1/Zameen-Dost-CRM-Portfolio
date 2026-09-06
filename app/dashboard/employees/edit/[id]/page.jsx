@@ -39,7 +39,7 @@ export default function EditEmployeePage() {
   if (loading || contextLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="animate-pulse text-slate-500">Loading employee...</div>
+        <div className="animate-pulse text-muted-foreground">Loading employee...</div>
       </div>
     );
   }
@@ -49,14 +49,14 @@ export default function EditEmployeePage() {
       <div className="mx-auto max-w-5xl px-4 py-8">
         <Link
           href="/dashboard/employees"
-          className="mb-6 inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-white"
+          className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground"
         >
           <ArrowLeft size={17} />
           Back to Employees
         </Link>
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-12 text-center">
-          <h2 className="text-xl font-semibold text-slate-300">Employee Not Found</h2>
-          <p className="mt-2 text-sm text-slate-500">This employee may have been deleted.</p>
+        <div className="rounded-2xl border border-border bg-card p-12 text-center">
+          <h2 className="text-xl font-semibold text-card-foreground">Employee Not Found</h2>
+          <p className="mt-2 text-sm text-muted-foreground">This employee may have been deleted.</p>
           <Link
             href="/dashboard/employees"
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500"
@@ -74,7 +74,7 @@ export default function EditEmployeePage() {
         <div className="mb-8">
           <Link
             href="/dashboard/employees"
-            className="mb-4 inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-white"
+            className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground"
           >
             <ArrowLeft size={17} />
             Back to Employees
@@ -83,7 +83,7 @@ export default function EditEmployeePage() {
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
             Edit Employee
           </h1>
-          <p className="mt-2 text-sm text-slate-500">Update employee information.</p>
+          <p className="mt-2 text-sm text-muted-foreground">Update employee information.</p>
         </div>
 
         <EmployeeForm 

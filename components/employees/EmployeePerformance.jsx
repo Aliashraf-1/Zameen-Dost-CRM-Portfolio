@@ -2,12 +2,15 @@
 
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
+import { useTheme } from "next-themes";
 import { TrendingUp, TrendingDown, Clock, CheckCircle2, XCircle, AlertCircle, Target } from "lucide-react";
 import { useLeads } from "@/context/LeadContext";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export default function EmployeePerformance({ employee }) {
+  const { resolvedTheme } = useTheme();
+  const chartMuted = resolvedTheme === "light" ? "#64748b" : "#94a3b8";
   const attendance = employee?.attendance || [];
   const tasks = employee?.tasks || [];
   const { getLeadsByEmployee } = useLeads();
@@ -70,43 +73,43 @@ export default function EmployeePerformance({ employee }) {
     <div className="space-y-6">
       {/* Stats Grid - Add lead stats */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock size={16} />
             Attendance Rate
           </div>
           <p className="mt-2 text-2xl font-bold">{stats.attendanceRate}%</p>
-          <p className="text-xs text-slate-500">{stats.present}/{stats.totalDays} days present</p>
+          <p className="text-xs text-muted-foreground">{stats.present}/{stats.totalDays} days present</p>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <CheckCircle2 size={16} className="text-emerald-400" />
             Task Completion
           </div>
           <p className="mt-2 text-2xl font-bold">{stats.taskCompletionRate}%</p>
-          <p className="text-xs text-slate-500">{stats.completed}/{stats.totalTasks} completed</p>
+          <p className="text-xs text-muted-foreground">{stats.completed}/{stats.totalTasks} completed</p>
         </div>
 
         {/* ✅ Lead Stats */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Target size={16} className="text-indigo-400" />
             Lead Conversion
           </div>
           <p className="mt-2 text-2xl font-bold">{leadStats.conversionRate}%</p>
-          <p className="text-xs text-slate-500">{leadStats.converted}/{leadStats.total} converted</p>
+          <p className="text-xs text-muted-foreground">{leadStats.converted}/{leadStats.total} converted</p>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <TrendingDown size={16} className="text-red-400" />
             Total Deductions
           </div>
           <p className="mt-2 text-2xl font-bold text-red-400">
             Rs. {stats.totalDeduction.toLocaleString()}
           </p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Leaves: {stats.leaves} | Late: {stats.totalLateMinutes}min
           </p>
         </div>
@@ -118,21 +121,21 @@ export default function EmployeePerformance({ employee }) {
             Overall Score
           </div>
           <p className="mt-2 text-2xl font-bold text-indigo-400">{stats.overallScore}%</p>
-          <p className="text-xs text-slate-500">Performance rating</p>
+          <p className="text-xs text-muted-foreground">Performance rating</p>
         </div>
       </div>
 
       {/* Charts - same as before */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Attendance Chart */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <div className="rounded-2xl border border-border bg-card p-6">
           <h3 className="mb-4 text-lg font-semibold">Attendance Distribution</h3>
           <Chart
             options={{
               chart: { type: "donut", toolbar: { show: false }, background: "transparent" },
               labels: ["Present", "Absent", "Leave"],
               colors: ["#10b981", "#ef4444", "#f59e0b"],
-              legend: { position: "bottom", labels: { colors: "#94a3b8" } },
+              legend: { position: "bottom", labels: { colors: chartMuted } },
               plotOptions: {
                 pie: {
                   donut: {
@@ -142,7 +145,7 @@ export default function EmployeePerformance({ employee }) {
                       total: {
                         show: true,
                         label: "Attendance",
-                        color: "#94a3b8",
+                        color: chartMuted,
                         fontSize: "14px",
                         formatter: () => `${stats.attendanceRate}%`,
                       },
@@ -158,14 +161,14 @@ export default function EmployeePerformance({ employee }) {
         </div>
 
         {/* Task Chart */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <div className="rounded-2xl border border-border bg-card p-6">
           <h3 className="mb-4 text-lg font-semibold">Task Distribution</h3>
           <Chart
             options={{
               chart: { type: "donut", toolbar: { show: false }, background: "transparent" },
               labels: ["Completed", "Failed", "Pending"],
               colors: ["#10b981", "#ef4444", "#f59e0b"],
-              legend: { position: "bottom", labels: { colors: "#94a3b8" } },
+              legend: { position: "bottom", labels: { colors: chartMuted } },
               plotOptions: {
                 pie: {
                   donut: {
@@ -175,7 +178,7 @@ export default function EmployeePerformance({ employee }) {
                       total: {
                         show: true,
                         label: "Tasks",
-                        color: "#94a3b8",
+                        color: chartMuted,
                         fontSize: "14px",
                         formatter: () => `${stats.taskCompletionRate}%`,
                       },

@@ -134,20 +134,20 @@ export default function EmployeeAttendance({ attendance = [] }) {
   const displayAttendance = showAll ? recentAttendance : recentAttendance.slice(0, 4);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card">
       {/* Header */}
-      <div className="border-b border-slate-800 p-6">
+      <div className="border-b border-border p-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold">Attendance History</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Last 30 days of attendance records
             </p>
           </div>
           {recentAttendance.length > 4 && (
             <button
               onClick={() => setShowAll(!showAll)}
-              className="flex items-center gap-1 rounded-lg border border-slate-800 px-3 py-1.5 text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white"
+              className="flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
               {showAll ? (
                 <>
@@ -166,29 +166,29 @@ export default function EmployeeAttendance({ attendance = [] }) {
 
         {/* ✅ Stats Summary with Deductions */}
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-lg bg-slate-950/50 p-3">
-            <p className="text-xs text-slate-500">Attendance Rate</p>
+          <div className="rounded-lg bg-muted p-3">
+            <p className="text-xs text-muted-foreground">Attendance Rate</p>
             <p className="mt-1 text-lg font-semibold text-emerald-400">
               {stats.attendanceRate}%
             </p>
           </div>
-          <div className="rounded-lg bg-slate-950/50 p-3">
-            <p className="text-xs text-slate-500">Present</p>
-            <p className="mt-1 text-lg font-semibold text-slate-200">
+          <div className="rounded-lg bg-muted p-3">
+            <p className="text-xs text-muted-foreground">Present</p>
+            <p className="mt-1 text-lg font-semibold text-foreground">
               {stats.present}/{stats.total - stats.fridayOff} days
             </p>
           </div>
-          <div className="rounded-lg bg-slate-950/50 p-3">
-            <p className="text-xs text-slate-500">Late Deduction</p>
+          <div className="rounded-lg bg-muted p-3">
+            <p className="text-xs text-muted-foreground">Late Deduction</p>
             <p className="mt-1 text-lg font-semibold text-amber-400">
               Rs. {stats.totalLateDeduction.toLocaleString()}
             </p>
             {stats.chargeableLateMinutes > 0 && (
-              <p className="text-xs text-slate-500">{stats.chargeableLateMinutes} min charged</p>
+              <p className="text-xs text-muted-foreground">{stats.chargeableLateMinutes} min charged</p>
             )}
           </div>
-          <div className="rounded-lg bg-slate-950/50 p-3">
-            <p className="text-xs text-slate-500">Leave Deduction</p>
+          <div className="rounded-lg bg-muted p-3">
+            <p className="text-xs text-muted-foreground">Leave Deduction</p>
             <p className="mt-1 text-lg font-semibold text-red-400">
               Rs. {stats.totalLeaveDeduction.toLocaleString()}
             </p>
@@ -199,20 +199,20 @@ export default function EmployeeAttendance({ attendance = [] }) {
       {/* Table */}
       {recentAttendance.length === 0 ? (
         <div className="p-10 text-center">
-          <p className="text-sm text-slate-500">No attendance records available.</p>
+          <p className="text-sm text-muted-foreground">No attendance records available.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[800px]">
             <thead>
-              <tr className="border-b border-slate-800 text-left">
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Date</th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Day</th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Status</th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Check In</th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Check Out</th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Late (min)</th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Deduction</th>
+              <tr className="border-b border-border text-left">
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Date</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Day</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Status</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Check In</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Check Out</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Late (min)</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Deduction</th>
               </tr>
             </thead>
 
@@ -227,16 +227,16 @@ export default function EmployeeAttendance({ attendance = [] }) {
                 return (
                   <tr
                     key={record._id || index}
-                    className="border-b border-slate-800/70 transition hover:bg-slate-950/50"
+                    className="border-b border-border/70 transition hover:bg-muted"
                   >
-                    <td className="px-6 py-4 text-sm text-slate-300">
+                    <td className="px-6 py-4 text-sm text-card-foreground">
                       {recordDate.toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "short",
                         day: "numeric",
                       })}
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-500">{dayName}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{dayName}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium ${statusBadge.class}`}>
                         {statusBadge.icon}
@@ -249,19 +249,19 @@ export default function EmployeeAttendance({ attendance = [] }) {
                         <span className="ml-2 text-xs text-green-400/70">(Free)</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-400">{record.checkIn || "—"}</td>
-                    <td className="px-6 py-4 text-sm text-slate-400">{record.checkOut || "—"}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{record.checkIn || "—"}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{record.checkOut || "—"}</td>
                     <td className="px-6 py-4 text-sm">
                       {record.lateMinutes > 0 ? (
                         <span className="inline-flex items-center gap-1 text-amber-400">
                           <Clock size={12} />
                           {record.lateMinutes}
                           {record.chargeableLateMinutes > 0 && (
-                            <span className="text-xs text-slate-500">({record.chargeableLateMinutes} charged)</span>
+                            <span className="text-xs text-muted-foreground">({record.chargeableLateMinutes} charged)</span>
                           )}
                         </span>
                       ) : (
-                        <span className="text-slate-600">0</span>
+                        <span className="text-muted-foreground">0</span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-sm">
@@ -271,7 +271,7 @@ export default function EmployeeAttendance({ attendance = [] }) {
                           Rs. {totalRecordDeduction.toLocaleString()}
                         </span>
                       ) : (
-                        <span className="text-slate-600">—</span>
+                        <span className="text-muted-foreground">—</span>
                       )}
                     </td>
                   </tr>
@@ -281,7 +281,7 @@ export default function EmployeeAttendance({ attendance = [] }) {
           </table>
 
           {recentAttendance.length > 4 && (
-            <div className="border-t border-slate-800 p-3 text-center">
+            <div className="border-t border-border p-3 text-center">
               <button
                 onClick={() => setShowAll(!showAll)}
                 className="inline-flex items-center gap-1 text-sm text-indigo-400 transition hover:text-indigo-300"

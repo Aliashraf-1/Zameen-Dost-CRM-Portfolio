@@ -20,30 +20,30 @@ export default function RecentActivity({ activities = [] }) {
       salary: "text-blue-400",
       building: "text-amber-400",
     };
-    return colors[type] || "text-slate-400";
+    return colors[type] || "text-muted-foreground";
   };
 
   if (activities.length === 0) {
     return (
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
+      <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
         <div className="mb-4">
           <h2 className="text-lg font-semibold">Recent Activity</h2>
-          <p className="mt-0.5 text-xs text-slate-500">No recent activity</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">No recent activity</p>
         </div>
         <div className="flex flex-col items-center justify-center py-8">
-          <Clock size={32} className="text-slate-600" />
-          <p className="mt-3 text-sm text-slate-500">No activity yet</p>
+          <Clock size={32} className="text-muted-foreground" />
+          <p className="mt-3 text-sm text-muted-foreground">No activity yet</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
+    <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold">Recent Activity</h2>
-          <p className="mt-0.5 text-xs text-slate-500">
+          <p className="mt-0.5 text-xs text-muted-foreground">
             Latest updates from your properties
           </p>
         </div>
@@ -60,16 +60,16 @@ export default function RecentActivity({ activities = [] }) {
           return (
             <div
               key={index}
-              className="flex items-start gap-3 rounded-xl border border-slate-800 bg-slate-950/30 p-3 transition hover:bg-slate-950/50"
+              className="flex items-start gap-3 rounded-xl border border-border bg-muted/50 p-3 transition hover:bg-muted"
             >
-              <div className={`rounded-lg bg-slate-800/30 p-2 ${iconColor}`}>
+              <div className={`rounded-lg bg-muted/30 p-2 ${iconColor}`}>
                 <Icon size={16} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-200">
+                <p className="text-sm font-medium text-foreground">
                   {activity.title || "Activity"}
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-muted-foreground">
                   {activity.description || ""}
                 </p>
                 <div className="mt-1 flex items-center gap-3">
@@ -78,7 +78,7 @@ export default function RecentActivity({ activities = [] }) {
                       Rs. {activity.amount.toLocaleString()}
                     </span>
                   )}
-                  <span className="flex items-center gap-1 text-xs text-slate-500">
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock size={11} />
                     {activity.time ? new Date(activity.time).toLocaleDateString() : "Just now"}
                   </span>

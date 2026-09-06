@@ -191,24 +191,24 @@ const handleDeleteConfirm = useCallback(async () => {
 
   return (
     <>
-      <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
         {/* Header */}
-        <div className="border-b border-slate-800 p-5 sm:p-6">
+        <div className="border-b border-border p-5 sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <h2 className="text-lg font-semibold">Employees</h2>
-              <p className="mt-1 text-sm text-slate-500">Manage your workforce and track attendance.</p>
+              <p className="mt-1 text-sm text-muted-foreground">Manage your workforce and track attendance.</p>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
               {/* Search */}
               <div className="relative">
-                <Search size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                <Search size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
                   value={filterState.search}
                   onChange={handleSearchChange}
                   placeholder="Search employees..."
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 pl-10 pr-4 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500 sm:w-64"
+                  className="w-full rounded-xl border border-border bg-input py-2.5 pl-10 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500 sm:w-64"
                 />
               </div>
 
@@ -216,7 +216,7 @@ const handleDeleteConfirm = useCallback(async () => {
               <select
                 value={filterState.status}
                 onChange={handleStatusChange}
-                className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-300 outline-none focus:border-indigo-500"
+                className="rounded-xl border border-border bg-input px-4 py-2.5 text-sm text-card-foreground outline-none focus:border-indigo-500"
               >
                 <option value="All">All Status</option>
                 <option value="Active">Active</option>
@@ -228,7 +228,7 @@ const handleDeleteConfirm = useCallback(async () => {
               <select
                 value={filterState.department}
                 onChange={handleDepartmentChange}
-                className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-300 outline-none focus:border-indigo-500"
+                className="rounded-xl border border-border bg-input px-4 py-2.5 text-sm text-card-foreground outline-none focus:border-indigo-500"
               >
                 <option value="All">All Departments</option>
                 <option value="Operations">Operations</option>
@@ -246,15 +246,15 @@ const handleDeleteConfirm = useCallback(async () => {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1400px]">
             <thead>
-              <tr className="border-b border-slate-800 text-left">
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Employee</th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Designation</th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Department</th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Contact</th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Salary</th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Salary Status</th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Status</th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Action</th>
+              <tr className="border-b border-border text-left">
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Employee</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Designation</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Department</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Contact</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Salary</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Salary Status</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Status</th>
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Action</th>
               </tr>
             </thead>
 
@@ -266,7 +266,7 @@ const handleDeleteConfirm = useCallback(async () => {
                 const todayAttendance = employee.attendance?.find(a => a.date === todayStr);
 
                 return (
-                  <tr key={employeeId} className="border-b border-slate-800/70 transition hover:bg-slate-950/50">
+                  <tr key={employeeId} className="border-b border-border/70 transition hover:bg-muted">
                     {/* Employee */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -287,27 +287,27 @@ const handleDeleteConfirm = useCallback(async () => {
                           )}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-slate-200">{employee.name}</p>
-                          <p className="mt-1 text-xs text-slate-500">{employee.email}</p>
+                          <p className="text-sm font-medium text-foreground">{employee.name}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">{employee.email}</p>
                         </div>
                       </div>
                     </td>
 
                     {/* Designation */}
                     <td className="px-6 py-4">
-                      <span className="text-sm text-slate-300">{employee.designation}</span>
+                      <span className="text-sm text-card-foreground">{employee.designation}</span>
                     </td>
 
                     {/* Department */}
                     <td className="px-6 py-4">
-                      <span className="rounded-lg bg-slate-800 px-2.5 py-1.5 text-xs text-slate-400">{employee.department}</span>
+                      <span className="rounded-lg bg-muted px-2.5 py-1.5 text-xs text-muted-foreground">{employee.department}</span>
                     </td>
 
                     {/* Contact */}
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1 text-sm">
-                        <span className="text-slate-300">{employee.phone}</span>
-                        <span className="text-xs text-slate-500">{employee.cnic}</span>
+                        <span className="text-card-foreground">{employee.phone}</span>
+                        <span className="text-xs text-muted-foreground">{employee.cnic}</span>
                       </div>
                     </td>
 
@@ -327,7 +327,7 @@ const handleDeleteConfirm = useCallback(async () => {
                         </span>
 
                         {salaryStatus.amount > 0 && (
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs text-muted-foreground">
                             Paid: Rs. {Number(salaryStatus.amount).toLocaleString()}
                           </span>
                         )}
@@ -339,7 +339,7 @@ const handleDeleteConfirm = useCallback(async () => {
                         )}
 
                         {salaryStatus.paidAt && (
-                          <span className="flex items-center gap-1 text-xs text-slate-600">
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Calendar size={12} />
                             {new Date(salaryStatus.paidAt).toLocaleString()}
                           </span>
@@ -365,7 +365,7 @@ const handleDeleteConfirm = useCallback(async () => {
                       <div className="flex items-center gap-1">
                         <Link
                           href={`/dashboard/employees/${employeeId}`}
-                          className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                          className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                           title="View employee"
                         >
                           <Eye size={17} />
@@ -373,7 +373,7 @@ const handleDeleteConfirm = useCallback(async () => {
 
                         <Link
                           href={`/dashboard/employees/edit/${employeeId}`}
-                          className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                          className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                           title="Edit employee"
                         >
                           <Pencil size={17} />
@@ -381,7 +381,7 @@ const handleDeleteConfirm = useCallback(async () => {
 
                         <button
                           onClick={() => onMarkAttendance?.(employee)}
-                          className="rounded-lg p-2 text-slate-500 transition hover:bg-emerald-500/10 hover:text-emerald-400"
+                          className="rounded-lg p-2 text-muted-foreground transition hover:bg-emerald-500/10 hover:text-emerald-400"
                           title="Mark attendance"
                         >
                           <CalendarCheck size={17} />
@@ -389,7 +389,7 @@ const handleDeleteConfirm = useCallback(async () => {
 
                         <button
                           onClick={() => handlePayClick(employee)}
-                          className="rounded-lg p-2 text-slate-500 transition hover:bg-emerald-500/10 hover:text-emerald-400"
+                          className="rounded-lg p-2 text-muted-foreground transition hover:bg-emerald-500/10 hover:text-emerald-400"
                           title="Pay salary"
                         >
                           <Wallet size={17} />
@@ -397,7 +397,7 @@ const handleDeleteConfirm = useCallback(async () => {
                         {canDelete && onDelete && (
                         <button
                           onClick={() => handleDeleteClick(employee)}
-                          className="rounded-lg p-2 text-slate-500 transition hover:bg-red-500/10 hover:text-red-400"
+                          className="rounded-lg p-2 text-muted-foreground transition hover:bg-red-500/10 hover:text-red-400"
                           title="Delete employee"
                         >
                           <Trash2 size={17} />
@@ -415,7 +415,7 @@ const handleDeleteConfirm = useCallback(async () => {
           {filteredEmployees.length === 0 && (
             <div className="py-16 text-center">
               <p className="text-sm font-medium">No employees found</p>
-              <p className="mt-1 text-xs text-slate-500">Try changing your search or filter.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Try changing your search or filter.</p>
             </div>
           )}
         </div>

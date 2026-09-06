@@ -12,12 +12,12 @@ function SummaryItem({
   description,
 }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 transition hover:border-slate-700">
+    <div className="rounded-2xl border border-border bg-card p-5 transition hover:border-border">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-slate-500">{title}</p>
+          <p className="text-sm text-muted-foreground">{title}</p>
           <p className="mt-2 text-2xl font-bold">{value}</p>
-          <p className="mt-1 text-xs text-slate-600">{description}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{description}</p>
         </div>
         <div className="rounded-xl bg-indigo-500/10 p-3 text-indigo-400">
           <Icon size={21} />

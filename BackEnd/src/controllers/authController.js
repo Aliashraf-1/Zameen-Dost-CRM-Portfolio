@@ -1,5 +1,21 @@
 const User = require('../models/User');
+const Employee = require('../models/Employee');
 const jwt = require('jsonwebtoken');
+
+const attachEmployeeProfile = async (user) => {
+  const userObj = user.toJSON ? user.toJSON() : { ...user };
+  const employee = await Employee.findOne({ email: userObj.email });
+
+  if (employee) {
+    userObj.employeeRef = employee._id;
+    userObj.canManageLeads = !!employee.canManageLeads;
+  } else {
+    userObj.employeeRef = null;
+    userObj.canManageLeads = false;
+  }
+
+  return userObj;
+};
 
 // ✅ Generate JWT Token
 const generateToken = (id) => {
@@ -76,14 +92,14 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Generate token
     const token = generateToken(user._id);
+    const userPayload = await attachEmployeeProfile(user);
 
     res.status(200).json({
       success: true,
       message: 'Login successful.',
       data: {
-        user: user.toJSON(),
+        user: userPayload,
         token,
       },
     });
@@ -99,9 +115,10 @@ exports.login = async (req, res) => {
 exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
+    const userPayload = await attachEmployeeProfile(user);
     res.status(200).json({
       success: true,
-      data: user,
+      data: userPayload,
     });
   } catch (error) {
     res.status(500).json({

@@ -43,11 +43,11 @@ export default function BuildingUnitTypeChart({ rooms = [] }) {
   const totalUnits = rooms.length;
 
   return (
-    <div className="rounded-2xl border border-slate-800 mt-4 bg-slate-900 p-6">
+    <div className="rounded-2xl border border-border mt-4 bg-card p-6">
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-lg font-semibold">Unit Types</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Distribution of units in this building.
           </p>
         </div>
@@ -70,7 +70,7 @@ export default function BuildingUnitTypeChart({ rooms = [] }) {
               fill="none"
               stroke="currentColor"
               strokeWidth="28"
-              className="text-slate-800"
+              className="text-muted"
             />
 
             {(() => {
@@ -129,7 +129,7 @@ export default function BuildingUnitTypeChart({ rooms = [] }) {
 
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-3xl font-bold">{totalUnits}</span>
-            <span className="mt-1 text-xs text-slate-500">Total Units</span>
+            <span className="mt-1 text-xs text-muted-foreground">Total Units</span>
           </div>
         </div>
 
@@ -152,18 +152,18 @@ export default function BuildingUnitTypeChart({ rooms = [] }) {
               <div key={item.name} className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <span className={`h-2.5 w-2.5 rounded-full ${dotColors[index]}`} />
-                  <span className="text-sm text-slate-400">{item.name}</span>
+                  <span className="text-sm text-muted-foreground">{item.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold">{item.value}</span>
-                  <span className="text-xs text-slate-600">{percentage}%</span>
+                  <span className="text-xs text-muted-foreground">{percentage}%</span>
                 </div>
               </div>
             );
           })}
 
           {unitTypes.length === 0 && (
-            <p className="text-sm text-slate-600">No units have been added yet.</p>
+            <p className="text-sm text-muted-foreground">No units have been added yet.</p>
           )}
         </div>
       </div>

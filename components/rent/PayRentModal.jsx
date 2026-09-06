@@ -182,16 +182,16 @@ const getPendingAmount = useMemo(() => {
         className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
         onClick={handleBackdropClick}
       >
-        <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl animate-in fade-in zoom-in-95 duration-200">
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800 bg-slate-900 p-5">
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card p-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
                 <Wallet size={20} />
               </div>
               <div>
                 <h2 className="font-semibold">Pay Rent</h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   {room.unitNo} • {room.type}
                 </p>
               </div>
@@ -199,7 +199,7 @@ const getPendingAmount = useMemo(() => {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+              className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
               <X size={18} />
             </button>
@@ -207,42 +207,42 @@ const getPendingAmount = useMemo(() => {
 
           <form onSubmit={handleSubmit} className="space-y-5 p-5">
             {/* Customer */}
-            <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+            <div className="rounded-xl border border-border bg-input/70 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-slate-500">Customer</p>
+                  <p className="text-xs text-muted-foreground">Customer</p>
                   <p className="mt-1 font-medium">{room.tenant?.name || "Unknown"}</p>
-                  <p className="text-xs text-slate-500">{room.tenant?.phone || "No phone"}</p>
+                  <p className="text-xs text-muted-foreground">{room.tenant?.phone || "No phone"}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-slate-500">Building</p>
-                  <p className="mt-1 text-sm font-medium text-slate-200">Building #{buildingId}</p>
+                  <p className="text-xs text-muted-foreground">Building</p>
+                  <p className="mt-1 text-sm font-medium text-foreground">Building #{buildingId}</p>
                 </div>
               </div>
             </div>
 
             {/* Unit Info */}
-            <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+            <div className="rounded-xl border border-border bg-input/70 p-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-400">Unit</span>
-                <span className="text-sm font-medium text-slate-200">{room.unitNo}</span>
+                <span className="text-sm text-muted-foreground">Unit</span>
+                <span className="text-sm font-medium text-foreground">{room.unitNo}</span>
               </div>
               <div className="mt-2 flex items-center justify-between">
-                <span className="text-sm text-slate-400">Type</span>
-                <span className="text-sm text-slate-300">{room.type}</span>
+                <span className="text-sm text-muted-foreground">Type</span>
+                <span className="text-sm text-card-foreground">{room.type}</span>
               </div>
               <div className="mt-2 flex items-center justify-between">
-                <span className="text-sm text-slate-400">Purpose</span>
-                <span className="text-sm text-slate-300">{room.purpose || "N/A"}</span>
+                <span className="text-sm text-muted-foreground">Purpose</span>
+                <span className="text-sm text-card-foreground">{room.purpose || "N/A"}</span>
               </div>
             </div>
 
             {/* Monthly Rent */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
+              <label className="mb-2 block text-sm font-medium text-card-foreground">
                 Monthly Rent
               </label>
-              <div className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-200">
+              <div className="rounded-xl border border-border bg-input px-4 py-3 text-sm text-foreground">
                 Rs. {monthlyRent.toLocaleString()}
               </div>
             </div>
@@ -251,13 +251,13 @@ const getPendingAmount = useMemo(() => {
                       {/* ✅ Due Amount */}
           <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-400">Pending Due</span>
+              <span className="text-sm text-muted-foreground">Pending Due</span>
               <span className={`text-lg font-bold ${getPendingAmount.amount > 0 ? "text-red-400" : "text-emerald-400"}`}>
                 {getPendingAmount.amount > 0 ? `Rs. ${getPendingAmount.amount.toLocaleString()}` : "All Paid"}
               </span>
             </div>
             {getPendingAmount.months > 0 && (
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-muted-foreground">
                 {getPendingAmount.months} month{getPendingAmount.months > 1 ? 's' : ''} pending
               </p>
             )}
@@ -275,7 +275,7 @@ const getPendingAmount = useMemo(() => {
                 className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition ${
                   !useCustomAmount
                     ? "bg-indigo-600 text-white"
-                    : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                    : "bg-muted text-muted-foreground hover:bg-muted-foreground/40"
                 }`}
               >
                 Monthly
@@ -289,7 +289,7 @@ const getPendingAmount = useMemo(() => {
                 className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition ${
                   useCustomAmount
                     ? "bg-indigo-600 text-white"
-                    : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                    : "bg-muted text-muted-foreground hover:bg-muted-foreground/40"
                 }`}
               >
                 Custom Amount
@@ -299,7 +299,7 @@ const getPendingAmount = useMemo(() => {
             {/* Months or Custom Amount */}
             {!useCustomAmount ? (
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-card-foreground">
                   Months to Pay
                 </label>
                 <input
@@ -310,15 +310,15 @@ const getPendingAmount = useMemo(() => {
                     setMonths(Number(e.target.value));
                     setError("");
                   }}
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                  className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-indigo-500"
                 />
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Number of months to pay rent for
                 </p>
               </div>
             ) : (
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-card-foreground">
                   Custom Amount (Rs.)
                 </label>
                 <input
@@ -330,10 +330,10 @@ const getPendingAmount = useMemo(() => {
                     setError("");
                   }}
                   placeholder="Enter custom amount"
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                  className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-indigo-500"
                 />
                 {customAmount && monthlyRent > 0 && (
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Covers ~{Math.floor(Number(customAmount) / monthlyRent)} month(s)
                   </p>
                 )}
@@ -342,7 +342,7 @@ const getPendingAmount = useMemo(() => {
 
             {/* Remarks */}
             <div>
-              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-300">
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-card-foreground">
                 Remarks *
               </label>
               <textarea
@@ -353,25 +353,25 @@ const getPendingAmount = useMemo(() => {
                 }}
                 placeholder="Add remarks about this rent payment..."
                 rows="2"
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
               />
             </div>
 
             {/* Total */}
             <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-400">Total Payment</span>
+                <span className="text-sm text-muted-foreground">Total Payment</span>
                 <span className="text-xl font-bold text-emerald-400">
                   Rs. {calculatedAmount.toLocaleString()}
                 </span>
               </div>
               {useCustomAmount && customAmount && monthlyRent > 0 && (
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-muted-foreground">
                   {Math.floor(Number(customAmount) / monthlyRent)} month(s) @ Rs. {monthlyRent.toLocaleString()}/month
                 </p>
               )}
               {!useCustomAmount && (
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-muted-foreground">
                   {months} month{months > 1 ? 's' : ''} × Rs. {monthlyRent.toLocaleString()}
                 </p>
               )}
@@ -400,7 +400,7 @@ const getPendingAmount = useMemo(() => {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 rounded-xl border border-slate-800 px-5 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                className="flex-1 rounded-xl border border-border px-5 py-3 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
               >
                 Cancel
               </button>

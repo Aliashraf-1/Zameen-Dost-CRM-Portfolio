@@ -68,7 +68,7 @@ export default function BuildingDetailsPage() {
   if (loading || buildingsLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="animate-pulse text-slate-500">Loading building details...</div>
+        <div className="animate-pulse text-muted-foreground">Loading building details...</div>
       </div>
     );
   }
@@ -86,7 +86,7 @@ export default function BuildingDetailsPage() {
       <div className="mb-8">
         <Link
           href="/dashboard/buildings"
-          className="mb-5 inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-white"
+          className="mb-5 inline-flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground"
         >
           <ArrowLeft size={16} />
           Back to Buildings
@@ -108,7 +108,7 @@ export default function BuildingDetailsPage() {
               </span>
             </div>
 
-            <div className="mt-3 flex items-center gap-2 text-sm text-slate-500">
+            <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
               <Building2 size={16} />
               {building.address}
             </div>
@@ -117,7 +117,7 @@ export default function BuildingDetailsPage() {
           <div className="flex gap-3">
             <Link
               href={`/dashboard/buildings/${buildingId}/edit`}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm font-medium text-slate-300 transition hover:border-slate-700 hover:bg-slate-800 hover:text-white"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-card-foreground transition hover:border-border hover:bg-muted hover:text-foreground"
             >
               <Pencil size={17} />
               Edit Building

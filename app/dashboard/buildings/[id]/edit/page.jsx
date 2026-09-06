@@ -27,7 +27,7 @@ export default async function EditBuildingPage({
           Edit {building.buildingNo}
         </h1>
 
-        <p className="mt-2 text-sm text-slate-500">
+        <p className="mt-2 text-sm text-muted-foreground">
           Update the building information below.
         </p>
       </div>

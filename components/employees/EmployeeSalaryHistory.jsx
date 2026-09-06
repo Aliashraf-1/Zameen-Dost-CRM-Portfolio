@@ -31,19 +31,19 @@ export default function EmployeeSalaryHistory({ salaryHistory = [] }) {
   const displayHistory = showAll ? sortedHistory : sortedHistory.slice(0, 3);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
-      <div className="border-b border-slate-800 p-6">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="border-b border-border p-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold">Salary History</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Monthly salary payment records.
             </p>
           </div>
           {sortedHistory.length > 3 && (
             <button
               onClick={() => setShowAll(!showAll)}
-              className="flex items-center gap-1 rounded-lg border border-slate-800 px-3 py-1.5 text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white"
+              className="flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
               {showAll ? (
                 <>
@@ -63,26 +63,26 @@ export default function EmployeeSalaryHistory({ salaryHistory = [] }) {
 
       {sortedHistory.length === 0 ? (
         <div className="p-10 text-center">
-          <p className="text-sm text-slate-500">No salary records available.</p>
+          <p className="text-sm text-muted-foreground">No salary records available.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[650px]">
             <thead>
-              <tr className="border-b border-slate-800 text-left">
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
+              <tr className="border-b border-border text-left">
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Month
                 </th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Amount
                 </th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Deductions
                 </th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Status
                 </th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Paid At
                 </th>
               </tr>
@@ -97,9 +97,9 @@ export default function EmployeeSalaryHistory({ salaryHistory = [] }) {
                 return (
                   <tr
                     key={recordKey}
-                    className="border-b border-slate-800/70 transition hover:bg-slate-950/50"
+                    className="border-b border-border/70 transition hover:bg-muted"
                   >
-                    <td className="px-6 py-4 text-sm font-medium text-slate-300">
+                    <td className="px-6 py-4 text-sm font-medium text-card-foreground">
                       {record.month}
                     </td>
                     <td className="px-6 py-4 text-sm font-medium text-emerald-400">
@@ -111,7 +111,7 @@ export default function EmployeeSalaryHistory({ salaryHistory = [] }) {
                           - Rs. {totalDeduction.toLocaleString()}
                         </span>
                       ) : (
-                        <span className="text-slate-500">—</span>
+                        <span className="text-muted-foreground">—</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -122,7 +122,7 @@ export default function EmployeeSalaryHistory({ salaryHistory = [] }) {
                         {record.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-500">
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
                       {record.paidAt
                         ? new Date(record.paidAt).toLocaleString()
                         : "—"}
@@ -134,7 +134,7 @@ export default function EmployeeSalaryHistory({ salaryHistory = [] }) {
           </table>
 
           {sortedHistory.length > 3 && (
-            <div className="border-t border-slate-800 p-3 text-center">
+            <div className="border-t border-border p-3 text-center">
               <button
                 onClick={() => setShowAll(!showAll)}
                 className="inline-flex items-center gap-1 text-sm text-indigo-400 transition hover:text-indigo-300"

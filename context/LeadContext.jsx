@@ -5,12 +5,41 @@ import { leadAPI } from "@/lib/api";
 
 const LeadContext = createContext(null);
 
+const normalizeId = (value) => {
+  if (!value) return null;
+  if (typeof value === "object") return value._id || value.id || null;
+  return value;
+};
+
+const toLeadPayload = (leadData, { isUpdate } = {}) => {
+  const payload = {
+    customerName: leadData.customerName,
+    customerPhone: leadData.customerPhone,
+    customerEmail: leadData.customerEmail || "",
+    customerCNIC: leadData.customerCNIC || "",
+    type: leadData.type,
+    status: leadData.status,
+    source: leadData.source,
+    remarks: leadData.remarks || "",
+    followUpDate: leadData.followUpDate || null,
+    assignedTo: normalizeId(leadData.assignedTo),
+    assignedToName: leadData.assignedToName || "",
+    convertedToUnit: leadData.convertedToUnit || null,
+  };
+
+  if (!isUpdate) {
+    payload.createdBy = normalizeId(leadData.createdBy);
+    payload.createdByName = leadData.createdByName || "";
+  }
+
+  return payload;
+};
+
 export function LeadProvider({ children }) {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ Load leads from API
   useEffect(() => {
     loadLeads();
   }, []);
@@ -19,7 +48,6 @@ export function LeadProvider({ children }) {
     try {
       setLoading(true);
       const response = await leadAPI.getAll();
-      console.log("📋 Leads loaded:", response.data.data);
       setLeads(response.data.data || []);
       setError(null);
     } catch (error) {
@@ -31,23 +59,24 @@ export function LeadProvider({ children }) {
   };
 
   const addLead = async (leadData) => {
-  try {
-    console.log("📤 LeadContext addLead:", leadData); // Debug
-    const response = await leadAPI.create(leadData);
-    const newLead = response.data.data;
-    setLeads(prev => [newLead, ...prev]);
-    return newLead;
-  } catch (error) {
-    console.error("Failed to add lead:", error);
-    throw error;
-  }
-};
+    try {
+      const response = await leadAPI.create(toLeadPayload(leadData));
+      const newLead = response.data.data;
+      setLeads((prev) => [newLead, ...prev]);
+      return newLead;
+    } catch (error) {
+      console.error("Failed to add lead:", error);
+      throw error;
+    }
+  };
 
   const updateLead = async (id, leadData) => {
     try {
-      const response = await leadAPI.update(id, leadData);
+      const response = await leadAPI.update(id, toLeadPayload(leadData, { isUpdate: true }));
       const updatedLead = response.data.data;
-      setLeads(prev => prev.map(l => (l._id === id || l.id === id) ? updatedLead : l));
+      setLeads((prev) =>
+        prev.map((l) => (l._id === id || l.id === id ? updatedLead : l))
+      );
       return updatedLead;
     } catch (error) {
       console.error("Failed to update lead:", error);
@@ -58,7 +87,7 @@ export function LeadProvider({ children }) {
   const deleteLead = async (id) => {
     try {
       await leadAPI.delete(id);
-      setLeads(prev => prev.filter(l => l._id !== id && l.id !== id));
+      setLeads((prev) => prev.filter((l) => l._id !== id && l.id !== id));
     } catch (error) {
       console.error("Failed to delete lead:", error);
       throw error;
@@ -69,7 +98,9 @@ export function LeadProvider({ children }) {
     try {
       const response = await leadAPI.addNote(leadId, noteData);
       const updatedLead = response.data.data;
-      setLeads(prev => prev.map(l => (l._id === leadId || l.id === leadId) ? updatedLead : l));
+      setLeads((prev) =>
+        prev.map((l) => (l._id === leadId || l.id === leadId ? updatedLead : l))
+      );
       return updatedLead;
     } catch (error) {
       console.error("Failed to add note:", error);
@@ -77,39 +108,20 @@ export function LeadProvider({ children }) {
     }
   };
 
-  // ✅ Fixed: Get leads by employee - Handle all ID formats
   const getLeadsByEmployee = (employeeId) => {
-    if (!employeeId) {
-      console.log("❌ No employeeId provided");
-      return [];
-    }
-    
+    if (!employeeId) return [];
+
     const empIdStr = String(employeeId);
-    console.log("🔍 Searching leads for employee:", empIdStr);
-    console.log("📋 Total leads in context:", leads.length);
-    
-    const filtered = leads.filter((lead) => {
+
+    return leads.filter((lead) => {
       const assignedTo = lead.assignedTo;
-      
-      // ✅ If assignedTo is populated object
-      if (typeof assignedTo === 'object' && assignedTo !== null) {
-        const assignedId = assignedTo._id || assignedTo.id;
-        const match = String(assignedId) === empIdStr;
-        if (match) console.log("✅ Match found (object):", lead.customerName);
-        return match;
+      if (typeof assignedTo === "object" && assignedTo !== null) {
+        return String(assignedTo._id || assignedTo.id) === empIdStr;
       }
-      
-      // ✅ If assignedTo is primitive
-      const match = String(assignedTo) === empIdStr || assignedTo === Number(employeeId);
-      if (match) console.log("✅ Match found (primitive):", lead.customerName);
-      return match;
+      return String(assignedTo) === empIdStr;
     });
-    
-    console.log("📊 Leads found for employee:", filtered.length);
-    return filtered;
   };
 
-  // ✅ Get lead stats
   const getLeadStats = (employeeId = null) => {
     const filtered = employeeId ? getLeadsByEmployee(employeeId) : leads;
     const total = filtered.length;
@@ -118,7 +130,6 @@ export function LeadProvider({ children }) {
     const qualified = filtered.filter((l) => l.status === "Qualified").length;
     const converted = filtered.filter((l) => l.status === "Converted" || l.status === "Closed").length;
     const lost = filtered.filter((l) => l.status === "Lost").length;
-    
     const conversionRate = total > 0 ? Math.round((converted / total) * 100) : 0;
 
     return { total, new: newLeads, contacted, qualified, converted, lost, conversionRate };

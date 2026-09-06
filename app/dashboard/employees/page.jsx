@@ -80,7 +80,7 @@ export default function EmployeesPage() {
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="animate-pulse text-slate-500">Loading employees...</div>
+        <div className="animate-pulse text-muted-foreground">Loading employees...</div>
       </div>
     );
   }
@@ -93,7 +93,7 @@ export default function EmployeesPage() {
           <div>
             <p className="text-sm font-medium text-indigo-400">Human Resources</p>
             <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Employees</h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-500">
+            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
               Manage employees, track attendance, and process salaries.
             </p>
           </div>
@@ -113,9 +113,9 @@ export default function EmployeesPage() {
               {showEmployeeSelect && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowEmployeeSelect(false)} />
-                  <div className="absolute right-0 top-full mt-2 z-50 w-64 rounded-xl border border-slate-700 bg-slate-800 shadow-2xl">
+                  <div className="absolute right-0 top-full mt-2 z-50 w-64 rounded-xl border border-border bg-muted shadow-2xl">
                     <div className="max-h-64 overflow-y-auto p-2">
-                      <div className="px-3 py-2 text-xs font-medium text-slate-400 border-b border-slate-700">
+                      <div className="px-3 py-2 text-xs font-medium text-muted-foreground border-b border-border">
                         Select Employee
                       </div>
                       {filteredEmployees.length > 0 ? (
@@ -123,19 +123,19 @@ export default function EmployeesPage() {
                           <button
                             key={employee._id}
                             onClick={() => selectEmployee(employee)}
-                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-slate-700"
+                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-card-foreground transition hover:bg-muted-foreground/40"
                           >
                             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-xs font-medium text-indigo-400">
                               {employee.name.split(" ").map((n) => n[0]).join("")}
                             </div>
                             <div className="text-left">
                               <p className="text-sm font-medium">{employee.name}</p>
-                              <p className="text-xs text-slate-500">{employee.designation}</p>
+                              <p className="text-xs text-muted-foreground">{employee.designation}</p>
                             </div>
                           </button>
                         ))
                       ) : (
-                        <div className="px-3 py-4 text-center text-sm text-slate-500">No employees found</div>
+                        <div className="px-3 py-4 text-center text-sm text-muted-foreground">No employees found</div>
                       )}
                     </div>
                   </div>

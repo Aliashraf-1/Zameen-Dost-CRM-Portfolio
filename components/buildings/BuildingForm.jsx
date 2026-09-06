@@ -138,10 +138,10 @@ export default function BuildingForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-2xl border border-slate-800 bg-slate-900"
+      className="rounded-2xl border border-border bg-card"
     >
       {/* Header */}
-      <div className="flex items-center gap-4 border-b border-slate-800 p-6">
+      <div className="flex items-center gap-4 border-b border-border p-6">
         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
           <Building2 size={22} />
         </div>
@@ -149,7 +149,7 @@ export default function BuildingForm({
           <h2 className="font-semibold">
             {isEdit ? "Edit Building" : "Add New Building"}
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Manage the basic information of this building.
           </p>
         </div>
@@ -175,7 +175,7 @@ export default function BuildingForm({
       <div className="grid gap-5 p-6 md:grid-cols-2">
         {/* Building Number */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Building Number
           </label>
           <input
@@ -184,13 +184,13 @@ export default function BuildingForm({
             onChange={handleChange}
             placeholder="e.g. Building #04"
             required
-            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+            className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
           />
         </div>
 
         {/* Reference */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Building Reference
           </label>
           <input
@@ -199,13 +199,13 @@ export default function BuildingForm({
             onChange={handleChange}
             placeholder="e.g. Faisalabad Road"
             required
-            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+            className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
           />
         </div>
 
         {/* Address */}
         <div className="md:col-span-2">
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Full Address
           </label>
           <input
@@ -214,13 +214,13 @@ export default function BuildingForm({
             onChange={handleChange}
             placeholder="Enter complete building address"
             required
-            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+            className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
           />
         </div>
 
         {/* Total Units */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Total Units
           </label>
           <div className="relative">
@@ -232,13 +232,13 @@ export default function BuildingForm({
               onChange={handleChange}
               placeholder="e.g. 12"
               required
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+              className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
             />
-            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-600">
+            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
               <Plus size={17} />
             </div>
           </div>
-          <p className="mt-2 text-xs text-slate-600">
+          <p className="mt-2 text-xs text-muted-foreground">
             {mode === "create"
               ? "The system will automatically create these units with default values."
               : "Increasing this number will create additional units automatically."}
@@ -247,14 +247,14 @@ export default function BuildingForm({
 
         {/* Status */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Building Status
           </label>
           <select
             name="status"
             value={form.status}
             onChange={handleChange}
-            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+            className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm text-card-foreground outline-none focus:border-indigo-500"
           >
             <option value="Active">Active</option>
             <option value="Inactive">Inactive</option>
@@ -263,39 +263,39 @@ export default function BuildingForm({
       </div>
 
       {/* Default Units Info */}
-      <div className="mx-6 mb-6 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-        <p className="text-sm font-medium text-slate-300">New Unit Defaults</p>
-        <div className="mt-3 grid gap-2 text-xs text-slate-500 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-6 mb-6 rounded-xl border border-border bg-muted p-4">
+        <p className="text-sm font-medium text-card-foreground">New Unit Defaults</p>
+        <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2 lg:grid-cols-4">
           <span>
             Type:
-            <strong className="ml-1 text-slate-400">Room</strong>
+            <strong className="ml-1 text-muted-foreground">Room</strong>
           </span>
           <span>
             Purpose:
-            <strong className="ml-1 text-slate-400">Room</strong>
+            <strong className="ml-1 text-muted-foreground">Room</strong>
           </span>
           <span>
             Monthly Rent:
-            <strong className="ml-1 text-slate-400">Rs. 999</strong>
+            <strong className="ml-1 text-muted-foreground">Rs. 999</strong>
           </span>
           <span>
             Status:
             <strong className="ml-1 text-emerald-400">Available</strong>
           </span>
         </div>
-        <p className="mt-3 text-xs text-slate-600">
+        <p className="mt-3 text-xs text-muted-foreground">
           Unit reference, image, tenant and rental information can be added later from the
           unit management screen.
         </p>
       </div>
 
       {/* Footer */}
-      <div className="flex justify-end gap-3 border-t border-slate-800 p-6">
+      <div className="flex justify-end gap-3 border-t border-border p-6">
         {onCancel ? (
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-800 px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+            className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             <X size={17} />
             Cancel
@@ -303,7 +303,7 @@ export default function BuildingForm({
         ) : (
           <Link
             href="/dashboard/buildings"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-800 px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+            className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             <X size={17} />
             Cancel

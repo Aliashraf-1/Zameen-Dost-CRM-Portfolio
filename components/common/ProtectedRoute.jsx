@@ -47,7 +47,7 @@ export default function ProtectedRoute({
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500/30 border-t-indigo-500" />
-          <p className="text-sm text-slate-500">Loading...</p>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -63,8 +63,8 @@ export function Unauthorized() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
       <ShieldAlert size={64} className="mb-4 text-red-400" />
-      <h1 className="text-2xl font-bold text-slate-200">Access Denied</h1>
-      <p className="mt-2 max-w-md text-slate-500">
+      <h1 className="text-2xl font-bold text-foreground">Access Denied</h1>
+      <p className="mt-2 max-w-md text-muted-foreground">
         You don't have permission to access this page. Please contact your administrator.
       </p>
       <Link

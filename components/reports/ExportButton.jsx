@@ -7,7 +7,7 @@ export default function ExportButton({ onPrint, onExportPDF }) {
     <div className="flex gap-2">
       <button
         onClick={onPrint}
-        className="flex items-center gap-2 rounded-lg border border-slate-800 px-3 py-2 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+        className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
       >
         <Printer size={16} />
         Print

@@ -43,7 +43,7 @@ export default function NewRoomPage() {
   if (loading || buildingsLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="animate-pulse text-slate-500">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
       </div>
     );
   }
@@ -58,7 +58,7 @@ export default function NewRoomPage() {
     <div className="mx-auto max-w-5xl">
       <Link
         href={`/dashboard/buildings/${buildingId}`}
-        className="mb-6 inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-white"
+        className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground"
       >
         <ArrowLeft size={16} />
         Back to {building.buildingNo}
@@ -71,7 +71,7 @@ export default function NewRoomPage() {
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
           Add New Unit
         </h1>
-        <p className="mt-2 text-sm text-slate-500">
+        <p className="mt-2 text-sm text-muted-foreground">
           Add a room, hall, office or other unit to this building.
         </p>
       </div>

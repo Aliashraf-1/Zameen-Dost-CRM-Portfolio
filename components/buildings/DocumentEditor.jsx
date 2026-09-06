@@ -227,9 +227,9 @@ export default function DocumentEditor({
         className="fixed inset-0 z-[150] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
         onClick={handleBackdropClick}
       >
-        <div className="w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div className="w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl border border-border bg-card shadow-2xl animate-in fade-in zoom-in-95 duration-200">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900 p-5">
+          <div className="flex items-center justify-between border-b border-border bg-card p-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
                 <FileText size={20} />
@@ -239,30 +239,30 @@ export default function DocumentEditor({
                   type="text"
                   value={documentTitle}
                   onChange={(e) => setDocumentTitle(e.target.value)}
-                  className="bg-transparent text-lg font-semibold text-slate-200 outline-none focus:border-indigo-500 border-b border-transparent focus:border-slate-700"
+                  className="bg-transparent text-lg font-semibold text-foreground outline-none focus:border-indigo-500 border-b border-transparent focus:border-border"
                   placeholder="Document Title"
                 />
-                <p className="text-xs text-slate-500">{template?.name} • {template?.type}</p>
+                <p className="text-xs text-muted-foreground">{template?.name} • {template?.type}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsPreview(!isPreview)}
-                className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                 title={isPreview ? "Edit" : "Preview"}
               >
                 {isPreview ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
               <button
                 onClick={handlePrint}
-                className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                 title="Print"
               >
                 <Printer size={18} />
               </button>
               <button
                 onClick={onClose}
-                className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
               >
                 <X size={18} />
               </button>
@@ -274,7 +274,7 @@ export default function DocumentEditor({
             {isPreview ? (
               <div 
                 ref={printRef}
-                className="prose prose-invert max-w-none bg-slate-950/50 rounded-xl p-6 border border-slate-800"
+                className="prose prose-invert max-w-none bg-muted rounded-xl p-6 border border-border"
                 style={{
                   fontFamily: "'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif",
                   direction: "rtl",
@@ -290,7 +290,7 @@ export default function DocumentEditor({
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full min-h-[400px] rounded-xl border border-slate-800 bg-slate-950 p-4 text-sm text-slate-200 outline-none focus:border-indigo-500 resize-y"
+                className="w-full min-h-[400px] rounded-xl border border-border bg-input p-4 text-sm text-foreground outline-none focus:border-indigo-500 resize-y"
                 style={{
                   fontFamily: "'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif",
                   direction: "rtl",
@@ -318,11 +318,11 @@ export default function DocumentEditor({
           )}
 
           {/* Footer */}
-          <div className="flex justify-end gap-3 border-t border-slate-800 p-5">
+          <div className="flex justify-end gap-3 border-t border-border p-5">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-800 px-5 py-2.5 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+              className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
               Cancel
             </button>

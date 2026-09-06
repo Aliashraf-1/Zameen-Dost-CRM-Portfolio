@@ -5,9 +5,9 @@ import { UserX } from "lucide-react";
 export default function NotFound() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-      <UserX size={64} className="mb-4 text-slate-600" />
-      <h2 className="text-2xl font-bold text-slate-200">Employee Not Found</h2>
-      <p className="mt-2 text-slate-500">
+      <UserX size={64} className="mb-4 text-muted-foreground" />
+      <h2 className="text-2xl font-bold text-foreground">Employee Not Found</h2>
+      <p className="mt-2 text-muted-foreground">
         The employee you're looking for doesn't exist or has been removed.
       </p>
       <Link

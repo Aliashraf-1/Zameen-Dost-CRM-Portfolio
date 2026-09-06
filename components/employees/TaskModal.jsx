@@ -88,21 +88,21 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
         className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
         onClick={handleBackdropClick}
       >
-        <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+        <div className="w-full max-w-lg rounded-2xl border border-border bg-card shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800 bg-slate-900 p-5">
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card p-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
                 <Plus size={20} />
               </div>
               <div>
                 <h2 className="font-semibold">{isEdit ? "Edit Task" : "Assign Task"}</h2>
-                <p className="text-xs text-slate-500">{employee?.name}</p>
+                <p className="text-xs text-muted-foreground">{employee?.name}</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+              className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
               <X size={18} />
             </button>
@@ -111,7 +111,7 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
           <form onSubmit={handleSubmit} className="space-y-4 p-5">
             {/* Title */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
+              <label className="mb-2 block text-sm font-medium text-card-foreground">
                 Task Title *
               </label>
               <input
@@ -119,14 +119,14 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
                 value={form.title}
                 onChange={handleChange}
                 placeholder="Enter task title"
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-indigo-500"
                 required
               />
             </div>
 
             {/* Description */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
+              <label className="mb-2 block text-sm font-medium text-card-foreground">
                 Description
               </label>
               <textarea
@@ -135,14 +135,14 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
                 onChange={handleChange}
                 rows="3"
                 placeholder="Enter task description"
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-indigo-500"
               />
             </div>
 
             {/* Assigned Date & Due Date */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-card-foreground">
                   Assigned Date
                 </label>
                 <input
@@ -150,12 +150,12 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
                   name="assignedDate"
                   value={form.assignedDate}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                  className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-indigo-500"
                   required
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-card-foreground">
                   Due Date
                 </label>
                 <input
@@ -163,7 +163,7 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
                   name="dueDate"
                   value={form.dueDate}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                  className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-indigo-500"
                   required
                 />
               </div>
@@ -171,14 +171,14 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
 
             {/* Priority */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
+              <label className="mb-2 block text-sm font-medium text-card-foreground">
                 Priority
               </label>
               <select
                 name="priority"
                 value={form.priority}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm text-card-foreground outline-none focus:border-indigo-500"
               >
                 <option value="Low">Low</option>
                 <option value="Medium">Medium</option>
@@ -188,14 +188,14 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
 
             {/* Status */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
+              <label className="mb-2 block text-sm font-medium text-card-foreground">
                 Status
               </label>
               <select
                 name="status"
                 value={form.status}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm text-card-foreground outline-none focus:border-indigo-500"
               >
                 <option value="Pending">Pending</option>
                 <option value="In Progress">In Progress</option>
@@ -208,7 +208,7 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
             {form.status === "Failed" && (
               <>
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                  <label className="mb-2 block text-sm font-medium text-card-foreground">
                     Failure Reason *
                   </label>
                   <input
@@ -222,7 +222,7 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                  <label className="mb-2 block text-sm font-medium text-card-foreground">
                     Task Failure Deduction (Rs.)
                   </label>
                   <input
@@ -231,7 +231,7 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
                     name="failureDeduction"
                     value={form.failureDeduction}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                    className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-indigo-500"
                     placeholder="Enter deduction amount"
                   />
                 </div>
@@ -242,7 +242,7 @@ export default function TaskModal({ employee, onClose, onSave, task = null }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 rounded-xl border border-slate-800 px-5 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                className="flex-1 rounded-xl border border-border px-5 py-3 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
               >
                 Cancel
               </button>

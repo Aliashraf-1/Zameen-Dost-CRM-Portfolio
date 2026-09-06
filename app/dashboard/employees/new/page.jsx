@@ -27,7 +27,7 @@ export default function NewEmployeePage() {
         <div className="mb-8">
           <Link
             href="/dashboard/employees"
-            className="mb-4 inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-white"
+            className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground"
           >
             <ArrowLeft size={17} />
             Back to Employees
@@ -36,7 +36,7 @@ export default function NewEmployeePage() {
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
             Add New Employee
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             Add a new employee to the system.
           </p>
         </div>

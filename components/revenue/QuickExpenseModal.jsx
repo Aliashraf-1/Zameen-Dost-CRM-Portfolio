@@ -262,19 +262,19 @@ export default function QuickExpenseModal({ onClose, onSave }) {
   return (
     <ModalPortal>
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-        <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl animate-in fade-in zoom-in-95 duration-200">
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800 bg-slate-900 p-5">
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card p-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10 text-red-400">
                 <Zap size={20} />
               </div>
               <div>
                 <h2 className="font-semibold">Add Expense</h2>
-                <p className="text-xs text-slate-500">Quick expense entry</p>
+                <p className="text-xs text-muted-foreground">Quick expense entry</p>
               </div>
             </div>
-            <button onClick={onClose} className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white">
+            <button onClick={onClose} className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground">
               <X size={18} />
             </button>
           </div>
@@ -282,12 +282,12 @@ export default function QuickExpenseModal({ onClose, onSave }) {
           <form onSubmit={handleSubmit} className="space-y-4 p-5">
             {/* Type */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">Expense Type</label>
+              <label className="mb-2 block text-sm font-medium text-card-foreground">Expense Type</label>
               <select
                 name="type"
                 value={form.type}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm text-card-foreground outline-none focus:border-indigo-500"
               >
                 {EXPENSE_TYPES.map((type) => (
                   <option key={type} value={type}>{type}</option>
@@ -298,12 +298,12 @@ export default function QuickExpenseModal({ onClose, onSave }) {
             {/* Custom Type */}
             {form.type === "Other" && (
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">Custom Category *</label>
+                <label className="mb-2 block text-sm font-medium text-card-foreground">Custom Category *</label>
                 <input
                   value={customType}
                   onChange={(e) => setCustomType(e.target.value)}
                   placeholder="e.g., Office Supplies"
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                  className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-indigo-500"
                   required
                 />
               </div>
@@ -313,13 +313,13 @@ export default function QuickExpenseModal({ onClose, onSave }) {
             {form.type === "Salary" && (
               <>
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">Select Employee *</label>
+                  <label className="mb-2 block text-sm font-medium text-card-foreground">Select Employee *</label>
                   <div className="relative">
-                    <Users size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <Users size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                     <select
                       value={form.employeeId}
                       onChange={handleEmployeeSelect}
-                      className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-11 pr-4 text-sm text-slate-300 outline-none focus:border-indigo-500 appearance-none"
+                      className="w-full rounded-xl border border-border bg-input py-3 pl-11 pr-4 text-sm text-card-foreground outline-none focus:border-indigo-500 appearance-none"
                     >
                       <option value="">Select Employee</option>
                       {employees.map((emp) => (
@@ -335,32 +335,32 @@ export default function QuickExpenseModal({ onClose, onSave }) {
                 {salaryCard && (
                   <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs text-slate-400">Salary Payment Details</p>
-                      <label className="flex items-center gap-2 text-xs text-slate-400">
+                      <p className="text-xs text-muted-foreground">Salary Payment Details</p>
+                      <label className="flex items-center gap-2 text-xs text-muted-foreground">
                         <input
                           type="checkbox"
                           checked={applyDeductions}
                           onChange={(e) => setApplyDeductions(e.target.checked)}
-                          className="rounded border-slate-700 bg-slate-800 text-indigo-500 focus:ring-indigo-500"
+                          className="rounded border-border bg-muted text-indigo-500 focus:ring-indigo-500"
                         />
                         Apply Deductions
                       </label>
                     </div>
                     <div className="mt-2 space-y-1 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Employee</span>
-                        <span className="text-slate-200">{salaryCard.name}</span>
+                        <span className="text-muted-foreground">Employee</span>
+                        <span className="text-foreground">{salaryCard.name}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Designation</span>
-                        <span className="text-slate-200">{salaryCard.designation}</span>
+                        <span className="text-muted-foreground">Designation</span>
+                        <span className="text-foreground">{salaryCard.designation}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Department</span>
-                        <span className="text-slate-200">{salaryCard.department}</span>
+                        <span className="text-muted-foreground">Department</span>
+                        <span className="text-foreground">{salaryCard.department}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Monthly Salary</span>
+                        <span className="text-muted-foreground">Monthly Salary</span>
                         <span className="text-emerald-400">Rs. {salaryCard.salary.toLocaleString()}</span>
                       </div>
 
@@ -402,7 +402,7 @@ export default function QuickExpenseModal({ onClose, onSave }) {
                         </>
                       )}
                       {applyDeductions && salaryCard.deductions && salaryCard.deductions.totalDeduction === 0 && (
-                        <div className="text-xs text-slate-500 mt-2">No deductions for this month</div>
+                        <div className="text-xs text-muted-foreground mt-2">No deductions for this month</div>
                       )}
                     </div>
                   </div>
@@ -412,39 +412,39 @@ export default function QuickExpenseModal({ onClose, onSave }) {
 
             {/* Amount */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">Amount (Rs.) *</label>
+              <label className="mb-2 block text-sm font-medium text-card-foreground">Amount (Rs.) *</label>
               <input
                 type="number"
                 name="amount"
                 value={form.amount}
                 onChange={handleChange}
                 placeholder="0"
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-indigo-500"
                 required
               />
             </div>
 
             {/* Description */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">Description</label>
+              <label className="mb-2 block text-sm font-medium text-card-foreground">Description</label>
               <input
                 name="description"
                 value={form.description}
                 onChange={handleChange}
                 placeholder="Brief description"
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-indigo-500"
               />
             </div>
 
             {/* Paid To */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">Paid To</label>
+              <label className="mb-2 block text-sm font-medium text-card-foreground">Paid To</label>
               <input
                 name="paidTo"
                 value={form.paidTo}
                 onChange={handleChange}
                 placeholder="Vendor/Person"
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-indigo-500"
               />
             </div>
 
@@ -458,7 +458,7 @@ export default function QuickExpenseModal({ onClose, onSave }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 rounded-xl border border-slate-800 px-5 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                className="flex-1 rounded-xl border border-border px-5 py-3 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
               >
                 Cancel
               </button>

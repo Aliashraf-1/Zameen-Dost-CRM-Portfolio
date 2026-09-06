@@ -5,8 +5,8 @@ export default function Unauthorized() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
       <ShieldAlert size={64} className="mb-4 text-red-400" />
-      <h1 className="text-2xl font-bold text-slate-200">Access Denied</h1>
-      <p className="mt-2 max-w-md text-slate-500">
+      <h1 className="text-2xl font-bold text-foreground">Access Denied</h1>
+      <p className="mt-2 max-w-md text-muted-foreground">
         You don't have permission to access this page. Please contact your administrator.
       </p>
       <Link

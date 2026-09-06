@@ -29,7 +29,7 @@ router.delete('/:id', checkRole(['admin', 'super_admin']), deleteEmployee);
 router.post('/:id/attendance', markAttendance);
 
 // ✅ Tasks
-router.post('/:id/tasks', addTask);
+router.post('/:id/tasks', checkRole(['admin', 'super_admin']), addTask);
 router.put('/:id/tasks/:taskId', updateTask);
 
 // ✅ Salary

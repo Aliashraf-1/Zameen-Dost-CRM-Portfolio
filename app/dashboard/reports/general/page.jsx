@@ -165,7 +165,7 @@ export default function GeneralReport() {
           <div>
             <p className="text-sm font-medium text-indigo-400">Reports</p>
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">General Business Report</h1>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-foreground">
               Comprehensive overview of your business performance for the selected period.
             </p>
           </div>

@@ -46,15 +46,15 @@ export default function DashboardPage() {
     return (
       <div className="mx-auto max-w-[1600px]">
         <div className="animate-pulse space-y-6">
-          <div className="h-40 w-full rounded-2xl bg-slate-800/50" />
+          <div className="h-40 w-full rounded-2xl bg-muted" />
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-32 rounded-2xl bg-slate-800/50" />
+              <div key={i} className="h-32 rounded-2xl bg-muted" />
             ))}
           </div>
           <div className="grid gap-5 lg:grid-cols-3">
-            <div className="lg:col-span-2 h-80 rounded-2xl bg-slate-800/50" />
-            <div className="h-80 rounded-2xl bg-slate-800/50" />
+            <div className="lg:col-span-2 h-80 rounded-2xl bg-muted" />
+            <div className="h-80 rounded-2xl bg-muted" />
           </div>
         </div>
       </div>

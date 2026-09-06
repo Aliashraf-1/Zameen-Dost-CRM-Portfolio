@@ -45,12 +45,12 @@ import { getImageUrl } from "@/lib/imageHelper";
 
 function InfoItem({ icon: Icon, label, value, valueClassName = "" }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-      <div className="flex items-center gap-2 text-xs text-slate-500">
+    <div className="rounded-xl border border-border bg-muted p-4">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <Icon size={15} />
         {label}
       </div>
-      <p className={`mt-2 text-sm font-medium ${valueClassName || "text-slate-200"}`}>
+      <p className={`mt-2 text-sm font-medium ${valueClassName || "text-foreground"}`}>
         {value || "Not Set"}
       </p>
     </div>
@@ -95,7 +95,7 @@ function PreviousCustomerCard({ customer, onDelete }) {
 
   return (
     <>
-      <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4 transition hover:border-slate-700">
+      <div className="rounded-xl border border-border bg-muted p-4 transition hover:border-border">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-500/10 text-indigo-400">
@@ -114,11 +114,11 @@ function PreviousCustomerCard({ customer, onDelete }) {
               )}
             </div>
             <div>
-              <p className="font-medium text-slate-200">{customer.tenantName}</p>
-              <p className="text-xs text-slate-500">
+              <p className="font-medium text-foreground">{customer.tenantName}</p>
+              <p className="text-xs text-muted-foreground">
                 {customer.unitNo} • {customer.type}
               </p>
-              <p className="text-xs text-slate-600">
+              <p className="text-xs text-muted-foreground">
                 Cleared: {new Date(customer.clearedAt).toLocaleDateString()}
               </p>
             </div>
@@ -126,7 +126,7 @@ function PreviousCustomerCard({ customer, onDelete }) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setExpanded(!expanded)}
-              className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+              className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
               title="View details"
             >
               {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
@@ -142,7 +142,7 @@ function PreviousCustomerCard({ customer, onDelete }) {
         </div>
 
         {expanded && (
-          <div className="mt-4 space-y-4 border-t border-slate-800 pt-4">
+          <div className="mt-4 space-y-4 border-t border-border pt-4">
             <div className="grid gap-3 md:grid-cols-2">
               <InfoItem icon={User} label="Name" value={customer.tenantName} />
               <InfoItem icon={CreditCard} label="CNIC" value={customer.tenantCnic} />
@@ -172,24 +172,24 @@ function PreviousCustomerCard({ customer, onDelete }) {
             </div>
 
             {customer.remarks && (
-              <div className="rounded-xl border border-slate-800 bg-slate-950/30 p-3">
-                <p className="text-xs text-slate-500">Remarks</p>
-                <p className="mt-1 text-sm text-slate-300">{customer.remarks}</p>
+              <div className="rounded-xl border border-border bg-muted/50 p-3">
+                <p className="text-xs text-muted-foreground">Remarks</p>
+                <p className="mt-1 text-sm text-card-foreground">{customer.remarks}</p>
               </div>
             )}
 
             {customer.agreement && customer.agreement.length > 0 && (
-              <div className="rounded-xl border border-slate-800 bg-slate-950/30 p-3">
-                <p className="text-xs text-slate-500">Agreement Documents</p>
+              <div className="rounded-xl border border-border bg-muted/50 p-3">
+                <p className="text-xs text-muted-foreground">Agreement Documents</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {customer.agreement.map((doc, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-1 rounded-lg bg-slate-800 px-3 py-2 text-xs text-slate-300"
+                      className="flex items-center gap-1 rounded-lg bg-muted px-3 py-2 text-xs text-card-foreground"
                     >
                       <FileText size={14} className="text-indigo-400" />
                       <span>Document {index + 1}</span>
-                      <button className="ml-1 rounded p-1 hover:bg-slate-700">
+                      <button className="ml-1 rounded p-1 hover:bg-muted-foreground/40">
                         <Download size={12} />
                       </button>
                     </div>
@@ -199,8 +199,8 @@ function PreviousCustomerCard({ customer, onDelete }) {
             )}
 
             {customer.tenantImage && (
-              <div className="rounded-xl border border-slate-800 bg-slate-950/30 p-3">
-                <p className="text-xs text-slate-500">Tenant Image</p>
+              <div className="rounded-xl border border-border bg-muted/50 p-3">
+                <p className="text-xs text-muted-foreground">Tenant Image</p>
                 <div className="mt-2">
                   <img
                     src={getImageUrl(customer.tenantImage)}
@@ -216,26 +216,26 @@ function PreviousCustomerCard({ customer, onDelete }) {
             )}
 
             <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">
-              <p className="text-xs text-slate-500">Clearance Details</p>
+              <p className="text-xs text-muted-foreground">Clearance Details</p>
               <div className="mt-2 grid gap-1 text-sm">
-                <p className="text-slate-300">
-                  <span className="text-slate-500">Cleared At:</span>{" "}
+                <p className="text-card-foreground">
+                  <span className="text-muted-foreground">Cleared At:</span>{" "}
                   {new Date(customer.clearedAt).toLocaleString()}
                 </p>
-                <p className="text-slate-300">
-                  <span className="text-slate-500">Security Held:</span>{" "}
+                <p className="text-card-foreground">
+                  <span className="text-muted-foreground">Security Held:</span>{" "}
                   <span className="text-emerald-400">
                     Rs. {customer.securityHeld?.toLocaleString() || "0"}
                   </span>
                 </p>
-                <p className="text-slate-300">
-                  <span className="text-slate-500">Security Returned:</span>{" "}
+                <p className="text-card-foreground">
+                  <span className="text-muted-foreground">Security Returned:</span>{" "}
                   <span className="text-amber-400">
                     Rs. {customer.returnAmount?.toLocaleString() || "0"}
                   </span>
                 </p>
-                <p className="text-slate-300">
-                  <span className="text-slate-500">Security Forfeited:</span>{" "}
+                <p className="text-card-foreground">
+                  <span className="text-muted-foreground">Security Forfeited:</span>{" "}
                   <span className="text-red-400">
                     Rs. {customer.forfeitAmount?.toLocaleString() || "0"}
                   </span>
@@ -274,15 +274,15 @@ function PreviousCustomers({ previousCustomers = [], onDelete }) {
   const displayCustomers = showAll ? previousCustomers : previousCustomers.slice(0, 2);
 
   return (
-    <div id="previous-customers" className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6 scroll-mt-20">
+    <div id="previous-customers" className="mt-6 rounded-2xl border border-border bg-card p-6 scroll-mt-20">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <History size={20} className="text-indigo-400" />
           <div>
-            <h2 className="text-lg font-semibold text-slate-200">
+            <h2 className="text-lg font-semibold text-foreground">
               Previous Customers ({previousCustomers.length})
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               Customers who have previously rented this unit
             </p>
           </div>
@@ -290,7 +290,7 @@ function PreviousCustomers({ previousCustomers = [], onDelete }) {
         {previousCustomers.length > 2 && (
           <button
             onClick={() => setShowAll(!showAll)}
-            className="flex items-center gap-1 rounded-lg border border-slate-800 px-3 py-1.5 text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white"
+            className="flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             {showAll ? (
               <>
@@ -327,14 +327,14 @@ function DocumentsSection({ documents = [], onViewDocument }) {
   }
 
   return (
-    <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+    <div className="mt-6 rounded-2xl border border-border bg-card p-6">
       <div className="mb-4 flex items-center gap-3">
         <FileText size={20} className="text-indigo-400" />
         <div>
-          <h2 className="text-lg font-semibold text-slate-200">
+          <h2 className="text-lg font-semibold text-foreground">
             Saved Documents ({documents.length})
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Editable agreement documents for this unit
           </p>
         </div>
@@ -344,22 +344,22 @@ function DocumentsSection({ documents = [], onViewDocument }) {
         {documents.map((doc) => (
           <div
             key={doc.id}
-            className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/50 p-3 transition hover:border-slate-700"
+            className="flex items-center justify-between rounded-xl border border-border bg-muted p-3 transition hover:border-border"
           >
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-indigo-500/10 p-2 text-indigo-400">
                 <FileText size={16} />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-200">{doc.title}</p>
-                <p className="text-xs text-slate-500">
+                <p className="text-sm font-medium text-foreground">{doc.title}</p>
+                <p className="text-xs text-muted-foreground">
                   {doc.type} • v{doc.version || 1} • {new Date(doc.updatedAt || doc.createdAt).toLocaleDateString()}
                 </p>
               </div>
             </div>
             <button
               onClick={() => onViewDocument(doc)}
-              className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+              className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
               title="View document"
             >
               <Eye size={16} />
@@ -501,7 +501,7 @@ const handleDeletePreviousCustomer = async (recordId) => {
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="animate-pulse text-slate-500">Loading unit details...</div>
+        <div className="animate-pulse text-muted-foreground">Loading unit details...</div>
       </div>
     );
   }
@@ -530,7 +530,7 @@ const handleDeletePreviousCustomer = async (recordId) => {
         {/* Back Button */}
         <Link
           href={`/dashboard/buildings/${buildingId}`}
-          className="mb-6 inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-white"
+          className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground"
         >
           <ArrowLeft size={16} />
           Back to {building.buildingNo}
@@ -545,15 +545,15 @@ const handleDeletePreviousCustomer = async (recordId) => {
               </h1>
               <StatusBadge status={unit.status} />
             </div>
-            <div className="mt-2 flex items-center gap-2 text-sm text-slate-500">
+            <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
               <Building2 size={16} />
               {building.buildingNo} — {building.reference}
-              <span className="mx-2 text-slate-700">|</span>
+              <span className="mx-2 text-muted-foreground">|</span>
               <DoorOpen size={16} />
               {unit.purpose || "Not specified"}
             </div>
             {unit.reference && (
-              <p className="mt-1 text-sm text-slate-400">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Reference: {unit.reference}
               </p>
             )}
@@ -562,7 +562,7 @@ const handleDeletePreviousCustomer = async (recordId) => {
           <div className="flex gap-3">
             <Link
               href={`/dashboard/buildings/${buildingId}/rooms/${unitId}/edit`}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm font-medium text-slate-300 transition hover:border-slate-700 hover:bg-slate-800 hover:text-white"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-card-foreground transition hover:border-border hover:bg-muted hover:text-foreground"
             >
               <Pencil size={17} />
               Edit Unit
@@ -572,7 +572,7 @@ const handleDeletePreviousCustomer = async (recordId) => {
 
         {/* ✅ Unit Image - Fixed */}
       {unit.unitImage && (
-  <div className="mb-6 overflow-hidden rounded-2xl border border-slate-800 relative h-64 w-full">
+  <div className="mb-6 overflow-hidden rounded-2xl border border-border relative h-64 w-full">
     <Image
       src={getImageUrl(unit.unitImage)}
       alt={`${unit.type} ${unit.unitNo}`}
@@ -589,7 +589,7 @@ const handleDeletePreviousCustomer = async (recordId) => {
         {/* Stats Grid */}
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Unit Information */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <div className="rounded-2xl border border-border bg-card p-6">
             <h2 className="mb-5 font-semibold">Unit Information</h2>
             <div className="grid gap-3">
               <InfoItem icon={DoorOpen} label="Unit Number" value={unit.unitNo} />
@@ -604,11 +604,11 @@ const handleDeletePreviousCustomer = async (recordId) => {
           </div>
 
           {/* ✅ Tenant Information - Fixed */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <div className="rounded-2xl border border-border bg-card p-6">
             <h2 className="mb-5 font-semibold">Tenant Information</h2>
             {isRented && tenant ? (
               <div className="grid gap-3">
-                <div className="flex items-center gap-4 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+                <div className="flex items-center gap-4 rounded-xl border border-border bg-muted p-4">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-500/10 text-indigo-400">
                     {tenant.image ? (
                       <img
@@ -627,17 +627,17 @@ const handleDeletePreviousCustomer = async (recordId) => {
                   </div>
                   <div>
                     <p className="font-medium">{tenant.name}</p>
-                    <p className="text-xs text-slate-500">{tenant.reference || "No reference"}</p>
+                    <p className="text-xs text-muted-foreground">{tenant.reference || "No reference"}</p>
                   </div>
                 </div>
                 <InfoItem icon={CreditCard} label="CNIC" value={tenant.cnic} />
                 <InfoItem icon={Phone} label="Phone" value={tenant.phone} />
                 {tenant.agreement && tenant.agreement.length > 0 && (
-                  <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-                    <p className="text-xs text-slate-500">Documents</p>
+                  <div className="rounded-xl border border-border bg-muted p-4">
+                    <p className="text-xs text-muted-foreground">Documents</p>
                     <div className="mt-2 space-y-1">
                       {tenant.agreement.map((doc, index) => (
-                        <div key={index} className="flex items-center gap-2 text-sm text-slate-300">
+                        <div key={index} className="flex items-center gap-2 text-sm text-card-foreground">
                           <FileText size={14} className="text-indigo-400" />
                           <span>Agreement {index + 1}</span>
                         </div>
@@ -647,16 +647,16 @@ const handleDeletePreviousCustomer = async (recordId) => {
                 )}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-700 bg-slate-950/50 py-8 text-center">
-                <Home size={32} className="text-slate-600" />
-                <p className="mt-2 text-sm text-slate-500">No tenant assigned</p>
-                <p className="text-xs text-slate-600">This unit is currently available</p>
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted py-8 text-center">
+                <Home size={32} className="text-muted-foreground" />
+                <p className="mt-2 text-sm text-muted-foreground">No tenant assigned</p>
+                <p className="text-xs text-muted-foreground">This unit is currently available</p>
               </div>
             )}
           </div>
 
           {/* Financial Information */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <div className="rounded-2xl border border-border bg-card p-6">
             <h2 className="mb-5 font-semibold">Financial Information</h2>
             {isRented && initialPayment ? (
               <div className="grid gap-3">
@@ -683,9 +683,9 @@ const handleDeletePreviousCustomer = async (recordId) => {
                   value={`Rs. ${(initialPayment.rentPaid || 0).toLocaleString()}`}
                   valueClassName="text-emerald-400"
                 />
-                <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-                  <p className="text-xs text-slate-500">Payment Date & Time</p>
-                  <p className="mt-2 text-sm font-medium text-slate-200">
+                <div className="rounded-xl border border-border bg-muted p-4">
+                  <p className="text-xs text-muted-foreground">Payment Date & Time</p>
+                  <p className="mt-2 text-sm font-medium text-foreground">
                     {initialPayment.paymentDateTime
                       ? new Date(initialPayment.paymentDateTime).toLocaleString()
                       : "Not recorded"}
@@ -693,10 +693,10 @@ const handleDeletePreviousCustomer = async (recordId) => {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-700 bg-slate-950/50 py-8 text-center">
-                <Wallet size={32} className="text-slate-600" />
-                <p className="mt-2 text-sm text-slate-500">No financial records</p>
-                <p className="text-xs text-slate-600">This unit is currently available</p>
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted py-8 text-center">
+                <Wallet size={32} className="text-muted-foreground" />
+                <p className="mt-2 text-sm text-muted-foreground">No financial records</p>
+                <p className="text-xs text-muted-foreground">This unit is currently available</p>
               </div>
             )}
           </div>
@@ -723,7 +723,7 @@ const handleDeletePreviousCustomer = async (recordId) => {
         />
 
         {/* Quick Actions */}
-        <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <div className="mt-6 rounded-2xl border border-border bg-card p-6">
           <h2 className="mb-4 font-semibold">Quick Actions</h2>
           <div className="flex flex-wrap gap-3">
             {isRented && (
@@ -746,7 +746,7 @@ const handleDeletePreviousCustomer = async (recordId) => {
             )}
             <Link
               href={`/dashboard/buildings/${buildingId}/rooms/${unitId}/edit`}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-slate-700 hover:bg-slate-800 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-card-foreground transition hover:border-border hover:bg-muted hover:text-foreground"
             >
               <Pencil size={16} />
               Edit Unit

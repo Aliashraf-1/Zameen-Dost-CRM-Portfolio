@@ -16,6 +16,7 @@ import {
 
 import RentHistory from "@/components/customers/RentHistory";
 import SecurityHistory from "@/components/customers/SecurityHistory";
+import { getImageUrl } from "@/lib/imageHelper";
 
 function InfoItem({
   icon: Icon,
@@ -23,13 +24,13 @@ function InfoItem({
   value,
 }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-      <div className="flex items-center gap-2 text-xs text-slate-500">
+    <div className="rounded-xl border border-border bg-muted p-4">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <Icon size={15} />
         {label}
       </div>
 
-      <p className="mt-2 text-sm font-medium text-slate-200">
+      <p className="mt-2 text-sm font-medium text-foreground">
         {value || "Not Set"}
       </p>
     </div>
@@ -50,7 +51,7 @@ function RentStatus({ customer }) {
               Rent Paid
             </p>
 
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               Current rent is clear.
             </p>
           </div>
@@ -92,7 +93,7 @@ function RentStatus({ customer }) {
                 : "Rent Pending"}
             </p>
 
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               {customer.pendingMonths}{" "}
               {customer.pendingMonths === 1
                 ? "month"
@@ -102,7 +103,7 @@ function RentStatus({ customer }) {
           </div>
         </div>
 
-        <p className="text-lg font-bold text-slate-200">
+        <p className="text-lg font-bold text-foreground">
           Rs.{" "}
           {Number(
             customer.outstanding || 0
@@ -121,7 +122,7 @@ export default function CustomerDetails({
       {/* Back */}
       <Link
         href="/dashboard/customers"
-        className="mb-6 inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-white"
+        className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground"
       >
         <ArrowLeft size={16} />
         Back to Customers
@@ -133,7 +134,7 @@ export default function CustomerDetails({
           <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-indigo-500/10 text-indigo-400">
             {customer.image ? (
               <img
-                src={customer.image}
+                src={getImageUrl(customer.image)}
                 alt={customer.name}
                 className="h-full w-full object-cover"
               />
@@ -159,7 +160,7 @@ export default function CustomerDetails({
               )}
             </div>
 
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-foreground">
               {customer.reference}
             </p>
           </div>
@@ -169,7 +170,7 @@ export default function CustomerDetails({
       {/* Top Information */}
       <div className="grid gap-6 xl:grid-cols-3">
         {/* Personal */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <div className="rounded-2xl border border-border bg-card p-6">
           <h2 className="mb-5 font-semibold">
             Personal Information
           </h2>
@@ -196,7 +197,7 @@ export default function CustomerDetails({
         </div>
 
         {/* Rental */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <div className="rounded-2xl border border-border bg-card p-6">
           <h2 className="mb-5 font-semibold">
             Current Rental
           </h2>
@@ -223,7 +224,7 @@ export default function CustomerDetails({
         </div>
 
         {/* Financial */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <div className="rounded-2xl border border-border bg-card p-6">
           <h2 className="mb-5 font-semibold">
             Financial Information
           </h2>
@@ -232,13 +233,13 @@ export default function CustomerDetails({
             <InfoItem
               icon={Wallet}
               label="Monthly Rent"
-              value={`Rs. ${customer.monthlyRent.toLocaleString()}`}
+              value={`Rs. ${Number(customer.monthlyRent || 0).toLocaleString()}`}
             />
 
             <InfoItem
               icon={ShieldCheck}
               label="Security Held"
-              value={`Rs. ${customer.security.toLocaleString()}`}
+              value={`Rs. ${Number(customer.security || 0).toLocaleString()}`}
             />
 
             <InfoItem

@@ -12,7 +12,7 @@ export default function NewBuildingPage() {
           Add Building
         </h1>
 
-        <p className="mt-2 text-sm text-slate-500">
+        <p className="mt-2 text-sm text-muted-foreground">
           Add a new building to your property portfolio.
         </p>
       </div>

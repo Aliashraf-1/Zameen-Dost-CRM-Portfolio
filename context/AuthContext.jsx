@@ -4,7 +4,7 @@ import { createContext, useContext, useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 const AuthContext = createContext(null);
-const STORAGE_KEY = "bms-auth-user";
+const STORAGE_KEY = "bms-user";
 const TOKEN_KEY = "bms-token";
 
 import { authAPI } from '@/lib/api';
@@ -155,9 +155,9 @@ const login = async (email, password) => {
     const response = await authAPI.login(email, password);
     const { user, token } = response.data.data;
 
-    localStorage.setItem('bms-token', token);
-    localStorage.setItem('bms-user', JSON.stringify(user));
-    
+    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+
     setUser(user);
     return { success: true, user };
   } catch (error) {
@@ -176,6 +176,7 @@ const login = async (email, password) => {
     if (typeof window !== "undefined") {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem("bms-auth-user");
     }
     router.push("/login");
   };
@@ -200,7 +201,11 @@ const login = async (email, password) => {
   // ✅ Check if user can manage leads
   const canManageLeads = () => {
     if (!user) return false;
-    return hasPermission("manage_leads") || hasRole([ROLES.ADMIN, ROLES.LEAD_MANAGER, ROLES.SUPER_ADMIN]);
+    return (
+      !!user.canManageLeads ||
+      hasPermission("manage_leads") ||
+      hasRole([ROLES.ADMIN, ROLES.LEAD_MANAGER, ROLES.MODERATOR, ROLES.SUPER_ADMIN])
+    );
   };
 
   // ✅ Check if user can view reports

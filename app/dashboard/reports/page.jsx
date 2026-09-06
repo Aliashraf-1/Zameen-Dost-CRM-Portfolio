@@ -201,7 +201,7 @@ export default function ReportsPage() {
         <div>
           <p className="text-sm font-medium text-indigo-400">Analytics</p>
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Reports & Analytics</h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             Generate comprehensive reports for your business.
           </p>
         </div>
@@ -212,7 +212,7 @@ export default function ReportsPage() {
             <Link
               key={card.href}
               href={card.href}
-              className="group rounded-2xl border border-slate-800 bg-slate-900 p-6 transition-all hover:-translate-y-1 hover:border-slate-700 hover:shadow-xl hover:shadow-black/20"
+              className="group rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:border-border hover:shadow-xl hover:shadow-black/20"
             >
               <div className="flex items-start justify-between">
                 <div className={`rounded-xl ${card.bgColor} p-3 ${card.color}`}>
@@ -220,12 +220,12 @@ export default function ReportsPage() {
                 </div>
                 <ArrowRight
                   size={18}
-                  className="text-slate-600 transition group-hover:translate-x-1 group-hover:text-indigo-400"
+                  className="text-muted-foreground transition group-hover:translate-x-1 group-hover:text-indigo-400"
                 />
               </div>
-              <h3 className="mt-4 text-lg font-semibold text-slate-200">{card.title}</h3>
-              <p className="mt-2 text-sm text-slate-500">{card.description}</p>
-              <div className="mt-4 flex items-center gap-2 text-xs text-slate-600">
+              <h3 className="mt-4 text-lg font-semibold text-foreground">{card.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{card.description}</p>
+              <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
                 <Calendar size={12} />
                 <span>Available: Weekly, Monthly, Annual</span>
               </div>
@@ -234,8 +234,8 @@ export default function ReportsPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-lg font-semibold text-slate-200">Quick Actions</h2>
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <h2 className="text-lg font-semibold text-foreground">Quick Actions</h2>
           <div className="mt-4 flex flex-wrap gap-3">
          
            
@@ -244,11 +244,11 @@ export default function ReportsPage() {
             <button
               onClick={handleExportAll}
               disabled={exporting}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-800 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-card-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {exporting ? (
                 <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300/30 border-t-slate-300" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
                   Exporting...
                 </>
               ) : (
@@ -261,7 +261,7 @@ export default function ReportsPage() {
 
             {/* ✅ Success Message (when done) */}
             {!printing && !exporting && (
-              <span className="text-xs text-slate-500 self-center">
+              <span className="text-xs text-muted-foreground self-center">
                 Click Print to print current page, or Export All for combined report
               </span>
             )}

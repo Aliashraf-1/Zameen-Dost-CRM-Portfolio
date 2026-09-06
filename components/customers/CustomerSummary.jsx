@@ -12,10 +12,10 @@ function SummaryCard({
   description,
 }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-700">
+    <div className="rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-border">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             {title}
           </p>
 
@@ -23,7 +23,7 @@ function SummaryCard({
             {value}
           </p>
 
-          <p className="mt-1 text-xs text-slate-600">
+          <p className="mt-1 text-xs text-muted-foreground">
             {description}
           </p>
         </div>

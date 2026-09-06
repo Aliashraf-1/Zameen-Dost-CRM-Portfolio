@@ -36,13 +36,13 @@ export default function BuildingsPage() {
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="mb-1 text-sm font-medium text-indigo-400 animate-pulse bg-indigo-400/20 w-32 h-4 rounded" />
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl animate-pulse bg-slate-700/30 w-48 h-8 rounded" />
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl animate-pulse bg-muted-foreground/40/30 w-48 h-8 rounded" />
           </div>
           <div className="animate-pulse bg-indigo-600/30 w-32 h-12 rounded-xl" />
         </div>
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="animate-pulse rounded-2xl bg-slate-800/50 p-5 h-56" />
+            <div key={i} className="animate-pulse rounded-2xl bg-muted p-5 h-56" />
           ))}
         </div>
       </div>
@@ -77,7 +77,7 @@ export default function BuildingsPage() {
             Buildings
           </h1>
 
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             Manage your buildings, rooms and rental properties.
           </p>
         </div>
@@ -108,12 +108,12 @@ export default function BuildingsPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-slate-800 bg-slate-900/50 py-20 text-center">
+        <div className="rounded-2xl border border-dashed border-border bg-card/50 py-20 text-center">
           <h3 className="font-semibold">
             No buildings found
           </h3>
 
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             Try changing your search or filter.
           </p>
         </div>

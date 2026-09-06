@@ -326,12 +326,25 @@ exports.updateTask = async (req, res) => {
       });
     }
 
+    const isAdmin = ['admin', 'super_admin'].includes(req.user.role);
+    const isSelf = employee.email?.toLowerCase() === req.user.email?.toLowerCase();
+    if (!isAdmin && !isSelf) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only update your own tasks.',
+      });
+    }
+
     const task = employee.tasks.id(taskId);
     if (!task) {
       return res.status(404).json({
         success: false,
         message: 'Task not found.',
       });
+    }
+
+    if (!isAdmin) {
+      delete updates.failureDeduction;
     }
 
     Object.keys(updates).forEach(key => {

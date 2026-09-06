@@ -49,22 +49,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-600/20 mb-4">
             <Building2 size={32} className="text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Zameen Dost Marketing</h1>
-          <p className="text-slate-400 mt-1">Building Management System</p>
+          <h1 className="text-2xl font-bold text-foreground">Zameen Dost Marketing</h1>
+          <p className="text-muted-foreground mt-1">Building Management System</p>
         </div>
 
         {/* Login Card */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-8 shadow-2xl">
+        <div className="rounded-2xl border border-border bg-card p-8 shadow-2xl">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-white">Welcome Back</h2>
-            <p className="text-sm text-slate-400 mt-1">Sign in to your account</p>
+            <h2 className="text-xl font-semibold text-foreground">Welcome Back</h2>
+            <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
           </div>
 
           {/* Error Message */}
@@ -78,20 +78,20 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
+              <label className="mb-2 block text-sm font-medium text-card-foreground">
                 Email Address
               </label>
               <div className="relative">
                 <Mail
                   size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
                 />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@bms.com"
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-12 pr-4 text-sm text-slate-200 outline-none placeholder:text-slate-600 focus:border-indigo-500 transition"
+                  className="w-full rounded-xl border border-border bg-input py-3 pl-12 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-indigo-500 transition"
                   disabled={isLoading}
                   required
                 />
@@ -100,27 +100,27 @@ export default function LoginPage() {
 
             {/* Password */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
+              <label className="mb-2 block text-sm font-medium text-card-foreground">
                 Password
               </label>
               <div className="relative">
                 <Lock
                   size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
                 />
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-12 pr-12 text-sm text-slate-200 outline-none placeholder:text-slate-600 focus:border-indigo-500 transition"
+                  className="w-full rounded-xl border border-border bg-input py-3 pl-12 pr-12 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-indigo-500 transition"
                   disabled={isLoading}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-card-foreground transition"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -129,8 +129,8 @@ export default function LoginPage() {
 
             {/* Forgot Password */}
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-sm text-slate-400">
-                <input type="checkbox" className="rounded border-slate-700 bg-slate-800 text-indigo-500 focus:ring-indigo-500" />
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                <input type="checkbox" className="rounded border-border bg-muted text-indigo-500 focus:ring-indigo-500" />
                 Remember me
               </label>
               <Link
@@ -159,35 +159,35 @@ export default function LoginPage() {
           </form>
 
           {/* Demo Credentials */}
-          <div className="mt-6 border-t border-slate-800 pt-6">
-            <p className="text-xs text-center text-slate-500 mb-3">Demo Credentials</p>
+          <div className="mt-6 border-t border-border pt-6">
+            <p className="text-xs text-center text-muted-foreground mb-3">Demo Credentials</p>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="rounded-lg border border-slate-800 p-2 text-center">
-                <p className="text-slate-400">Admin</p>
-                <p className="text-slate-500 font-mono">admin@bms.com</p>
-                <p className="text-slate-500 font-mono">admin123</p>
+              <div className="rounded-lg border border-border p-2 text-center">
+                <p className="text-muted-foreground">Admin</p>
+                <p className="text-muted-foreground font-mono">admin@bms.com</p>
+                <p className="text-muted-foreground font-mono">admin123</p>
               </div>
-              <div className="rounded-lg border border-slate-800 p-2 text-center">
-                <p className="text-slate-400">Employee</p>
-                <p className="text-slate-500 font-mono">usman@bms.com</p>
-                <p className="text-slate-500 font-mono">usman123</p>
+              <div className="rounded-lg border border-border p-2 text-center">
+                <p className="text-muted-foreground">Employee</p>
+                <p className="text-muted-foreground font-mono">usman@bms.com</p>
+                <p className="text-muted-foreground font-mono">usman123</p>
               </div>
-              <div className="rounded-lg border border-slate-800 p-2 text-center">
-                <p className="text-slate-400">Lead Manager</p>
-                <p className="text-slate-500 font-mono">sara@bms.com</p>
-                <p className="text-slate-500 font-mono">sara123</p>
+              <div className="rounded-lg border border-border p-2 text-center">
+                <p className="text-muted-foreground">Lead Manager</p>
+                <p className="text-muted-foreground font-mono">sara@bms.com</p>
+                <p className="text-muted-foreground font-mono">sara123</p>
               </div>
-              <div className="rounded-lg border border-slate-800 p-2 text-center">
-                <p className="text-slate-400">Super Admin</p>
-                <p className="text-slate-500 font-mono">superadmin@bms.com</p>
-                <p className="text-slate-500 font-mono">super123</p>
+              <div className="rounded-lg border border-border p-2 text-center">
+                <p className="text-muted-foreground">Super Admin</p>
+                <p className="text-muted-foreground font-mono">superadmin@bms.com</p>
+                <p className="text-muted-foreground font-mono">super123</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-slate-600 mt-6">
+        <p className="text-center text-xs text-muted-foreground mt-6">
           &copy; {new Date().getFullYear()} Zameen Dost Marketing. All rights reserved.
         </p>
       </div>

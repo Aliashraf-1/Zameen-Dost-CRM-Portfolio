@@ -89,7 +89,7 @@ export default function DashboardHeader() {
   return (
     <>
       {/* ✅ Removed overflow-hidden from card */}
-      <div className="relative rounded-2xl border mb-2 border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/20 p-6 sm:p-8">
+      <div className="relative rounded-2xl border mb-2 border-border bg-gradient-to-br from-card via-card to-indigo-500/10 p-6 sm:p-8">
         {/* Background Decoration */}
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-500/5 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-purple-500/5 blur-3xl" />
@@ -106,10 +106,10 @@ export default function DashboardHeader() {
               </div>
             </div>
 
-            <p className="mt-2 flex items-center gap-2 text-sm text-slate-400">
+            <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
               <span>Here's what's happening with your properties today.</span>
-              <span className="hidden h-1 w-1 rounded-full bg-slate-700 sm:inline-block" />
-              <span className="hidden items-center gap-1 text-xs text-slate-500 sm:flex">
+              <span className="hidden h-1 w-1 rounded-full bg-muted-foreground/40 sm:inline-block" />
+              <span className="hidden items-center gap-1 text-xs text-muted-foreground sm:flex">
                 <Clock size={12} />
                 {time}
               </span>
@@ -119,13 +119,13 @@ export default function DashboardHeader() {
           {/* Right Side */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Date */}
-            <div className="hidden items-center gap-2 rounded-xl border border-slate-800 bg-slate-950/50 px-3 py-2 text-sm text-slate-400 md:flex">
+            <div className="hidden items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2 text-sm text-muted-foreground md:flex">
               <Calendar size={15} />
               <span>{date}</span>
             </div>
 
             {/* Search */}
-            <button className="rounded-xl border border-slate-800 bg-slate-950/50 p-2 text-slate-400 transition hover:border-slate-700 hover:bg-slate-800 hover:text-white">
+            <button className="rounded-xl border border-border bg-muted p-2 text-muted-foreground transition hover:border-border hover:bg-muted hover:text-foreground">
               <Search size={18} />
             </button>
 
@@ -133,17 +133,17 @@ export default function DashboardHeader() {
             <div className="relative inline-block" ref={dropdownRef}>
               <button
                 onClick={toggleDropdown}
-                className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-950/50 px-3 py-2 transition hover:border-slate-700 hover:bg-slate-800"
+                className="flex items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2 transition hover:border-border hover:bg-muted"
               >
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500/20 text-sm font-medium text-indigo-400">
                   {user?.name?.charAt(0) || "A"}
                 </div>
-                <span className="hidden text-sm text-slate-300 sm:inline-block">
+                <span className="hidden text-sm text-card-foreground sm:inline-block">
                   {user?.name || "Admin"}
                 </span>
                 <ChevronDown
                   size={14}
-                  className={`text-slate-500 transition-transform duration-200 ${
+                  className={`text-muted-foreground transition-transform duration-200 ${
                     showDropdown ? "rotate-180" : ""
                   }`}
                 />
@@ -152,14 +152,14 @@ export default function DashboardHeader() {
               {/* Dropdown Menu - Now not clipped */}
               {showDropdown && (
                 <div 
-                  className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-slate-700 bg-slate-800 shadow-2xl overflow-hidden"
+                  className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border bg-muted shadow-2xl overflow-hidden"
                   style={{ zIndex: 9999 }}
                 >
                   <div className="p-2 space-y-1">
                     {/* User Info */}
-                    <div className="px-3 py-2 border-b border-slate-700">
-                      <p className="text-sm font-medium text-slate-200">{user?.name}</p>
-                      <p className="text-xs text-slate-500">{user?.email}</p>
+                    <div className="px-3 py-2 border-b border-border">
+                      <p className="text-sm font-medium text-foreground">{user?.name}</p>
+                      <p className="text-xs text-muted-foreground">{user?.email}</p>
                       <span className="mt-1 inline-block rounded-lg bg-indigo-500/10 px-2 py-0.5 text-xs text-indigo-400">
                         {user?.role?.replace(/_/g, " ")}
                       </span>
@@ -169,7 +169,7 @@ export default function DashboardHeader() {
                     {canManageUsers && (
                       <button
                         onClick={handleAddUserClick}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition hover:bg-slate-700"
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-card-foreground transition hover:bg-muted-foreground/40"
                       >
                         <UserPlus size={16} className="text-indigo-400" />
                         Add User
@@ -180,7 +180,7 @@ export default function DashboardHeader() {
                     {canManageUsers && (
                       <button
                         onClick={handleUsersManagement}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition hover:bg-slate-700"
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-card-foreground transition hover:bg-muted-foreground/40"
                       >
                         <Users size={16} className="text-indigo-400" />
                         Users Management
@@ -193,14 +193,14 @@ export default function DashboardHeader() {
                         router.push("/dashboard/settings");
                         setShowDropdown(false);
                       }}
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition hover:bg-slate-700"
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-card-foreground transition hover:bg-muted-foreground/40"
                     >
-                      <Settings size={16} className="text-slate-400" />
+                      <Settings size={16} className="text-muted-foreground" />
                       Settings
                     </button>
 
                     {/* Divider */}
-                    <div className="border-t border-slate-700 my-1" />
+                    <div className="border-t border-border my-1" />
 
                     {/* Logout */}
                     <button

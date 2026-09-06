@@ -35,7 +35,7 @@ export default function BuildingCard({ building }) {
   console.log("BuildingCard - image URL:", firstUnitImage ? getImageUrl(firstUnitImage) : null);
 
   return (
-    <div className="group rounded-2xl border border-slate-800 bg-slate-900 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-slate-700 hover:shadow-xl hover:shadow-black/20">
+    <div className="group rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-border hover:shadow-xl hover:shadow-black/20">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
@@ -66,7 +66,7 @@ export default function BuildingCard({ building }) {
               {building?.buildingNo || "Unnamed Building"}
             </h3>
 
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               {building?.reference || "No reference"}
             </p>
           </div>
@@ -82,15 +82,15 @@ export default function BuildingCard({ building }) {
       </div>
 
       {/* Address */}
-      <p className="mt-5 text-sm text-slate-400">
+      <p className="mt-5 text-sm text-muted-foreground">
         {building?.address || "No address available"}
       </p>
 
       {/* Stats */}
       <div className="mt-5 grid grid-cols-2 gap-3">
         {/* Total Rooms */}
-        <div className="rounded-xl bg-slate-950/60 p-3">
-          <div className="flex items-center gap-2 text-slate-500">
+        <div className="rounded-xl bg-input/60 p-3">
+          <div className="flex items-center gap-2 text-muted-foreground">
             <DoorOpen size={16} />
             <span className="text-xs">Rooms</span>
           </div>
@@ -98,8 +98,8 @@ export default function BuildingCard({ building }) {
         </div>
 
         {/* Monthly Revenue */}
-        <div className="rounded-xl bg-slate-950/60 p-3">
-          <div className="flex items-center gap-2 text-slate-500">
+        <div className="rounded-xl bg-input/60 p-3">
+          <div className="flex items-center gap-2 text-muted-foreground">
             <Wallet size={16} />
             <span className="text-xs">Revenue</span>
           </div>
@@ -113,7 +113,7 @@ export default function BuildingCard({ building }) {
       <div className="mt-5 flex items-center justify-between text-xs">
         <div className="flex gap-4">
           <span className="text-emerald-400">{rentedRooms} rented</span>
-          <span className="text-slate-500">{availableRooms} available</span>
+          <span className="text-muted-foreground">{availableRooms} available</span>
         </div>
 
         {/* View */}

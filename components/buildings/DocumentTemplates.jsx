@@ -25,7 +25,7 @@ export default function DocumentTemplates({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FileText size={18} className="text-indigo-400" />
-          <span className="text-sm font-medium text-slate-300">Document Templates</span>
+          <span className="text-sm font-medium text-card-foreground">Document Templates</span>
           {existingDocuments.length > 0 && (
             <span className="ml-2 rounded-full bg-indigo-500/20 px-2 py-0.5 text-xs text-indigo-400">
               {existingDocuments.length}
@@ -36,7 +36,7 @@ export default function DocumentTemplates({
           type="button"
           onClick={() => setExpanded(!expanded)}
           disabled={disabled}
-          className="flex items-center gap-1 rounded-lg border border-slate-800 px-3 py-1.5 text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white disabled:opacity-50"
+          className="flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-50"
         >
           {expanded ? (
             <>
@@ -57,8 +57,8 @@ export default function DocumentTemplates({
         <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-200">{selectedTemplate.name}</p>
-              <p className="text-xs text-slate-500">{selectedTemplate.description}</p>
+              <p className="text-sm font-medium text-foreground">{selectedTemplate.name}</p>
+              <p className="text-xs text-muted-foreground">{selectedTemplate.description}</p>
             </div>
             <button
               type="button"
@@ -67,7 +67,7 @@ export default function DocumentTemplates({
                   onViewExisting(selectedTemplate);
                 }
               }}
-              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+              className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
               title="View existing documents"
             >
               <Eye size={16} />
@@ -78,7 +78,7 @@ export default function DocumentTemplates({
 
       {/* Templates List */}
       {expanded && (
-        <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-2 space-y-2 max-h-48 overflow-y-auto">
+        <div className="rounded-xl border border-border bg-muted p-2 space-y-2 max-h-48 overflow-y-auto">
           {documentTemplates.map((template) => {
             const isSelected = selectedTemplate?.id === template.id;
             const hasExisting = existingDocuments.some(doc => doc.templateId === template.id);
@@ -91,12 +91,12 @@ export default function DocumentTemplates({
                 className={`flex w-full items-center justify-between rounded-lg p-3 text-left transition ${
                   isSelected
                     ? "bg-indigo-500/20 border border-indigo-500/30"
-                    : "hover:bg-slate-800"
+                    : "hover:bg-muted"
                 }`}
               >
                 <div>
-                  <p className="text-sm font-medium text-slate-200">{template.name}</p>
-                  <p className="text-xs text-slate-500">{template.description}</p>
+                  <p className="text-sm font-medium text-foreground">{template.name}</p>
+                  <p className="text-xs text-muted-foreground">{template.description}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {hasExisting && (

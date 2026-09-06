@@ -12,10 +12,10 @@ export default function StatCard({
   trend,
 }) {
   const content = (
-    <div className="group rounded-2xl border border-slate-800 bg-slate-900 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-slate-700 hover:shadow-xl hover:shadow-black/20">
+    <div className="group rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-border hover:shadow-xl hover:shadow-black/20">
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-slate-400">{title}</p>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <div className="mt-2 flex items-end gap-2">
             <h2 className="text-2xl font-bold tracking-tight">{value}</h2>
             {trend && (
@@ -25,7 +25,7 @@ export default function StatCard({
                     ? trend.positive
                       ? "bg-emerald-500/10 text-emerald-400"
                       : "bg-red-500/10 text-red-400"
-                    : "bg-slate-800 text-slate-400"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 {trend.positive !== undefined ? (
@@ -40,7 +40,7 @@ export default function StatCard({
             )}
           </div>
           {description && (
-            <p className="mt-1 text-xs text-slate-500">{description}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{description}</p>
           )}
         </div>
 
@@ -50,8 +50,8 @@ export default function StatCard({
       </div>
 
       {trend && trend.label && (
-        <div className="mt-3 flex items-center gap-1 border-t border-slate-800 pt-3 text-xs text-slate-500">
-          <span className="text-slate-400">↳</span>
+        <div className="mt-3 flex items-center gap-1 border-t border-border pt-3 text-xs text-muted-foreground">
+          <span className="text-muted-foreground">↳</span>
           <span>{trend.label}</span>
         </div>
       )}

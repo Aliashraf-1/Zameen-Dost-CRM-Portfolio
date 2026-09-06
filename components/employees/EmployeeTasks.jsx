@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, Clock, AlertCircle, XCircle, Plus, Eye, ChevronDown, ChevronUp } from "lucide-react";
 import TaskModal from "./TaskModal";
 
-export default function EmployeeTasks({ employee, onTaskAdd, onTaskUpdate }) {
+export default function EmployeeTasks({ employee, onTaskAdd, onTaskUpdate, canAssign = true }) {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [expandedTask, setExpandedTask] = useState(null);
@@ -58,11 +58,9 @@ export default function EmployeeTasks({ employee, onTaskAdd, onTaskUpdate }) {
   const handleSaveTask = async (taskData) => {
     try {
       if (editingTask) {
-        // Update existing task
         const taskId = editingTask._id || editingTask.id;
         await onTaskUpdate({ ...taskData, _id: taskId, id: taskId });
-      } else {
-        // Add new task
+      } else if (onTaskAdd) {
         const { id, _id, ...cleanData } = taskData;
         await onTaskAdd(cleanData);
       }
@@ -74,12 +72,12 @@ export default function EmployeeTasks({ employee, onTaskAdd, onTaskUpdate }) {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+    <div className="rounded-2xl border border-border bg-card p-6">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold">Tasks</h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             {totalTasks} total tasks
             {hiddenOldCount > 0 && (
               <span className="ml-2 text-amber-400">
@@ -88,6 +86,7 @@ export default function EmployeeTasks({ employee, onTaskAdd, onTaskUpdate }) {
             )}
           </p>
         </div>
+        {canAssign && (
         <button
           onClick={() => {
             setEditingTask(null);
@@ -98,13 +97,14 @@ export default function EmployeeTasks({ employee, onTaskAdd, onTaskUpdate }) {
           <Plus size={16} />
           Assign Task
         </button>
+        )}
       </div>
 
       {/* Tasks List */}
       <div className="space-y-3">
         {displayTasks.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-700 p-8 text-center">
-            <p className="text-sm text-slate-500">No tasks</p>
+          <div className="rounded-xl border border-dashed border-border p-8 text-center">
+            <p className="text-sm text-muted-foreground">No tasks</p>
           </div>
         ) : (
           displayTasks.map((task) => {
@@ -116,16 +116,16 @@ export default function EmployeeTasks({ employee, onTaskAdd, onTaskUpdate }) {
             return (
               <div
                 key={taskId}
-                className={`rounded-xl border p-4 transition hover:border-slate-700 ${
+                className={`rounded-xl border p-4 transition hover:border-border ${
                   isOld
                     ? "border-amber-500/30 bg-amber-500/5"
-                    : "border-slate-800 bg-slate-950/50"
+                    : "border-border bg-muted"
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 flex-wrap">
-                      <h3 className="font-medium text-slate-200">{task.title}</h3>
+                      <h3 className="font-medium text-foreground">{task.title}</h3>
                       <span className={`rounded-lg px-2 py-0.5 text-xs font-medium ${getPriorityBadge(task.priority)}`}>
                         {task.priority}
                       </span>
@@ -139,8 +139,8 @@ export default function EmployeeTasks({ employee, onTaskAdd, onTaskUpdate }) {
                         <span className="text-xs text-amber-400">⚠️ Overdue</span>
                       )}
                     </div>
-                    <p className="mt-1 text-sm text-slate-400 line-clamp-2">{task.description}</p>
-                    <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-500">
+                    <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{task.description}</p>
+                    <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
                       <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
                       {task.completedAt && (
                         <span>Completed: {new Date(task.completedAt).toLocaleDateString()}</span>
@@ -156,7 +156,7 @@ export default function EmployeeTasks({ employee, onTaskAdd, onTaskUpdate }) {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setExpandedTask(isExpanded ? null : taskId)}
-                      className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                      className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                     >
                       <Eye size={16} />
                     </button>
@@ -165,7 +165,7 @@ export default function EmployeeTasks({ employee, onTaskAdd, onTaskUpdate }) {
                         setEditingTask(task);
                         setShowTaskModal(true);
                       }}
-                      className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                      className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                     >
                       ✏️
                     </button>
@@ -173,16 +173,16 @@ export default function EmployeeTasks({ employee, onTaskAdd, onTaskUpdate }) {
                 </div>
 
                 {isExpanded && (
-                  <div className="mt-3 border-t border-slate-800 pt-3">
+                  <div className="mt-3 border-t border-border pt-3">
                     <div className="grid gap-2 text-sm">
-                      <p><span className="text-slate-500">Description:</span> {task.description}</p>
-                      <p><span className="text-slate-500">Assigned:</span> {new Date(task.assignedDate).toLocaleString()}</p>
-                      <p><span className="text-slate-500">Due:</span> {new Date(task.dueDate).toLocaleString()}</p>
+                      <p><span className="text-muted-foreground">Description:</span> {task.description}</p>
+                      <p><span className="text-muted-foreground">Assigned:</span> {new Date(task.assignedDate).toLocaleString()}</p>
+                      <p><span className="text-muted-foreground">Due:</span> {new Date(task.dueDate).toLocaleString()}</p>
                       {task.completedAt && (
-                        <p><span className="text-slate-500">Completed:</span> {new Date(task.completedAt).toLocaleString()}</p>
+                        <p><span className="text-muted-foreground">Completed:</span> {new Date(task.completedAt).toLocaleString()}</p>
                       )}
                       {task.remarks && (
-                        <p><span className="text-slate-500">Remarks:</span> {task.remarks}</p>
+                        <p><span className="text-muted-foreground">Remarks:</span> {task.remarks}</p>
                       )}
                       {task.failureReason && (
                         <p><span className="text-red-400">Failure Reason:</span> {task.failureReason}</p>
@@ -201,7 +201,7 @@ export default function EmployeeTasks({ employee, onTaskAdd, onTaskUpdate }) {
 
       {/* Show More (Recent) */}
       {activeTasks.length > 3 && (
-        <div className="mt-4 border-t border-slate-800 pt-3 text-center">
+        <div className="mt-4 border-t border-border pt-3 text-center">
           <button
             onClick={() => setShowAllTasks(!showAllTasks)}
             className="inline-flex items-center gap-1 text-sm text-indigo-400 transition hover:text-indigo-300"
@@ -223,7 +223,7 @@ export default function EmployeeTasks({ employee, onTaskAdd, onTaskUpdate }) {
 
       {/* Show Previous (Old Tasks) */}
       {hiddenOldCount > 0 && (
-        <div className="mt-2 border-t border-slate-800 pt-3 text-center">
+        <div className="mt-2 border-t border-border pt-3 text-center">
           <button
             onClick={() => setShowPreviousTasks(!showPreviousTasks)}
             className="inline-flex items-center gap-1 text-sm text-amber-400 transition hover:text-amber-300"

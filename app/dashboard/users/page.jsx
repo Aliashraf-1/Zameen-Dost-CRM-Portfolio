@@ -57,7 +57,7 @@ export default function UsersPage() {
             <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
               Users
             </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-500">
+            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
               Manage user accounts and roles.
             </p>
           </div>
@@ -75,28 +75,28 @@ export default function UsersPage() {
           <div className="relative max-w-md">
             <Search
               size={17}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search users..."
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-11 pr-4 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+              className="w-full rounded-xl border border-border bg-input py-3 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
             />
           </div>
         </div>
 
         {/* Users Table */}
-        <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px]">
               <thead>
-                <tr className="border-b border-slate-800 text-left">
-                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">User</th>
-                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Role</th>
-                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Status</th>
-                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Employee</th>
-                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">Action</th>
+                <tr className="border-b border-border text-left">
+                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">User</th>
+                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Role</th>
+                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Status</th>
+                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Employee</th>
+                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -106,12 +106,12 @@ export default function UsersPage() {
                   return (
                     <tr
                       key={user.id}
-                      className="border-b border-slate-800/70 transition hover:bg-slate-950/50"
+                      className="border-b border-border/70 transition hover:bg-muted"
                     >
                       <td className="px-6 py-4">
                         <div>
-                          <p className="font-medium text-slate-200">{user.name}</p>
-                          <p className="text-xs text-slate-500">{user.email}</p>
+                          <p className="font-medium text-foreground">{user.name}</p>
+                          <p className="text-xs text-muted-foreground">{user.email}</p>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -139,13 +139,13 @@ export default function UsersPage() {
                           {user.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-slate-400">
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
                         {user.employeeId || "—"}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1">
                           <button
-                            className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                            className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                             title="View"
                           >
                             <Eye size={17} />
@@ -153,14 +153,14 @@ export default function UsersPage() {
                           {!isCurrentUser && (
                             <>
                               <button
-                                className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                                className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                                 title="Edit"
                               >
                                 <Edit size={17} />
                               </button>
                               <button
                                 onClick={() => handleDelete(user.id)}
-                                className="rounded-lg p-2 text-slate-500 transition hover:bg-red-500/10 hover:text-red-400"
+                                className="rounded-lg p-2 text-muted-foreground transition hover:bg-red-500/10 hover:text-red-400"
                                 title="Delete"
                               >
                                 <Trash2 size={17} />
@@ -176,8 +176,8 @@ export default function UsersPage() {
             </table>
             {filteredUsers.length === 0 && (
               <div className="py-12 text-center">
-                <Users size={32} className="mx-auto text-slate-600" />
-                <p className="mt-3 text-sm text-slate-500">No users found</p>
+                <Users size={32} className="mx-auto text-muted-foreground" />
+                <p className="mt-3 text-sm text-muted-foreground">No users found</p>
               </div>
             )}
           </div>

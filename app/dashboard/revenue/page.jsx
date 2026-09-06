@@ -27,19 +27,19 @@ function DetailModal({ isOpen, onClose, title, data, renderItem }) {
 
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-2xl max-h-[80vh] overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="w-full max-w-2xl max-h-[80vh] overflow-hidden rounded-2xl border border-border bg-card shadow-2xl animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800 bg-slate-900 p-5">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card p-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
               <FileText size={20} />
             </div>
             <div>
               <h2 className="font-semibold">{title}</h2>
-              <p className="text-xs text-slate-500">{data?.length || 0} records found</p>
+              <p className="text-xs text-muted-foreground">{data?.length || 0} records found</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white">
+          <button onClick={onClose} className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground">
             <X size={18} />
           </button>
         </div>
@@ -47,7 +47,7 @@ function DetailModal({ isOpen, onClose, title, data, renderItem }) {
         {/* Content */}
         <div className="overflow-y-auto p-5 max-h-[60vh]">
           {!data || data.length === 0 ? (
-            <p className="text-center text-sm text-slate-500 py-8">No records found</p>
+            <p className="text-center text-sm text-muted-foreground py-8">No records found</p>
           ) : (
             <div className="space-y-3">
               {data.map((item, index) => renderItem(item, index))}
@@ -56,10 +56,10 @@ function DetailModal({ isOpen, onClose, title, data, renderItem }) {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-slate-800 p-4 flex justify-end">
+        <div className="border-t border-border p-4 flex justify-end">
           <button
             onClick={onClose}
-            className="rounded-xl border border-slate-800 px-5 py-2.5 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+            className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             Close
           </button>
@@ -207,7 +207,7 @@ export default function RevenuePage() {
           <div>
             <p className="text-sm font-medium text-indigo-400">Financial Management</p>
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Revenue</h1>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-foreground">
               Track income, expenses, securities and profit/loss.
             </p>
           </div>
@@ -223,10 +223,10 @@ export default function RevenuePage() {
         {/* Stats Grid */}
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {/* Total Revenue */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+          <div className="rounded-2xl border border-border bg-card p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Total Revenue</p>
+                <p className="text-sm text-muted-foreground">Total Revenue</p>
                 <h2 className="mt-2 text-2xl font-bold text-emerald-400">
                   Rs. {totalRevenue.toLocaleString()}
                 </h2>
@@ -241,7 +241,7 @@ export default function RevenuePage() {
                 className={`flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium transition ${
                   showSecurities
                     ? "bg-indigo-500/20 text-indigo-400"
-                    : "bg-slate-800 text-slate-400"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 {showSecurities ? (
@@ -266,12 +266,12 @@ export default function RevenuePage() {
 
           {/* Total Expenses */}
           <div 
-            className="rounded-2xl border border-slate-800 bg-slate-900 p-5 cursor-pointer hover:border-slate-700 transition"
+            className="rounded-2xl border border-border bg-card p-5 cursor-pointer hover:border-border transition"
             onClick={() => setShowExpensesModal(true)}
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Total Expenses</p>
+                <p className="text-sm text-muted-foreground">Total Expenses</p>
                 <h2 className="mt-2 text-2xl font-bold text-red-400">
                   Rs. {totalExpenses.toLocaleString()}
                 </h2>
@@ -287,16 +287,16 @@ export default function RevenuePage() {
 
           {/* Securities */}
           <div 
-            className="rounded-2xl border border-slate-800 bg-slate-900 p-5 cursor-pointer hover:border-slate-700 transition"
+            className="rounded-2xl border border-border bg-card p-5 cursor-pointer hover:border-border transition"
             onClick={() => setShowSecuritiesModal(true)}
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Securities Held</p>
+                <p className="text-sm text-muted-foreground">Securities Held</p>
                 <h2 className="mt-2 text-2xl font-bold text-amber-400">
                   Rs. {totalSecurities.toLocaleString()}
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   {allSecurities.filter(s => s.status === "Held").length} held securities
                 </p>
               </div>
@@ -311,16 +311,16 @@ export default function RevenuePage() {
 
           {/* Profit/Loss */}
           <div 
-            className="rounded-2xl border border-slate-800 bg-slate-900 p-5 cursor-pointer hover:border-slate-700 transition"
+            className="rounded-2xl border border-border bg-card p-5 cursor-pointer hover:border-border transition"
             onClick={() => setShowProfitLossModal(true)}
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Net Profit/Loss</p>
+                <p className="text-sm text-muted-foreground">Net Profit/Loss</p>
                 <h2 className={`mt-2 text-2xl font-bold ${profit >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                   {profit >= 0 ? "+" : "-"} Rs. {Math.abs(profit).toLocaleString()}
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   {profitMargin.toFixed(1)}% margin
                 </p>
               </div>
@@ -335,11 +335,11 @@ export default function RevenuePage() {
         </div>
 
         {/* Recent Transactions */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <div className="rounded-2xl border border-border bg-card p-6">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold">Recent Transactions</h2>
-              <p className="text-xs text-slate-500">Latest financial activities</p>
+              <p className="text-xs text-muted-foreground">Latest financial activities</p>
             </div>
             {/* ✅ View All Button - Now Functional */}
             <button
@@ -352,12 +352,12 @@ export default function RevenuePage() {
 
           <div className="space-y-2">
             {recentTransactions.length === 0 ? (
-              <p className="text-center text-sm text-slate-500 py-8">No transactions yet</p>
+              <p className="text-center text-sm text-muted-foreground py-8">No transactions yet</p>
             ) : (
               recentTransactions.map((tx, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/30 p-3 transition hover:bg-slate-950/50 cursor-pointer"
+                  className="flex items-center justify-between rounded-xl border border-border bg-muted/50 p-3 transition hover:bg-muted cursor-pointer"
                   onClick={() => setSelectedTransaction(tx)}
                 >
                   <div className="flex items-center gap-3">
@@ -378,14 +378,14 @@ export default function RevenuePage() {
                     </div>
                     <div>
                       <p className="text-sm font-medium">{tx.description || tx.type}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-muted-foreground">
                         {new Date(tx.date).toLocaleDateString()} • {new Date(tx.date).toLocaleTimeString()}
                       </p>
                       {tx.employeeName && (
-                        <p className="text-xs text-slate-500">Employee: {tx.employeeName}</p>
+                        <p className="text-xs text-muted-foreground">Employee: {tx.employeeName}</p>
                       )}
                       {tx.unitNo && (
-                        <p className="text-xs text-slate-500">Unit: {tx.unitNo}</p>
+                        <p className="text-xs text-muted-foreground">Unit: {tx.unitNo}</p>
                       )}
                     </div>
                   </div>
@@ -394,7 +394,7 @@ export default function RevenuePage() {
                       {tx.type === "Expense" ? "-" : "+"} Rs. {tx.amount.toLocaleString()}
                     </p>
                     {tx.category && (
-                      <p className="text-xs text-slate-500">{tx.category}</p>
+                      <p className="text-xs text-muted-foreground">{tx.category}</p>
                     )}
                   </div>
                 </div>
@@ -428,16 +428,16 @@ export default function RevenuePage() {
         title="Expenses Details"
         data={allExpenses}
         renderItem={(exp, index) => (
-          <div key={index} className="rounded-xl border border-slate-800 bg-slate-950/30 p-3">
+          <div key={index} className="rounded-xl border border-border bg-muted/50 p-3">
             <div className="flex justify-between items-start">
               <div>
-                <p className="font-medium text-slate-200">{exp.category || exp.type}</p>
-                <p className="text-xs text-slate-500">{exp.description || 'No description'}</p>
-                <p className="text-xs text-slate-500">Paid to: {exp.paidTo || 'N/A'}</p>
+                <p className="font-medium text-foreground">{exp.category || exp.type}</p>
+                <p className="text-xs text-muted-foreground">{exp.description || 'No description'}</p>
+                <p className="text-xs text-muted-foreground">Paid to: {exp.paidTo || 'N/A'}</p>
                 {exp.employeeName && (
-                  <p className="text-xs text-slate-500">Employee: {exp.employeeName}</p>
+                  <p className="text-xs text-muted-foreground">Employee: {exp.employeeName}</p>
                 )}
-                <p className="text-xs text-slate-500">{new Date(exp.createdAt).toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">{new Date(exp.createdAt).toLocaleString()}</p>
               </div>
               <p className="font-bold text-red-400">- Rs. {exp.amount.toLocaleString()}</p>
             </div>
@@ -452,25 +452,25 @@ export default function RevenuePage() {
         title="Securities Details"
         data={allSecurities}
         renderItem={(sec, index) => (
-          <div key={index} className="rounded-xl border border-slate-800 bg-slate-950/30 p-3">
+          <div key={index} className="rounded-xl border border-border bg-muted/50 p-3">
             <div className="flex justify-between items-start">
               <div>
-                <p className="font-medium text-slate-200">{sec.description || 'Security'}</p>
-                <p className="text-xs text-slate-500">Tenant: {sec.tenantName || 'N/A'}</p>
-                <p className="text-xs text-slate-500">Unit: {sec.unitNo || 'N/A'} - {sec.buildingNo || 'N/A'}</p>
-                <p className="text-xs text-slate-500">Status: {sec.status || 'Held'}</p>
+                <p className="font-medium text-foreground">{sec.description || 'Security'}</p>
+                <p className="text-xs text-muted-foreground">Tenant: {sec.tenantName || 'N/A'}</p>
+                <p className="text-xs text-muted-foreground">Unit: {sec.unitNo || 'N/A'} - {sec.buildingNo || 'N/A'}</p>
+                <p className="text-xs text-muted-foreground">Status: {sec.status || 'Held'}</p>
                 {sec.returnDate && (
-                  <p className="text-xs text-slate-500">Returned: {new Date(sec.returnDate).toLocaleDateString()}</p>
+                  <p className="text-xs text-muted-foreground">Returned: {new Date(sec.returnDate).toLocaleDateString()}</p>
                 )}
                 {sec.remarks && (
-                  <p className="text-xs text-slate-500">Remarks: {sec.remarks}</p>
+                  <p className="text-xs text-muted-foreground">Remarks: {sec.remarks}</p>
                 )}
-                <p className="text-xs text-slate-500">{new Date(sec.createdAt).toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">{new Date(sec.createdAt).toLocaleString()}</p>
               </div>
               <div className="text-right">
                 <p className="font-bold text-amber-400">+ Rs. {sec.amount.toLocaleString()}</p>
                 {sec.returnedAmount && (
-                  <p className="text-xs text-slate-500">Returned: Rs. {sec.returnedAmount.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">Returned: Rs. {sec.returnedAmount.toLocaleString()}</p>
                 )}
               </div>
             </div>
@@ -488,33 +488,33 @@ export default function RevenuePage() {
           <div key={index} className="space-y-4">
             <div className="grid grid-cols-3 gap-3">
               <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-center">
-                <p className="text-xs text-slate-500">Total Revenue</p>
+                <p className="text-xs text-muted-foreground">Total Revenue</p>
                 <p className="text-lg font-bold text-emerald-400">Rs. {report.totalRevenue.toLocaleString()}</p>
                 {report.totalSecurities > 0 && (
                   <p className="text-xs text-amber-400">+ Rs. {report.totalSecurities.toLocaleString()} securities</p>
                 )}
               </div>
               <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-center">
-                <p className="text-xs text-slate-500">Total Expenses</p>
+                <p className="text-xs text-muted-foreground">Total Expenses</p>
                 <p className="text-lg font-bold text-red-400">Rs. {report.totalExpenses.toLocaleString()}</p>
               </div>
               <div className={`rounded-xl border p-3 text-center ${report.profit >= 0 ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-red-500/20 bg-red-500/5'}`}>
-                <p className="text-xs text-slate-500">Net Profit / Loss</p>
+                <p className="text-xs text-muted-foreground">Net Profit / Loss</p>
                 <p className={`text-lg font-bold ${report.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {report.profit >= 0 ? '+' : '-'} Rs. {Math.abs(report.profit).toLocaleString()}
                 </p>
-                <p className="text-xs text-slate-500">Margin: {report.profitMargin.toFixed(1)}%</p>
+                <p className="text-xs text-muted-foreground">Margin: {report.profitMargin.toFixed(1)}%</p>
               </div>
             </div>
             
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-slate-300 flex items-center gap-2">
+              <h4 className="text-sm font-medium text-card-foreground flex items-center gap-2">
                 <span>Income Details</span>
-                <span className="text-xs text-slate-500">({revenueData.income?.length || 0} entries)</span>
+                <span className="text-xs text-muted-foreground">({revenueData.income?.length || 0} entries)</span>
               </h4>
               {(revenueData.income || []).map((inc, i) => (
-                <div key={i} className="flex justify-between text-sm border-b border-slate-800 pb-1">
-                  <span className="text-slate-400">{inc.category || inc.type} - {inc.description || ''}</span>
+                <div key={i} className="flex justify-between text-sm border-b border-border pb-1">
+                  <span className="text-muted-foreground">{inc.category || inc.type} - {inc.description || ''}</span>
                   <span className="text-emerald-400">Rs. {inc.amount.toLocaleString()}</span>
                 </div>
               ))}
@@ -525,13 +525,13 @@ export default function RevenuePage() {
                 </div>
               )}
               
-              <h4 className="text-sm font-medium text-slate-300 mt-4 flex items-center gap-2">
+              <h4 className="text-sm font-medium text-card-foreground mt-4 flex items-center gap-2">
                 <span>Expense Details</span>
-                <span className="text-xs text-slate-500">({revenueData.expenses?.length || 0} entries)</span>
+                <span className="text-xs text-muted-foreground">({revenueData.expenses?.length || 0} entries)</span>
               </h4>
               {(revenueData.expenses || []).map((exp, i) => (
-                <div key={i} className="flex justify-between text-sm border-b border-slate-800 pb-1">
-                  <span className="text-slate-400">{exp.category || exp.type} - {exp.description || ''}</span>
+                <div key={i} className="flex justify-between text-sm border-b border-border pb-1">
+                  <span className="text-muted-foreground">{exp.category || exp.type} - {exp.description || ''}</span>
                   <span className="text-red-400">Rs. {exp.amount.toLocaleString()}</span>
                 </div>
               ))}

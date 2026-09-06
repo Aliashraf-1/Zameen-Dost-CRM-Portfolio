@@ -8,6 +8,7 @@
   --color-border: #334155;
   --color-muted: #1e293b;
   --color-muted-foreground: #94a3b8;
+  --color-input: #020617;
 }
 
 /* Light mode */
@@ -19,6 +20,7 @@
   --color-border: #e2e8f0;
   --color-muted: #f1f5f9;
   --color-muted-foreground: #64748b;
+  --color-input: #ffffff;
 }
 
 @layer base {

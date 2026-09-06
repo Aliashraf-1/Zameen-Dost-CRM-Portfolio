@@ -84,7 +84,7 @@ export default function EmployeeDetailsPage() {
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="animate-pulse text-slate-500">Loading employee details...</div>
+        <div className="animate-pulse text-muted-foreground">Loading employee details...</div>
       </div>
     );
   }

@@ -33,16 +33,18 @@ import LeadForm from "@/components/leads/LeadForm";
 import LeadTable from "@/components/leads/LeadTable";
 import { useLeads } from "@/context/LeadContext";
 import { useAuth } from "@/context/AuthContext";
+import { useEmployees } from "@/context/EmployeeContext";
 import { getImageUrl } from "@/lib/imageHelper";
+import { canAddLeads, canDeleteLeads, canEditLead, getLinkedEmployee } from "@/lib/leadPermissions";
 
 function InfoItem({ icon: Icon, label, value }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-      <div className="flex items-center gap-2 text-xs text-slate-500">
+    <div className="rounded-xl border border-border bg-muted p-4">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <Icon size={15} />
         {label}
       </div>
-      <p className="mt-2 text-sm font-medium text-slate-200">{value || "Not Set"}</p>
+      <p className="mt-2 text-sm font-medium text-foreground">{value || "Not Set"}</p>
     </div>
   );
 }
@@ -63,7 +65,8 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
 
   const employeeId = employee._id || employee.id;
   const { user } = useAuth();
-  const { getLeadsByEmployee, addLead, updateLead, deleteLead, leads: allLeads, loading: leadsLoading } = useLeads();
+  const { employees } = useEmployees();
+  const { getLeadsByEmployee, addLead, updateLead, deleteLead, loading: leadsLoading } = useLeads();
 
   const getStatusBadge = useCallback((status) => {
     const variants = {
@@ -188,22 +191,17 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
   const salaryStatus = getSalaryStatus();
   const employeeLeads = getLeadsByEmployee(employeeId);
 
-  // ✅ Role-based permission checks
   const currentUserRole = user?.role || "";
   const isAdmin = currentUserRole === "admin" || currentUserRole === "super_admin";
-  const isLeadManager = currentUserRole === "lead_manager" || isAdmin;
-  const isModerator = currentUserRole === "moderator";
-  const canManageLeads = employee.canManageLeads || isLeadManager || isModerator || isAdmin;
-  
-  // ✅ Can this user add leads?
-  const canAddLead = isAdmin || isLeadManager || isModerator || employee.canManageLeads;
-  
-  // ✅ Can this user edit leads?
-  const canEditAllLeads = isAdmin || isLeadManager;
-  const canEditOwnLeads = isModerator || employee.canManageLeads;
-  
-  // ✅ Can delete leads?
-  const canDeleteLeads = isAdmin;
+  const linkedEmployee = getLinkedEmployee(user, employees);
+  const isOwnProfile =
+    String(employee.email || "").toLowerCase() === String(user?.email || "").toLowerCase() ||
+    String(employeeId) === String(linkedEmployee?._id || "") ||
+    String(employeeId) === String(user?.employeeId || "");
+
+  const showLeadsSection = isAdmin || isOwnProfile || employee.canManageLeads || employee.role === "lead_manager";
+  const canAddLead = isAdmin || (isOwnProfile && canAddLeads(user, linkedEmployee));
+  const canDeleteLeadsForUser = canDeleteLeads(user);
 
   return (
     <>
@@ -212,7 +210,7 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
         <div className="mb-6 flex items-center justify-between">
           <Link
             href="/dashboard/employees"
-            className="inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-white"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground"
           >
             <ArrowLeft size={16} />
             Back to Employees
@@ -263,7 +261,7 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
                   {employee.status}
                 </span>
               </div>
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-muted-foreground">
                 {employee.designation} • {employee.department}
               </p>
             </div>
@@ -273,7 +271,7 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
             {isAdmin && (
               <Link
                 href={`/dashboard/employees/edit/${employeeId}`}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm font-medium text-slate-300 transition hover:border-slate-700 hover:bg-slate-800 hover:text-white"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-card-foreground transition hover:border-border hover:bg-muted hover:text-foreground"
               >
                 Edit Employee
               </Link>
@@ -293,7 +291,7 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
         {/* Stats Grid */}
         <div className="grid gap-6 xl:grid-cols-3">
           {/* Personal Information */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <div className="rounded-2xl border border-border bg-card p-6">
             <h2 className="mb-5 font-semibold">Personal Information</h2>
             <div className="grid gap-3">
               <InfoItem icon={User} label="Full Name" value={employee.name} />
@@ -305,16 +303,16 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
           </div>
 
           {/* Employment Information */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <div className="rounded-2xl border border-border bg-card p-6">
             <h2 className="mb-5 font-semibold">Employment Information</h2>
             <div className="grid gap-3">
               <InfoItem icon={Briefcase} label="Designation" value={employee.designation} />
               <InfoItem icon={Calendar} label="Department" value={employee.department} />
               <InfoItem icon={Calendar} label="Joining Date" value={employee.joiningDate} />
               <InfoItem icon={Wallet} label="Monthly Salary" value={`Rs. ${Number(employee.salary).toLocaleString()}`} />
-              <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+              <div className="rounded-xl border border-border bg-muted p-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span>Salary Status</span>
                   </div>
                   <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium ${salaryStatus.class}`}>
@@ -324,13 +322,13 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
                 </div>
                 {salaryStatus.remaining > 0 && (
                   <div className="mt-2 flex items-center justify-between text-xs">
-                    <span className="text-slate-500">Remaining</span>
+                    <span className="text-muted-foreground">Remaining</span>
                     <span className="font-medium text-amber-400">Rs. {salaryStatus.remaining.toLocaleString()}</span>
                   </div>
                 )}
                 {salaryStatus.amount > 0 && (
                   <div className="mt-1 flex items-center justify-between text-xs">
-                    <span className="text-slate-500">Paid</span>
+                    <span className="text-muted-foreground">Paid</span>
                     <span className="font-medium text-emerald-400">Rs. {salaryStatus.amount.toLocaleString()}</span>
                   </div>
                 )}
@@ -340,7 +338,7 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
           </div>
 
           {/* Emergency Contact */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          <div className="rounded-2xl border border-border bg-card p-6">
             <h2 className="mb-5 font-semibold">Emergency Contact</h2>
             <div className="grid gap-3">
               <InfoItem icon={User} label="Contact Person" value={employee.emergencyName || "Not Set"} />
@@ -360,7 +358,7 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
         </div>
 
         {/* ✅ Leads Section - Always visible for users with lead permissions */}
-        {canManageLeads && (
+        {showLeadsSection && (
           <div className="mt-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">
@@ -381,34 +379,28 @@ export default function EmployeeDetails({ employee, onPaySalary, onDelete, onAtt
             </div>
 
             {leadsLoading ? (
-              <div className="rounded-xl border border-dashed border-slate-700 p-8 text-center">
-                <p className="text-sm text-slate-500">Loading leads...</p>
+              <div className="rounded-xl border border-dashed border-border p-8 text-center">
+                <p className="text-sm text-muted-foreground">Loading leads...</p>
               </div>
             ) : employeeLeads.length > 0 ? (
               <LeadTable
                 leads={employeeLeads}
                 userRole={currentUserRole}
                 employeeId={employeeId}
-                onAdd={canAddLead ? () => {
-                  setEditingLead(null);
-                  setShowLeadModal(true);
-                } : null}
-                onEdit={(lead) => {
-                  const canEdit = canEditAllLeads || (canEditOwnLeads && (
-                    String(lead.assignedTo) === String(employeeId) ||
-                    String(lead.assignedTo?._id) === String(employeeId) ||
-                    String(lead.createdBy) === String(employeeId)
-                  ));
-                  if (canEdit) {
-                    setEditingLead(lead);
-                    setShowLeadModal(true);
-                  }
-                }}
-                onDelete={canDeleteLeads ? handleLeadDelete : null}
+                onEdit={
+                  canAddLead
+                    ? (lead) => {
+                        setEditingLead(lead);
+                        setShowLeadModal(true);
+                      }
+                    : null
+                }
+                canEditLead={(lead) => canEditLead(lead, user, linkedEmployee)}
+                onDelete={canDeleteLeadsForUser ? handleLeadDelete : null}
               />
             ) : (
-              <div className="rounded-xl border border-dashed border-slate-700 p-8 text-center">
-                <p className="text-sm text-slate-500">No leads assigned yet</p>
+              <div className="rounded-xl border border-dashed border-border p-8 text-center">
+                <p className="text-sm text-muted-foreground">No leads assigned yet</p>
                 {canAddLead && (
                   <button
                     onClick={() => {

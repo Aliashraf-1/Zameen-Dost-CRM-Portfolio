@@ -58,21 +58,21 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
         className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
         onClick={handleBackdropClick}
       >
-        <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-card shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800 bg-slate-900 p-5">
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card p-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
                 <Clock size={20} />
               </div>
               <div>
                 <h2 className="font-semibold">Mark Attendance</h2>
-                <p className="text-xs text-slate-500">{employee?.name}</p>
+                <p className="text-xs text-muted-foreground">{employee?.name}</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+              className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
               <X size={18} />
             </button>
@@ -81,19 +81,19 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
           <form onSubmit={handleSubmit} className="space-y-4 p-5">
             {/* Date */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">Date</label>
+              <label className="mb-2 block text-sm font-medium text-card-foreground">Date</label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-indigo-500"
                 required
               />
             </div>
 
             {/* Status */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">Status</label>
+              <label className="mb-2 block text-sm font-medium text-card-foreground">Status</label>
               <select
                 value={status}
                 onChange={(e) => {
@@ -107,7 +107,7 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
                     setLateMinutes(0);
                   }
                 }}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm text-card-foreground outline-none focus:border-indigo-500"
               >
                 <option value="Present">Present</option>
                 <option value="Absent">Absent</option>
@@ -119,22 +119,22 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
             {status === "Present" && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">Check In</label>
+                  <label className="mb-2 block text-sm font-medium text-card-foreground">Check In</label>
                   <input
                     type="time"
                     value={checkIn}
                     onChange={(e) => setCheckIn(e.target.value)}
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                    className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-indigo-500"
                     required
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">Check Out</label>
+                  <label className="mb-2 block text-sm font-medium text-card-foreground">Check Out</label>
                   <input
                     type="time"
                     value={checkOut}
                     onChange={(e) => setCheckOut(e.target.value)}
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                    className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-indigo-500"
                     required
                   />
                 </div>
@@ -144,13 +144,13 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
             {/* Late Minutes */}
             {status === "Present" && (
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">Late Minutes</label>
+                <label className="mb-2 block text-sm font-medium text-card-foreground">Late Minutes</label>
                 <input
                   type="number"
                   min="0"
                   value={lateMinutes}
                   onChange={(e) => setLateMinutes(Number(e.target.value))}
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                  className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-indigo-500"
                   placeholder="0"
                 />
               </div>
@@ -168,7 +168,7 @@ export default function AttendanceModal({ employee, onClose, onSave }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 rounded-xl border border-slate-800 px-5 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                className="flex-1 rounded-xl border border-border px-5 py-3 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
               >
                 Cancel
               </button>

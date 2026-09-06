@@ -1,24 +1,64 @@
 const Lead = require('../models/Lead');
+const Employee = require('../models/Employee');
 const mongoose = require('mongoose');
 
-// ✅ Helper: Convert to ObjectId if valid, else return as-is
+const ADMIN_ROLES = ['super_admin', 'admin'];
+const MANAGER_ROLES = ['lead_manager', 'moderator'];
+
 const toObjectId = (value) => {
   if (!value) return null;
+  if (value instanceof mongoose.Types.ObjectId) return value;
+  if (typeof value === 'object') {
+    const id = value._id || value.id;
+    if (id && mongoose.Types.ObjectId.isValid(id)) {
+      return new mongoose.Types.ObjectId(id);
+    }
+    return null;
+  }
   if (mongoose.Types.ObjectId.isValid(value)) {
     return new mongoose.Types.ObjectId(value);
   }
-  return value;
+  return null;
 };
 
-// ✅ Get all leads
-// ✅ Get all leads - Populate assignedTo
+const cleanEmpty = (data) => {
+  Object.keys(data).forEach((key) => {
+    if (data[key] === '' || data[key] === null || data[key] === undefined) {
+      delete data[key];
+    }
+  });
+  return data;
+};
+
+const getActor = async (req) => {
+  const user = req.user;
+  const employee = await Employee.findOne({ email: user.email });
+  const isAdmin = ADMIN_ROLES.includes(user.role);
+  const canManage =
+    isAdmin ||
+    MANAGER_ROLES.includes(user.role) ||
+    (user.role === 'employee' && employee?.canManageLeads === true);
+
+  return { user, employee, isAdmin, canManage };
+};
+
+const isOwnLead = (lead, actor) => {
+  const userId = String(actor.user._id);
+  const empId = actor.employee ? String(actor.employee._id) : null;
+  const createdBy = lead.createdBy?._id || lead.createdBy;
+  const assignedTo = lead.assignedTo?._id || lead.assignedTo;
+  return String(createdBy) === userId || (empId && String(assignedTo) === empId);
+};
+
+const populateLead = (query) =>
+  query
+    .populate('assignedTo', 'name email phone designation')
+    .populate('createdBy', 'name email');
+
 exports.getLeads = async (req, res) => {
   try {
-    const leads = await Lead.find()
-      .populate('assignedTo', 'name email phone designation')
-      .populate('createdBy', 'name email')
-      .sort({ createdAt: -1 });
-    
+    const leads = await populateLead(Lead.find()).sort({ createdAt: -1 });
+
     res.status(200).json({
       success: true,
       count: leads.length,
@@ -33,13 +73,10 @@ exports.getLeads = async (req, res) => {
   }
 };
 
-// ✅ Get single lead
 exports.getLead = async (req, res) => {
   try {
     const { id } = req.params;
-    const lead = await Lead.findById(id)
-      .populate('assignedTo', 'name email phone designation')
-      .populate('createdBy', 'name email');
+    const lead = await populateLead(Lead.findById(id));
 
     if (!lead) {
       return res.status(404).json({
@@ -61,11 +98,10 @@ exports.getLead = async (req, res) => {
   }
 };
 
-// ✅ Get leads by employee - Support both ObjectId and Number
 exports.getLeadsByEmployee = async (req, res) => {
   try {
     const { employeeId } = req.params;
-    
+
     let query;
     if (mongoose.Types.ObjectId.isValid(employeeId)) {
       query = { assignedTo: new mongoose.Types.ObjectId(employeeId) };
@@ -74,11 +110,9 @@ exports.getLeadsByEmployee = async (req, res) => {
     } else {
       query = { assignedTo: employeeId };
     }
-    
-    const leads = await Lead.find(query)
-      .populate('assignedTo', 'name email phone designation')
-      .populate('createdBy', 'name email');
-    
+
+    const leads = await populateLead(Lead.find(query)).sort({ createdAt: -1 });
+
     res.status(200).json({
       success: true,
       count: leads.length,
@@ -93,44 +127,36 @@ exports.getLeadsByEmployee = async (req, res) => {
   }
 };
 
-// ✅ Create lead - Clean data and handle ObjectId
 exports.createLead = async (req, res) => {
   try {
-    const leadData = req.body;
-
-    // ✅ Remove empty strings
-    Object.keys(leadData).forEach(key => {
-      if (leadData[key] === "" || leadData[key] === null || leadData[key] === undefined) {
-        delete leadData[key];
-      }
-    });
-
-    // ✅ Convert assignedTo and createdBy to ObjectId if valid
-    if (leadData.assignedTo) {
-      if (mongoose.Types.ObjectId.isValid(leadData.assignedTo)) {
-        leadData.assignedTo = new mongoose.Types.ObjectId(leadData.assignedTo);
-      } else if (!isNaN(leadData.assignedTo)) {
-        leadData.assignedTo = Number(leadData.assignedTo);
-      }
+    const actor = await getActor(req);
+    if (!actor.canManage) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to add leads.',
+      });
     }
 
-    if (leadData.createdBy) {
-      if (mongoose.Types.ObjectId.isValid(leadData.createdBy)) {
-        leadData.createdBy = new mongoose.Types.ObjectId(leadData.createdBy);
-      } else if (!isNaN(leadData.createdBy)) {
-        leadData.createdBy = Number(leadData.createdBy);
-      }
-    }
+    const leadData = cleanEmpty({ ...req.body });
 
-    // ✅ Ensure createdByName is set (if not provided)
-    if (!leadData.createdByName || leadData.createdByName === "") {
-      leadData.createdByName = leadData.createdByName || "Unknown";
+    leadData.createdBy = actor.user._id;
+    leadData.createdByName = actor.user.name;
+
+    if (!actor.isAdmin) {
+      if (actor.employee) {
+        leadData.assignedTo = actor.employee._id;
+        leadData.assignedToName = actor.employee.name;
+      } else {
+        leadData.assignedTo = null;
+        leadData.assignedToName = actor.user.name;
+      }
+    } else if (leadData.assignedTo) {
+      const assignedId = toObjectId(leadData.assignedTo);
+      leadData.assignedTo = assignedId || leadData.assignedTo;
     }
 
     const lead = await Lead.create(leadData);
-    const populatedLead = await Lead.findById(lead._id)
-      .populate('assignedTo', 'name email phone designation')
-      .populate('createdBy', 'name email');
+    const populatedLead = await populateLead(Lead.findById(lead._id));
 
     res.status(201).json({
       success: true,
@@ -146,44 +172,50 @@ exports.createLead = async (req, res) => {
   }
 };
 
-// ✅ Update lead
 exports.updateLead = async (req, res) => {
   try {
+    const actor = await getActor(req);
+    if (!actor.canManage) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to update leads.',
+      });
+    }
+
     const { id } = req.params;
-    const updates = req.body;
+    const existing = await Lead.findById(id);
 
-    // ✅ Remove empty strings
-    Object.keys(updates).forEach(key => {
-      if (updates[key] === "" || updates[key] === null || updates[key] === undefined) {
-        delete updates[key];
-      }
-    });
-
-    // ✅ Convert ObjectId fields
-    if (updates.assignedTo) {
-      if (mongoose.Types.ObjectId.isValid(updates.assignedTo)) {
-        updates.assignedTo = new mongoose.Types.ObjectId(updates.assignedTo);
-      }
-    }
-
-    if (updates.createdBy) {
-      if (mongoose.Types.ObjectId.isValid(updates.createdBy)) {
-        updates.createdBy = new mongoose.Types.ObjectId(updates.createdBy);
-      }
-    }
-
-    const lead = await Lead.findByIdAndUpdate(
-      id,
-      updates,
-      { new: true, runValidators: true }
-    ).populate('assignedTo', 'name email phone designation');
-
-    if (!lead) {
+    if (!existing) {
       return res.status(404).json({
         success: false,
         message: 'Lead not found.',
       });
     }
+
+    if (!actor.isAdmin && !isOwnLead(existing, actor)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only update your own leads.',
+      });
+    }
+
+    const updates = cleanEmpty({ ...req.body });
+    delete updates.createdBy;
+    delete updates.createdByName;
+    delete updates._id;
+    delete updates.id;
+
+    if (!actor.isAdmin) {
+      delete updates.assignedTo;
+      delete updates.assignedToName;
+    } else if (updates.assignedTo) {
+      const assignedId = toObjectId(updates.assignedTo);
+      if (assignedId) updates.assignedTo = assignedId;
+    }
+
+    const lead = await populateLead(
+      Lead.findByIdAndUpdate(id, updates, { new: true, runValidators: true })
+    );
 
     res.status(200).json({
       success: true,
@@ -199,13 +231,12 @@ exports.updateLead = async (req, res) => {
   }
 };
 
-// ✅ Add note to lead
 exports.addNote = async (req, res) => {
   try {
+    const actor = await getActor(req);
     const { id } = req.params;
-    const noteData = req.body;
-
     const lead = await Lead.findById(id);
+
     if (!lead) {
       return res.status(404).json({
         success: false,
@@ -213,15 +244,24 @@ exports.addNote = async (req, res) => {
       });
     }
 
-    // ✅ Clean note data
-    if (noteData.createdBy && mongoose.Types.ObjectId.isValid(noteData.createdBy)) {
-      noteData.createdBy = new mongoose.Types.ObjectId(noteData.createdBy);
+    if (!actor.canManage || (!actor.isAdmin && !isOwnLead(lead, actor))) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to add notes to this lead.',
+      });
+    }
+
+    const noteData = { ...req.body };
+    noteData.createdBy = actor.user._id;
+    noteData.createdByName = noteData.createdByName || actor.user.name;
+    if (!noteData.createdAt) {
+      noteData.createdAt = new Date().toISOString();
     }
 
     lead.notes.push(noteData);
     await lead.save();
 
-    const populatedLead = await Lead.findById(lead._id).populate('assignedTo', 'name email phone designation');
+    const populatedLead = await populateLead(Lead.findById(lead._id));
 
     res.status(200).json({
       success: true,
@@ -237,9 +277,15 @@ exports.addNote = async (req, res) => {
   }
 };
 
-// ✅ Delete lead
 exports.deleteLead = async (req, res) => {
   try {
+    if (!ADMIN_ROLES.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only admins can delete leads.',
+      });
+    }
+
     const { id } = req.params;
     const lead = await Lead.findByIdAndDelete(id);
 

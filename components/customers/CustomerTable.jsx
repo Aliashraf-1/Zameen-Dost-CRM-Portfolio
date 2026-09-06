@@ -12,6 +12,7 @@ import {
   AlertCircle,
   ArrowUpRight,
 } from "lucide-react";
+import { getImageUrl } from "@/lib/imageHelper";
 
 function RentStatus({ customer }) {
   if (customer.status === "Paid") {
@@ -85,18 +86,17 @@ export default function CustomerTable({
   }, [customers, search, status]);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card">
       {/* Header */}
-      <div className="border-b border-slate-800 p-5 sm:p-6">
+      <div className="border-b border-border p-5 sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-lg font-semibold">
               Customers
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
-              Manage tenants and their rental
-              information.
+            <p className="mt-1 text-sm text-muted-foreground">
+              Tenants currently occupying rental units.
             </p>
           </div>
 
@@ -105,7 +105,7 @@ export default function CustomerTable({
             <div className="relative">
               <Search
                 size={17}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
               />
 
               <input
@@ -114,7 +114,7 @@ export default function CustomerTable({
                   setSearch(e.target.value)
                 }
                 placeholder="Search customer, CNIC, unit..."
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 py-2.5 pl-10 pr-4 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500 sm:w-72"
+                className="w-full rounded-xl border border-border bg-input py-2.5 pl-10 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500 sm:w-72"
               />
             </div>
 
@@ -124,7 +124,7 @@ export default function CustomerTable({
               onChange={(e) =>
                 setStatus(e.target.value)
               }
-              className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-300 outline-none focus:border-indigo-500"
+              className="rounded-xl border border-border bg-input px-4 py-2.5 text-sm text-card-foreground outline-none focus:border-indigo-500"
             >
               <option value="All">
                 All Customers
@@ -150,32 +150,32 @@ export default function CustomerTable({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1100px]">
           <thead>
-            <tr className="border-b border-slate-800 text-left">
-              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
+            <tr className="border-b border-border text-left">
+              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Customer
               </th>
 
-              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
+              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Rental Unit
               </th>
 
-              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
+              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Purpose
               </th>
 
-              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
+              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Monthly Rent
               </th>
 
-              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
+              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Security
               </th>
 
-              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
+              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Rent Status
               </th>
 
-              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-slate-500">
+              <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Action
               </th>
             </tr>
@@ -186,7 +186,7 @@ export default function CustomerTable({
               (customer) => (
                 <tr
                   key={customer.id}
-                  className="border-b border-slate-800/70 transition hover:bg-slate-950/50"
+                  className="border-b border-border/70 transition hover:bg-muted"
                 >
                   {/* Customer */}
                   <td className="px-6 py-4">
@@ -194,10 +194,8 @@ export default function CustomerTable({
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-500/10 text-indigo-400">
                         {customer.image ? (
                           <img
-                            src={customer.image}
-                            alt={
-                              customer.name
-                            }
+                            src={getImageUrl(customer.image)}
+                            alt={customer.name}
                             className="h-full w-full object-cover"
                           />
                         ) : (
@@ -206,15 +204,15 @@ export default function CustomerTable({
                       </div>
 
                       <div>
-                        <p className="text-sm font-medium text-slate-200">
+                        <p className="text-sm font-medium text-foreground">
                           {customer.name}
                         </p>
 
-                        <p className="mt-1 text-xs text-slate-500">
+                        <p className="mt-1 text-xs text-muted-foreground">
                           {customer.phone}
                         </p>
 
-                        <p className="mt-1 text-xs text-slate-600">
+                        <p className="mt-1 text-xs text-muted-foreground">
                           {customer.cnic}
                         </p>
                       </div>
@@ -235,7 +233,7 @@ export default function CustomerTable({
                         </span>
                       </div>
 
-                      <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
                         <DoorOpen size={14} />
 
                         {customer.unitType}{" "}
@@ -246,7 +244,7 @@ export default function CustomerTable({
 
                   {/* Purpose */}
                   <td className="px-6 py-4">
-                    <span className="rounded-lg bg-slate-800 px-2.5 py-1.5 text-xs text-slate-400">
+                    <span className="rounded-lg bg-muted px-2.5 py-1.5 text-xs text-muted-foreground">
                       {customer.purpose}
                     </span>
                   </td>
@@ -255,7 +253,7 @@ export default function CustomerTable({
                   <td className="px-6 py-4">
                     <span className="text-sm font-medium">
                       Rs.{" "}
-                      {customer.monthlyRent.toLocaleString()}
+                      {Number(customer.monthlyRent || 0).toLocaleString()}
                     </span>
                   </td>
 
@@ -268,12 +266,12 @@ export default function CustomerTable({
                           {customer.security.toLocaleString()}
                         </p>
 
-                        <p className="mt-1 text-xs text-slate-600">
+                        <p className="mt-1 text-xs text-muted-foreground">
                           Held
                         </p>
                       </div>
                     ) : (
-                      <span className="text-sm text-slate-600">
+                      <span className="text-sm text-muted-foreground">
                         —
                       </span>
                     )}
@@ -304,7 +302,7 @@ export default function CustomerTable({
                   <td className="px-6 py-4">
                     <Link
                       href={`/dashboard/customers/${customer.id}`}
-                      className="inline-flex rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                      className="inline-flex rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                       title="View customer"
                     >
                       <ArrowUpRight
@@ -325,7 +323,7 @@ export default function CustomerTable({
               No customers found
             </p>
 
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               Try changing your search or
               filter.
             </p>

@@ -8,7 +8,8 @@ import {
   UserCheck,
   UserPlus,
   Shield,
-  FileText, 
+  FileText,
+  ListTodo,
 } from "lucide-react";
 
 export const sidebarItems = [
@@ -40,7 +41,13 @@ export const sidebarItems = [
     title: "Leads",
     href: "/dashboard/leads",
     icon: UserPlus,
-    allowedRoles: ["super_admin", "admin", "lead_manager", "moderator"],
+    allowedRoles: ["super_admin", "admin", "lead_manager", "moderator", "employee"],
+  },
+  {
+    title: "Tasks",
+    href: "/dashboard/tasks",
+    icon: ListTodo,
+    allowedRoles: ["lead_manager", "moderator", "employee"],
   },
   {
     title: "Revenue",

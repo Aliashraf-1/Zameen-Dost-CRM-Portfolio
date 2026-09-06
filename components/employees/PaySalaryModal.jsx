@@ -186,22 +186,22 @@ export default function PaySalaryModal({
         className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
         onClick={handleBackdropClick}
       >
-        <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl animate-in fade-in zoom-in-95 duration-200">
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800 bg-slate-900 p-5">
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card p-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
                 <Wallet size={20} />
               </div>
               <div>
                 <h2 className="font-semibold">Pay Salary</h2>
-                <p className="text-xs text-slate-500">{employee.name}</p>
+                <p className="text-xs text-muted-foreground">{employee.name}</p>
               </div>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+              className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
               <X size={18} />
             </button>
@@ -209,15 +209,15 @@ export default function PaySalaryModal({
 
           <form onSubmit={handleSubmit} className="space-y-5 p-5">
             {/* Employee Info */}
-            <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+            <div className="rounded-xl border border-border bg-input/70 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-slate-500">Employee</p>
+                  <p className="text-xs text-muted-foreground">Employee</p>
                   <p className="mt-1 font-medium">{employee.name}</p>
-                  <p className="text-xs text-slate-500">{employee.designation}</p>
+                  <p className="text-xs text-muted-foreground">{employee.designation}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-slate-500">Monthly Salary</p>
+                  <p className="text-xs text-muted-foreground">Monthly Salary</p>
                   <p className="mt-1 text-lg font-bold text-emerald-400">
                     Rs. {monthlySalary.toLocaleString()}
                   </p>
@@ -229,12 +229,12 @@ export default function PaySalaryModal({
             <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-amber-400">Deductions</span>
-                <label className="flex items-center gap-2 text-sm text-slate-400">
+                <label className="flex items-center gap-2 text-sm text-muted-foreground">
                   <input
                     type="checkbox"
                     checked={applyDeductions}
                     onChange={(e) => setApplyDeductions(e.target.checked)}
-                    className="rounded border-slate-700 bg-slate-800 text-indigo-500 focus:ring-indigo-500"
+                    className="rounded border-border bg-muted text-indigo-500 focus:ring-indigo-500"
                   />
                   Apply Deductions
                 </label>
@@ -254,7 +254,7 @@ export default function PaySalaryModal({
 
                   {deductions.chargeableLeaves > 0 && (
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400 flex items-center gap-2">
+                      <span className="text-muted-foreground flex items-center gap-2">
                         <Calendar size={14} />
                         Leaves ({deductions.chargeableLeaves} × Rs. {deductions.leaveDeduction})
                       </span>
@@ -264,7 +264,7 @@ export default function PaySalaryModal({
 
                   {deductions.absent > 0 && (
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400 flex items-center gap-2">
+                      <span className="text-muted-foreground flex items-center gap-2">
                         <Clock size={14} />
                         Absent ({deductions.absent} days)
                         {deductions.chargeableAbsent < deductions.absent && (
@@ -277,7 +277,7 @@ export default function PaySalaryModal({
 
                   {deductions.totalLateMinutes > 0 && (
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400 flex items-center gap-2">
+                      <span className="text-muted-foreground flex items-center gap-2">
                         <Clock size={14} />
                         Late ({deductions.totalLateMinutes} min charged × Rs. {deductions.lateDeduction})
                         {deductions.freeLateMinutes > 0 && (
@@ -290,7 +290,7 @@ export default function PaySalaryModal({
 
                   {deductions.failedTasks > 0 && (
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400 flex items-center gap-2">
+                      <span className="text-muted-foreground flex items-center gap-2">
                         <Briefcase size={14} />
                         Task Failure ({deductions.failedTasks} tasks)
                       </span>
@@ -300,7 +300,7 @@ export default function PaySalaryModal({
 
                   {deductions.customTaskDeductions?.map((task, index) => (
                     <div key={index} className="flex items-center justify-between pl-6 text-xs">
-                      <span className="text-slate-500">└ {task.title}</span>
+                      <span className="text-muted-foreground">└ {task.title}</span>
                       <span className="text-red-400">- Rs. {task.failureDeduction.toLocaleString()}</span>
                     </div>
                   ))}
@@ -316,24 +316,24 @@ export default function PaySalaryModal({
                   )}
 
                   {deductions.totalDeduction === 0 && (
-                    <p className="text-xs text-slate-500">No deductions for this month</p>
+                    <p className="text-xs text-muted-foreground">No deductions for this month</p>
                   )}
                 </div>
               )}
             </div>
 
             {/* Current Month Status */}
-            <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+            <div className="rounded-xl border border-border bg-input/70 p-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500">Current Month</span>
-                  <span className="text-xs font-medium text-slate-300">
+                  <span className="text-xs text-muted-foreground">Current Month</span>
+                  <span className="text-xs font-medium text-card-foreground">
                     {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500">Status</span>
+                  <span className="text-xs text-muted-foreground">Status</span>
                   {isFullyPaid ? (
                     <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400">
                       <CheckCircle2 size={14} />
@@ -353,8 +353,8 @@ export default function PaySalaryModal({
                 </div>
 
                 {remainingAmount > 0 && !isFullyPaid && (
-                  <div className="flex items-center justify-between border-t border-slate-800 pt-2">
-                    <span className="text-xs text-slate-500">Remaining Salary</span>
+                  <div className="flex items-center justify-between border-t border-border pt-2">
+                    <span className="text-xs text-muted-foreground">Remaining Salary</span>
                     <span className="text-sm font-bold text-amber-400">
                       Rs. {remainingAmount.toLocaleString()}
                     </span>
@@ -363,7 +363,7 @@ export default function PaySalaryModal({
 
                 {applyDeductions && deductions.totalDeduction > 0 && (
                   <div className="flex items-center justify-between border-t border-emerald-500/20 pt-2">
-                    <span className="text-xs text-slate-500">Final Amount (After Deductions)</span>
+                    <span className="text-xs text-muted-foreground">Final Amount (After Deductions)</span>
                     <span className="text-sm font-bold text-emerald-400">
                       Rs. {finalAmount.toLocaleString()}
                     </span>
@@ -372,7 +372,7 @@ export default function PaySalaryModal({
 
                 {paidAmount > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500">Paid Amount</span>
+                    <span className="text-xs text-muted-foreground">Paid Amount</span>
                     <span className="text-xs font-medium text-emerald-400">
                       Rs. {paidAmount.toLocaleString()}
                     </span>
@@ -384,11 +384,11 @@ export default function PaySalaryModal({
             {/* Amount Input */}
             {!isFullyPaid && (
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-card-foreground">
                   Payment Amount
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-500">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                     Rs.
                   </span>
                   <input
@@ -400,12 +400,12 @@ export default function PaySalaryModal({
                       setAmount(Number(e.target.value));
                       setError("");
                     }}
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-12 pr-4 text-sm outline-none focus:border-indigo-500"
+                    className="w-full rounded-xl border border-border bg-input py-3 pl-12 pr-4 text-sm outline-none focus:border-indigo-500"
                     placeholder="Enter amount"
                   />
                 </div>
                 <div className="mt-2 flex items-center justify-between text-xs">
-                  <span className="text-slate-500">Monthly Salary: Rs. {monthlySalary.toLocaleString()}</span>
+                  <span className="text-muted-foreground">Monthly Salary: Rs. {monthlySalary.toLocaleString()}</span>
                   <span className="text-emerald-400">Final Amount: Rs. {finalAmount.toLocaleString()}</span>
                 </div>
               </div>
@@ -433,7 +433,7 @@ export default function PaySalaryModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 rounded-xl border border-slate-800 px-5 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                className="flex-1 rounded-xl border border-border px-5 py-3 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
               >
                 Cancel
               </button>

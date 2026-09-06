@@ -91,7 +91,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="animate-pulse text-slate-500">Loading settings...</div>
+        <div className="animate-pulse text-muted-foreground">Loading settings...</div>
       </div>
     );
   }
@@ -145,14 +145,14 @@ export default function SettingsPage() {
           <div>
             <p className="text-sm font-medium text-indigo-400">Administration</p>
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Settings</h1>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-foreground">
               Manage application settings and configurations.
             </p>
           </div>
           <div className="flex gap-3">
             <button
               onClick={handleReset}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-800 px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
               <RefreshCw size={17} />
               Reset to Default
@@ -191,7 +191,7 @@ export default function SettingsPage() {
             return (
               <div
                 key={category.id}
-                className="rounded-2xl border border-slate-800 bg-slate-900 p-6"
+                className="rounded-2xl border border-border bg-card p-6"
               >
                 <div className="mb-4 flex items-center gap-3">
                   <div className="rounded-xl bg-indigo-500/10 p-2.5 text-indigo-400">
@@ -203,7 +203,7 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   {category.fields.map((field) => (
                     <div key={field.key}>
-                      <label className="mb-1.5 block text-xs font-medium text-slate-400">
+                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
                         {field.label}
                       </label>
                       <input
@@ -213,7 +213,7 @@ export default function SettingsPage() {
                           const val = field.type === 'number' ? Number(e.target.value) : e.target.value;
                           handleChange(category.id, field.key, val);
                         }}
-                        className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 outline-none focus:border-indigo-500"
+                        className="w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-500"
                       />
                     </div>
                   ))}

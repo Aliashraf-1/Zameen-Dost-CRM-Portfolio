@@ -422,10 +422,10 @@ const handleSubmit = async (e) => {
     <>
       <form
         onSubmit={handleSubmit}
-        className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900"
+        className="overflow-hidden rounded-2xl border border-border bg-card"
       >
         {/* Header */}
-        <div className="border-b border-slate-800 p-6">
+        <div className="border-b border-border p-6">
           <div className="flex items-center gap-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
               <DoorOpen size={22} />
@@ -434,7 +434,7 @@ const handleSubmit = async (e) => {
               <h2 className="font-semibold">
                 {isEdit ? "Edit Unit" : "Add New Unit"}
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Manage unit and rental information.
               </p>
             </div>
@@ -442,10 +442,10 @@ const handleSubmit = async (e) => {
         </div>
 
         {/* Unit Information */}
-        <div className="border-b border-slate-800 p-6">
+        <div className="border-b border-border p-6">
           <div className="mb-5">
             <h3 className="text-base font-semibold">Unit Information</h3>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Basic information about this unit.
             </p>
           </div>
@@ -453,7 +453,7 @@ const handleSubmit = async (e) => {
           <div className="grid gap-5 md:grid-cols-2">
             {/* Unit Number */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
+              <label className="mb-2 block text-sm font-medium text-card-foreground">
                 Unit Number
               </label>
               <input
@@ -462,7 +462,7 @@ const handleSubmit = async (e) => {
                 onChange={handleChange}
                 placeholder="e.g. 104"
                 required
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
               />
               {form.purpose === "Desk" && form.deskNo && (
                 <p className="mt-2 text-xs text-indigo-400">
@@ -473,14 +473,14 @@ const handleSubmit = async (e) => {
 
             {/* Unit Type */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
+              <label className="mb-2 block text-sm font-medium text-card-foreground">
                 Unit Type
               </label>
               <select
                 name="type"
                 value={form.type}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm text-card-foreground outline-none focus:border-indigo-500"
               >
                 <option value="Room">Room</option>
                 <option value="Hall">Hall</option>
@@ -492,7 +492,7 @@ const handleSubmit = async (e) => {
 
             {/* Unit Reference */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
+              <label className="mb-2 block text-sm font-medium text-card-foreground">
                 Unit Reference
               </label>
               <input
@@ -500,20 +500,20 @@ const handleSubmit = async (e) => {
                 value={form.reference}
                 onChange={handleChange}
                 placeholder="e.g. Balcony k sath wala"
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
               />
             </div>
 
             {/* Purpose */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
+              <label className="mb-2 block text-sm font-medium text-card-foreground">
                 Purpose
               </label>
               <select
                 name="purpose"
                 value={form.purpose}
                 onChange={handlePurposeChange}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm text-card-foreground outline-none focus:border-indigo-500"
               >
                 <option value="Room">Room</option>
                 <option value="Office">Office</option>
@@ -528,7 +528,7 @@ const handleSubmit = async (e) => {
             {/* Desk Number */}
             {form.purpose === "Desk" && (
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-card-foreground">
                   Desk Number
                 </label>
                 <input
@@ -537,9 +537,9 @@ const handleSubmit = async (e) => {
                   onChange={handleChange}
                   placeholder="e.g. 03"
                   required
-                  className="w-full rounded-xl border border-indigo-500/40 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+                  className="w-full rounded-xl border border-indigo-500/40 bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
                 />
-                <p className="mt-2 text-xs text-slate-600">
+                <p className="mt-2 text-xs text-muted-foreground">
                   Example: Unit 101 + Desk 03 will be saved as 101-D03.
                 </p>
               </div>
@@ -547,11 +547,11 @@ const handleSubmit = async (e) => {
 
             {/* Monthly Rent */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
+              <label className="mb-2 block text-sm font-medium text-card-foreground">
                 Monthly Rent
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-500">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                   Rs.
                 </span>
                 <input
@@ -561,24 +561,24 @@ const handleSubmit = async (e) => {
                   value={form.monthlyRent}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-12 pr-4 text-sm outline-none focus:border-indigo-500"
+                  className="w-full rounded-xl border border-border bg-input py-3 pl-12 pr-4 text-sm outline-none focus:border-indigo-500"
                 />
               </div>
-              <p className="mt-2 text-xs text-slate-600">
+              <p className="mt-2 text-xs text-muted-foreground">
                 Agreed monthly rent. Ye initial payment nahi hai.
               </p>
             </div>
 
             {/* Status */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
+              <label className="mb-2 block text-sm font-medium text-card-foreground">
                 Unit Status
               </label>
               <select
                 name="status"
                 value={form.status}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm text-card-foreground outline-none focus:border-indigo-500"
               >
                 <option value="Available">Available</option>
                 <option value="Rented">Rented</option>
@@ -588,14 +588,14 @@ const handleSubmit = async (e) => {
 
           {/* Unit Image */}
           <div className="mt-5">
-            <label className="mb-2 block text-sm font-medium text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-card-foreground">
               Unit Picture
-              <span className="ml-2 text-xs font-normal text-slate-600">
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
                 Optional
               </span>
             </label>
             {unitImagePreview ? (
-              <div className="relative h-48 w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
+              <div className="relative h-48 w-full overflow-hidden rounded-xl border border-border bg-input">
                 <img
                   src={unitImagePreview}
                   alt="Unit preview"
@@ -610,10 +610,10 @@ const handleSubmit = async (e) => {
                 </button>
               </div>
             ) : (
-              <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-slate-700 bg-slate-950/50 px-6 py-10 text-center transition hover:border-indigo-500 hover:bg-indigo-500/5">
-                <ImageIcon size={28} className="text-slate-600" />
-                <p className="mt-3 text-sm text-slate-400">Upload unit picture</p>
-                <p className="mt-1 text-xs text-slate-600">JPG, PNG or WEBP</p>
+              <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted px-6 py-10 text-center transition hover:border-indigo-500 hover:bg-indigo-500/5">
+                <ImageIcon size={28} className="text-muted-foreground" />
+                <p className="mt-3 text-sm text-muted-foreground">Upload unit picture</p>
+                <p className="mt-1 text-xs text-muted-foreground">JPG, PNG or WEBP</p>
                 <input
                   type="file"
                   accept="image/*"
@@ -629,14 +629,14 @@ const handleSubmit = async (e) => {
         {form.status === "Rented" && (
           <>
             {/* Customer */}
-            <div className="border-b border-slate-800 p-6">
+            <div className="border-b border-border p-6">
               <div className="mb-5 flex items-center gap-3">
                 <div className="rounded-xl bg-indigo-500/10 p-3 text-indigo-400">
                   <User size={20} />
                 </div>
                 <div>
                   <h3 className="font-semibold">Customer Information</h3>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Information about the person renting this unit.
                   </p>
                 </div>
@@ -644,7 +644,7 @@ const handleSubmit = async (e) => {
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                  <label className="mb-2 block text-sm font-medium text-card-foreground">
                     Customer Name
                   </label>
                   <input
@@ -653,12 +653,12 @@ const handleSubmit = async (e) => {
                     onChange={handleTenantChange}
                     placeholder="Enter customer name"
                     required
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+                    className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                  <label className="mb-2 block text-sm font-medium text-card-foreground">
                     CNIC
                   </label>
                   <input
@@ -667,12 +667,12 @@ const handleSubmit = async (e) => {
                     onChange={handleTenantChange}
                     placeholder="37405-1234567-1"
                     required
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+                    className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                  <label className="mb-2 block text-sm font-medium text-card-foreground">
                     Phone Number
                   </label>
                   <input
@@ -681,12 +681,12 @@ const handleSubmit = async (e) => {
                     onChange={handleTenantChange}
                     placeholder="0300-1234567"
                     required
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+                    className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                  <label className="mb-2 block text-sm font-medium text-card-foreground">
                     Customer Reference
                   </label>
                   <input
@@ -694,21 +694,21 @@ const handleSubmit = async (e) => {
                     value={form.tenant.reference}
                     onChange={handleTenantChange}
                     placeholder="e.g. Software wala bacha"
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+                    className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
                   />
                 </div>
               </div>
 
               {/* Customer Image */}
               <div className="mt-5">
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-card-foreground">
                   Customer Picture
-                  <span className="ml-2 text-xs font-normal text-slate-600">
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">
                     Optional
                   </span>
                 </label>
                 {customerImagePreview ? (
-                  <div className="relative h-40 w-40 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950">
+                  <div className="relative h-40 w-40 overflow-hidden rounded-2xl border border-border bg-input">
                     <img
                       src={customerImagePreview}
                       alt="Customer"
@@ -723,9 +723,9 @@ const handleSubmit = async (e) => {
                     </button>
                   </div>
                 ) : (
-                  <label className="flex h-40 w-40 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-slate-700 bg-slate-950/50 transition hover:border-indigo-500 hover:bg-indigo-500/5">
-                    <User size={28} className="text-slate-600" />
-                    <span className="mt-2 text-xs text-slate-500">Upload Picture</span>
+                  <label className="flex h-40 w-40 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted transition hover:border-indigo-500 hover:bg-indigo-500/5">
+                    <User size={28} className="text-muted-foreground" />
+                    <span className="mt-2 text-xs text-muted-foreground">Upload Picture</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -740,15 +740,15 @@ const handleSubmit = async (e) => {
               <div className="mt-6">
                 <div className="mb-4">
                   <div className="mb-2 flex items-center justify-between">
-                    <label className="block text-sm font-medium text-slate-300">
+                    <label className="block text-sm font-medium text-card-foreground">
                       Agreement Files
                     </label>
-                    <span className="text-xs text-slate-600">
+                    <span className="text-xs text-muted-foreground">
                       {agreementFiles.length}/5 files
                     </span>
                   </div>
                   <label
-                    className={`flex items-center gap-3 rounded-xl border border-dashed border-slate-700 bg-slate-950/50 p-5 transition ${
+                    className={`flex items-center gap-3 rounded-xl border border-dashed border-border bg-muted p-5 transition ${
                       agreementFiles.length >= 5
                         ? "cursor-not-allowed opacity-50"
                         : "cursor-pointer hover:border-indigo-500 hover:bg-indigo-500/5"
@@ -758,8 +758,8 @@ const handleSubmit = async (e) => {
                       <Upload size={18} />
                     </div>
                     <div>
-                      <p className="text-sm text-slate-400">Add agreement documents</p>
-                      <p className="mt-1 text-xs text-slate-600">Maximum 5 files</p>
+                      <p className="text-sm text-muted-foreground">Add agreement documents</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Maximum 5 files</p>
                     </div>
                     <input
                       type="file"
@@ -775,21 +775,21 @@ const handleSubmit = async (e) => {
                       {agreementFiles.map((file, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950 p-3"
+                          className="flex items-center justify-between rounded-xl border border-border bg-input p-3"
                         >
                           <div className="flex min-w-0 items-center gap-3">
-                            <div className="rounded-lg bg-slate-800 p-2 text-slate-400">
+                            <div className="rounded-lg bg-muted p-2 text-muted-foreground">
                               <FileText size={17} />
                             </div>
                             <div className="min-w-0">
-                              <p className="truncate text-sm text-slate-300">{file.name}</p>
-                              <p className="text-xs text-slate-600">Document {index + 1}</p>
+                              <p className="truncate text-sm text-card-foreground">{file.name}</p>
+                              <p className="text-xs text-muted-foreground">Document {index + 1}</p>
                             </div>
                           </div>
                           <button
                             type="button"
                             onClick={() => removeAgreementFile(index)}
-                            className="rounded-lg p-2 text-slate-500 transition hover:bg-red-500/10 hover:text-red-400"
+                            className="rounded-lg p-2 text-muted-foreground transition hover:bg-red-500/10 hover:text-red-400"
                           >
                             <Trash2 size={16} />
                           </button>
@@ -800,7 +800,7 @@ const handleSubmit = async (e) => {
                 </div>
 
                 {/* Document Templates Section */}
-                <div className="mt-4 border-t border-slate-800 pt-4">
+                <div className="mt-4 border-t border-border pt-4">
                   <DocumentTemplates
                     onSelectTemplate={handleSelectTemplate}
                     onViewExisting={handleViewExistingDocument}
@@ -810,16 +810,16 @@ const handleSubmit = async (e) => {
 
                   {savedDocuments.length > 0 && (
                     <div className="mt-3 space-y-2">
-                      <p className="text-xs font-medium text-slate-500">Saved Documents</p>
+                      <p className="text-xs font-medium text-muted-foreground">Saved Documents</p>
                       {savedDocuments.map((doc) => (
                         <div
                           key={doc.id}
-                          className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-950/50 p-2.5"
+                          className="flex items-center justify-between rounded-lg border border-border bg-muted p-2.5"
                         >
                           <div className="flex items-center gap-2">
                             <FileText size={14} className="text-indigo-400" />
-                            <span className="text-sm text-slate-300">{doc.title}</span>
-                            <span className="text-xs text-slate-500">
+                            <span className="text-sm text-card-foreground">{doc.title}</span>
+                            <span className="text-xs text-muted-foreground">
                               v{doc.version || 1}
                             </span>
                           </div>
@@ -836,7 +836,7 @@ const handleSubmit = async (e) => {
                                   setShowDocumentEditor(true);
                                 }
                               }}
-                              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                              className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                             >
                               <Eye size={14} />
                             </button>
@@ -847,7 +847,7 @@ const handleSubmit = async (e) => {
                                   prev.filter((d) => d.id !== doc.id)
                                 );
                               }}
-                              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-red-500/10 hover:text-red-400"
+                              className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-red-500/10 hover:text-red-400"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -861,14 +861,14 @@ const handleSubmit = async (e) => {
             </div>
 
             {/* Rental & Payment */}
-            <div className="border-b border-slate-800 p-6">
+            <div className="border-b border-border p-6">
               <div className="mb-5 flex items-center gap-3">
                 <div className="rounded-xl bg-emerald-500/10 p-3 text-emerald-400">
                   <Wallet size={20} />
                 </div>
                 <div>
                   <h3 className="font-semibold">Rental & Initial Payment</h3>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Record the actual cash received from the customer.
                   </p>
                 </div>
@@ -876,13 +876,13 @@ const handleSubmit = async (e) => {
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                  <label className="mb-2 block text-sm font-medium text-card-foreground">
                     Rent Starting Date
                   </label>
                   <div className="relative">
                     <CalendarDays
                       size={17}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
                     />
                     <input
                       type="date"
@@ -890,20 +890,20 @@ const handleSubmit = async (e) => {
                       value={form.rentStartDate}
                       onChange={handleChange}
                       required
-                      className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-11 pr-4 text-sm text-slate-300 outline-none focus:border-indigo-500"
+                      className="w-full rounded-xl border border-border bg-input py-3 pl-11 pr-4 text-sm text-card-foreground outline-none focus:border-indigo-500"
                     />
                   </div>
-                  <p className="mt-2 text-xs text-slate-600">
+                  <p className="mt-2 text-xs text-muted-foreground">
                     Rent agreement ki starting date.
                   </p>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                  <label className="mb-2 block text-sm font-medium text-card-foreground">
                     Rent & Security Received
                   </label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-500">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                       Rs.
                     </span>
                     <input
@@ -914,39 +914,39 @@ const handleSubmit = async (e) => {
                       onChange={handleChange}
                       placeholder="e.g. 12000"
                       required
-                      className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-12 pr-4 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+                      className="w-full rounded-xl border border-border bg-input py-3 pl-12 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
                     />
                   </div>
-                  <p className="mt-2 text-xs text-slate-600">
+                  <p className="mt-2 text-xs text-muted-foreground">
                     Customer ne actual cash kitna diya.
                   </p>
                 </div>
               </div>
 
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                  <p className="text-xs text-slate-500">Current Month Rent</p>
-                  <p className="mt-2 text-xl font-bold text-white">
+                <div className="rounded-xl border border-border bg-input p-4">
+                  <p className="text-xs text-muted-foreground">Current Month Rent</p>
+                  <p className="mt-2 text-xl font-bold text-foreground">
                     Rs. {paymentCalculation.rentPaid.toLocaleString()}
                   </p>
-                  <p className="mt-1 text-xs text-slate-600">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     One month rent automatically paid
                   </p>
                 </div>
 
                 <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-                  <p className="text-xs text-slate-500">Security Received</p>
+                  <p className="text-xs text-muted-foreground">Security Received</p>
                   <p className="mt-2 text-xl font-bold text-emerald-400">
                     Rs. {paymentCalculation.securityReceived.toLocaleString()}
                   </p>
-                  <p className="mt-1 text-xs text-slate-600">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Held as refundable security
                   </p>
                 </div>
               </div>
 
-              <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-                <p className="text-xs leading-5 text-slate-500">
+              <div className="mt-4 rounded-xl border border-border bg-muted p-4">
+                <p className="text-xs leading-5 text-muted-foreground">
                   Monthly rent hamesha sirf aik month ka hoga. Customer ke diye huay additional paisay
                   automatically security mein chale jayenge. Payment ki exact date aur time system khud save
                   karega. Rent starting date agreement ki date hogi.
@@ -957,12 +957,12 @@ const handleSubmit = async (e) => {
         )}
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 border-t border-slate-800 p-6">
+        <div className="flex justify-end gap-3 border-t border-border p-6">
           {onCancel ? (
             <button
               type="button"
               onClick={handleCancel}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-800 px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
               <X size={17} />
               Cancel
@@ -970,7 +970,7 @@ const handleSubmit = async (e) => {
           ) : (
             <Link
               href={`/dashboard/buildings/${buildingId}`}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-800 px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
               <X size={17} />
               Cancel

@@ -184,10 +184,10 @@ export default function EmployeeForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-2xl border border-slate-800 bg-slate-900"
+      className="rounded-2xl border border-border bg-card"
     >
       {/* Header */}
-      <div className="flex items-center gap-4 border-b border-slate-800 p-6">
+      <div className="flex items-center gap-4 border-b border-border p-6">
         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
           <User size={22} />
         </div>
@@ -195,7 +195,7 @@ export default function EmployeeForm({
           <h2 className="font-semibold">
             {isEdit ? "Edit Employee" : "Add New Employee"}
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Manage employee information, employment details, and shift timing.
           </p>
         </div>
@@ -213,7 +213,7 @@ export default function EmployeeForm({
     <div className="grid gap-5 p-6 md:grid-cols-2">
         {/* Name */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Full Name *
           </label>
           <input
@@ -222,19 +222,19 @@ export default function EmployeeForm({
             onChange={handleChange}
             placeholder="Enter full name"
             required
-            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+            className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
           />
         </div>
 
         {/* Email */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Email Address *
           </label>
           <div className="relative">
             <Mail
               size={17}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <input
               type="email"
@@ -243,20 +243,20 @@ export default function EmployeeForm({
               onChange={handleChange}
               placeholder="employee@company.com"
               required
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-11 pr-4 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+              className="w-full rounded-xl border border-border bg-input py-3 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
             />
           </div>
         </div>
 
         {/* Phone */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Phone Number *
           </label>
           <div className="relative">
             <Phone
               size={17}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <input
               name="phone"
@@ -264,14 +264,14 @@ export default function EmployeeForm({
               onChange={handleChange}
               placeholder="0300-1234567"
               required
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-11 pr-4 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+              className="w-full rounded-xl border border-border bg-input py-3 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
             />
           </div>
         </div>
 
         {/* CNIC */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             CNIC
           </label>
               <input
@@ -280,18 +280,18 @@ export default function EmployeeForm({
         onChange={handleChange}
         placeholder="37405-1234567-1"
         required   // ✅ ADD THIS
-        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+        className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
       />
            </div>
         {/* Designation */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Designation *
           </label>
           <div className="relative">
             <Briefcase
               size={17}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <input
               name="designation"
@@ -299,21 +299,21 @@ export default function EmployeeForm({
               onChange={handleChange}
               placeholder="e.g. Property Manager"
               required
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-11 pr-4 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+              className="w-full rounded-xl border border-border bg-input py-3 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
             />
           </div>
         </div>
 
         {/* Department */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Department
           </label>
           <select
             name="department"
             value={form.department}
             onChange={handleChange}
-            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+            className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm text-card-foreground outline-none focus:border-indigo-500"
           >
             {departments.map((dept) => (
               <option key={dept} value={dept}>
@@ -325,13 +325,13 @@ export default function EmployeeForm({
 
         {/* Joining Date */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Joining Date
           </label>
           <div className="relative">
             <Calendar
               size={17}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
        <input
           type="date"
@@ -339,20 +339,20 @@ export default function EmployeeForm({
           value={form.joiningDate}
           onChange={handleChange}
           required   // ✅ ADD THIS
-          className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-11 pr-4 text-sm text-slate-300 outline-none focus:border-indigo-500"
+          className="w-full rounded-xl border border-border bg-input py-3 pl-11 pr-4 text-sm text-card-foreground outline-none focus:border-indigo-500"
         />
           </div>
         </div>
 
         {/* Salary */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Monthly Salary *
           </label>
           <div className="relative">
             <Wallet
               size={17}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <input
               type="number"
@@ -362,21 +362,21 @@ export default function EmployeeForm({
               onChange={handleChange}
               placeholder="75000"
               required
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-11 pr-4 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+              className="w-full rounded-xl border border-border bg-input py-3 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
             />
           </div>
         </div>
 
         {/* Status */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Status
           </label>
           <select
             name="status"
             value={form.status}
             onChange={handleChange}
-            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+            className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm text-card-foreground outline-none focus:border-indigo-500"
           >
             <option value="Active">Active</option>
             <option value="Inactive">Inactive</option>
@@ -384,14 +384,14 @@ export default function EmployeeForm({
           </select>
         </div>
           <div>
-  <label className="mb-2 block text-sm font-medium text-slate-300">
+  <label className="mb-2 block text-sm font-medium text-card-foreground">
     Role
   </label>
   <select
     name="role"
     value={form.role}
     onChange={handleChange}
-    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+    className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm text-card-foreground outline-none focus:border-indigo-500"
   >
     <option value="employee">Employee</option>
     <option value="lead_manager">Lead Manager</option>
@@ -401,14 +401,14 @@ export default function EmployeeForm({
 </div>
 
 <div>
-  <label className="mb-2 block text-sm font-medium text-slate-300">
+  <label className="mb-2 block text-sm font-medium text-card-foreground">
     Lead Management
   </label>
   <select
     name="canManageLeads"
     value={form.canManageLeads ? "true" : "false"}
     onChange={(e) => setForm({ ...form, canManageLeads: e.target.value === "true" })}
-    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+    className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm text-card-foreground outline-none focus:border-indigo-500"
   >
     <option value="false">Disabled</option>
     <option value="true">Enabled (Lead Manager)</option>
@@ -418,13 +418,13 @@ export default function EmployeeForm({
 
         {/* Address */}
         <div className="md:col-span-2">
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Address
           </label>
           <div className="relative">
             <MapPin
               size={17}
-              className="absolute left-4 top-4 text-slate-500"
+              className="absolute left-4 top-4 text-muted-foreground"
             />
             <textarea
               name="address"
@@ -432,14 +432,14 @@ export default function EmployeeForm({
               onChange={handleChange}
               placeholder="Enter full address"
               rows="2"
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 py-3 pl-11 pr-4 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+              className="w-full rounded-xl border border-border bg-input py-3 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
             />
           </div>
         </div>
 
         {/* Emergency Contact */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Emergency Contact Name
           </label>
           <input
@@ -447,12 +447,12 @@ export default function EmployeeForm({
             value={form.emergencyName}
             onChange={handleChange}
             placeholder="Emergency contact person"
-            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+            className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Emergency Contact Number
           </label>
           <input
@@ -460,21 +460,21 @@ export default function EmployeeForm({
             value={form.emergencyContact}
             onChange={handleChange}
             placeholder="0312-7654321"
-            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+            className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
           />
         </div>
 
         {/* Profile Image */}
         <div className="md:col-span-2">
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-sm font-medium text-card-foreground">
             Profile Picture
-            <span className="ml-2 text-xs font-normal text-slate-600">
+            <span className="ml-2 text-xs font-normal text-muted-foreground">
               Optional
             </span>
           </label>
 
           {imagePreview ? (
-          <div className="relative h-40 w-40 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950">
+          <div className="relative h-40 w-40 overflow-hidden rounded-2xl border border-border bg-input">
             {typeof imagePreview === 'string' && !imagePreview.startsWith('blob:') ? (
               <Image
                 src={getImageUrl(imagePreview)}
@@ -501,9 +501,9 @@ export default function EmployeeForm({
             </button>
           </div>
         ) : (
-          <label className="flex h-40 w-40 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-slate-700 bg-slate-950/50 transition hover:border-indigo-500 hover:bg-indigo-500/5">
-            <Upload size={28} className="text-slate-600" />
-            <span className="mt-2 text-xs text-slate-500">Upload Picture</span>
+          <label className="flex h-40 w-40 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted transition hover:border-indigo-500 hover:bg-indigo-500/5">
+            <Upload size={28} className="text-muted-foreground" />
+            <span className="mt-2 text-xs text-muted-foreground">Upload Picture</span>
             <input
               type="file"
               accept="image/*"
@@ -518,14 +518,14 @@ export default function EmployeeForm({
       {/* ==================================================
           SHIFT TIMING / TIME TABLE SECTION
       ================================================== */}
-      <div className="border-t border-slate-800 p-6">
+      <div className="border-t border-border p-6">
         <div className="mb-5 flex items-center gap-3">
           <div className="rounded-xl bg-emerald-500/10 p-2.5 text-emerald-400">
             <Clock size={20} />
           </div>
           <div>
             <h3 className="font-semibold">Shift Timing & Time Table</h3>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Set employee work schedule, grace time, and leave policies.
             </p>
           </div>
@@ -534,7 +534,7 @@ export default function EmployeeForm({
         <div className="grid gap-5 md:grid-cols-2">
           {/* Start Time */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-card-foreground">
               Shift Start Time
             </label>
             <input
@@ -542,13 +542,13 @@ export default function EmployeeForm({
               name="startTime"
               value={form.shiftTiming.startTime}
               onChange={handleShiftTimingChange}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+              className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm text-card-foreground outline-none focus:border-indigo-500"
             />
           </div>
 
           {/* End Time */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-card-foreground">
               Shift End Time
             </label>
             <input
@@ -556,15 +556,15 @@ export default function EmployeeForm({
               name="endTime"
               value={form.shiftTiming.endTime}
               onChange={handleShiftTimingChange}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+              className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm text-card-foreground outline-none focus:border-indigo-500"
             />
           </div>
 
           {/* Grace Minutes */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-card-foreground">
               Grace Minutes
-              <span className="ml-2 text-xs text-slate-500">(no deduction)</span>
+              <span className="ml-2 text-xs text-muted-foreground">(no deduction)</span>
             </label>
             <input
               type="number"
@@ -573,23 +573,23 @@ export default function EmployeeForm({
               value={form.shiftTiming.graceMinutes}
               onChange={handleShiftTimingChange}
               placeholder="30"
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+              className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
             />
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               Minutes allowed after shift start without deduction
             </p>
           </div>
 
           {/* Weekly Off */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-card-foreground">
               Weekly Off Day
             </label>
             <select
               name="weeklyOff"
               value={form.shiftTiming.weeklyOff}
               onChange={handleShiftTimingChange}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300 outline-none focus:border-indigo-500"
+              className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm text-card-foreground outline-none focus:border-indigo-500"
             >
               {weeklyOffOptions.map((day) => (
                 <option key={day} value={day}>
@@ -597,16 +597,16 @@ export default function EmployeeForm({
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               No deduction for weekly off days
             </p>
           </div>
 
           {/* Monthly Leaves */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-card-foreground">
               Monthly Paid Leaves
-              <span className="ml-2 text-xs text-slate-500">(no deduction)</span>
+              <span className="ml-2 text-xs text-muted-foreground">(no deduction)</span>
             </label>
             <input
               type="number"
@@ -615,9 +615,9 @@ export default function EmployeeForm({
               value={form.shiftTiming.monthlyLeaves}
               onChange={handleShiftTimingChange}
               placeholder="1"
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+              className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
             />
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               Number of paid leaves allowed per month (excluding weekly off)
             </p>
           </div>
@@ -627,14 +627,14 @@ export default function EmployeeForm({
       {/* ==================================================
           DEDUCTION SETTINGS
       ================================================== */}
-      <div className="border-t border-slate-800 p-6">
+      <div className="border-t border-border p-6">
         <div className="mb-5 flex items-center gap-3">
           <div className="rounded-xl bg-amber-500/10 p-2.5 text-amber-400">
             <Settings size={20} />
           </div>
           <div>
             <h3 className="font-semibold">Deduction Settings</h3>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Set deduction rates for this employee.
             </p>
           </div>
@@ -643,9 +643,9 @@ export default function EmployeeForm({
         <div className="grid gap-5 md:grid-cols-3">
           {/* Leave Deduction */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-card-foreground">
               Leave Deduction (Rs.)
-              <span className="ml-2 text-xs text-slate-500">per day</span>
+              <span className="ml-2 text-xs text-muted-foreground">per day</span>
             </label>
             <input
               type="number"
@@ -654,18 +654,18 @@ export default function EmployeeForm({
               value={form.attendanceSettings.leaveDeduction}
               onChange={handleAttendanceSettingsChange}
               placeholder="500"
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+              className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
             />
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               Deduction per leave day (after paid leaves)
             </p>
           </div>
 
           {/* Late Deduction */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-card-foreground">
               Late Deduction (Rs.)
-              <span className="ml-2 text-xs text-slate-500">per minute</span>
+              <span className="ml-2 text-xs text-muted-foreground">per minute</span>
             </label>
             <input
               type="number"
@@ -674,18 +674,18 @@ export default function EmployeeForm({
               value={form.attendanceSettings.lateDeduction}
               onChange={handleAttendanceSettingsChange}
               placeholder="10"
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+              className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
             />
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               Deduction per late minute (after grace time)
             </p>
           </div>
 
           {/* Task Failure Deduction */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
+            <label className="mb-2 block text-sm font-medium text-card-foreground">
               Task Failure Deduction (Rs.)
-              <span className="ml-2 text-xs text-slate-500">per task</span>
+              <span className="ml-2 text-xs text-muted-foreground">per task</span>
             </label>
             <input
               type="number"
@@ -694,9 +694,9 @@ export default function EmployeeForm({
               value={form.attendanceSettings.taskFailureDeduction}
               onChange={handleAttendanceSettingsChange}
               placeholder="1000"
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none placeholder:text-slate-600 focus:border-indigo-500"
+              className="w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus:border-indigo-500"
             />
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               Default deduction per failed task
             </p>
           </div>
@@ -704,11 +704,11 @@ export default function EmployeeForm({
       </div>
 
       {/* Footer */}
-      <div className="flex justify-end gap-3 border-t border-slate-800 p-6">
+      <div className="flex justify-end gap-3 border-t border-border p-6">
         <button
           type="button"
           onClick={handleCancel}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-800 px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+          className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
         >
           <X size={17} />
           Cancel

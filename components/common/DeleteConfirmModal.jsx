@@ -51,23 +51,23 @@ export default function DeleteConfirmModal({
         <div
           ref={modalRef}
           tabIndex={-1}
-          className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+          className="w-full max-w-md rounded-2xl border border-border bg-card shadow-2xl animate-in fade-in zoom-in-95 duration-200"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-800 p-5">
+          <div className="flex items-center justify-between border-b border-border p-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10 text-red-400">
                 <AlertTriangle size={20} />
               </div>
               <div>
                 <h2 className="font-semibold text-red-400">{title}</h2>
-                <p className="text-xs text-slate-500">This action cannot be undone</p>
+                <p className="text-xs text-muted-foreground">This action cannot be undone</p>
               </div>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+              className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
               <X size={18} />
             </button>
@@ -75,12 +75,12 @@ export default function DeleteConfirmModal({
 
           {/* Body */}
           <div className="p-5 space-y-4">
-            <p className="text-sm text-slate-300">{message}</p>
+            <p className="text-sm text-card-foreground">{message}</p>
             
             {itemName && (
               <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3">
                 <p className="text-sm font-medium text-red-400">
-                  <span className="text-slate-400">Item:</span> {itemName}
+                  <span className="text-muted-foreground">Item:</span> {itemName}
                 </p>
               </div>
             )}
@@ -94,12 +94,12 @@ export default function DeleteConfirmModal({
           </div>
 
           {/* Footer */}
-          <div className="flex gap-3 border-t border-slate-800 p-5">
+          <div className="flex gap-3 border-t border-border p-5">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 rounded-xl border border-slate-800 px-5 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white disabled:opacity-50"
+              className="flex-1 rounded-xl border border-border px-5 py-3 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-50"
             >
               Cancel
             </button>
